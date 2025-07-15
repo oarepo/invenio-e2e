@@ -7,6 +7,10 @@ import { HomePage } from './homePage';
  */
 
 export class BasePage<T extends Locators = Locators> {
+    protected page: Page;
+    protected locators: T;
+    protected availablePages: { [key: string]: object };
+
     /**
      * Creates a new instance of the abstract base page.
      * 
@@ -14,11 +18,15 @@ export class BasePage<T extends Locators = Locators> {
      * @param locators  An object containing locators for elements on the page.
      * @param availablePages  An object containing available pages for navigation.
      */
-    constructor(
-        protected page: Page,
-        protected locators: T,
-        protected availablePages: { [key: string]: object }
-    ) { }
+    constructor({ page, locators, availablePages }: {
+        page: Page,
+        locators: T,
+        availablePages: { [key: string]: object }
+    }) {
+        this.page = page;
+        this.locators = locators;
+        this.availablePages = availablePages;
+    }
 
     // VALIDATION
     /**

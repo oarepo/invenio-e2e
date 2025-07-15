@@ -10,15 +10,16 @@ export const test = base.extend<{
     availablePages: { [key: string]: object };
     homePage: HomePage;
     searchPage: SearchPage;
-    blah: HomePage;
+    blah: number;
 }>({
     // locators
     locators,
     // all pages
     availablePages: {} as { [key: string]: BasePage },
+    blah: 1,
     // pages
     ...registerPage('homePage', HomePage),
-    ...registerPage('searchPage', SearchPage),
+    ...registerPage('searchPage', SearchPage, { extraFixtures: ['blah'] }),
 })
 
 export type InvenioTest = typeof test
