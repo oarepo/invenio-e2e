@@ -32,7 +32,8 @@ export class BasePage<T extends Locators = Locators> {
      * Validates that the logo is visible on the page.
      */
     async expectLogoVisible(): Promise<void> {
-        const logo = await this.page.locator(this.locators.header.logoLink);
+        await this.page.waitForLoadState('networkidle');
+        const logo = this.page.locator(this.locators.header.logoLink);
         await expect(logo).toBeVisible();
     }
 

@@ -4,11 +4,11 @@ import { expect } from '@playwright/test';
 export function homepageTests(test: InvenioTest) {
     test.describe('Homepage Tests', () => {
         test.beforeEach(async ({ homePage }) => {
-            await homePage.open_page();
+            await homePage.openPage();
         });
 
         test('should display the homepage logo', async ({ homePage }) => {
-            homePage.expectLogoVisible();
+            await homePage.expectLogoVisible();
         });
 
         test('should navigate to search page from homepage', async ({ homePage, searchPage }) => {

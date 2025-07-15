@@ -8,7 +8,7 @@ import { BasePage } from './basePage';
 export class SearchPage<T extends Locators = Locators> extends BasePage<T> {
 
     /*
-     * Navigate to the search page.
+     * Navigate to the search results page.
      */
     async open_page(): Promise<void> {
         await this.page.goto('/search');

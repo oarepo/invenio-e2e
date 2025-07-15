@@ -14,14 +14,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@eslint/js": "^9.31.0",
     "@playwright/test": "^1.54.1",
     "@types/node": "^24.0.13",
-    "eslint": "^9.31.0",
-    "eslint-typescript": "^1.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.37.0"
+    "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "ts-deepmerge": "^7.0.3"
