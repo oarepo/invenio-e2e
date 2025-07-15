@@ -157,37 +157,50 @@ to be used deconstructed in the test fixture.
 
 ## updateLocators
 
-[src/locators/index.ts:54-59][37]
+[src/locators/index.ts:56-61][37]
 
-Function to update locators if user wants to override the default locators inside
-fixtures.
+Function to update locators if user wants to override the default locators inside fixtures.
+
+```typescript
+   import { updateLocators } from '@inveniosoftware/invenio-e2e';
+
+   myLocators = { ... }
+
+   export const test = invenio_test.extend({
+     locators: updateLocators(myLocators),
+   })
+```
+
+If you extend the locators with new properties and you need to use them in your page classes, define a new type that extends the Locators type:
+
+```typescript
+
+   import { Locators } from '@inveniosoftware/invenio-e2e';
+   import {myLocators} from './myLocators';
+
+   export type MyLocators = Locators & typeof myLocators;
+
+```
+
+Then, create your page class with the new type:
+
+```typescript
+
+   import { BasePage } from '@inveniosoftware/invenio-e2e';
+   class MyPage extends BasePage<MyLocators> {
+       blah() {
+         console.log(this.locators.myPage.something);
+       }
+   }
+```
 
 ### Parameters
 
 *   `locators` **T** the new locators to be merged with the existing ones.
 
-Returns **function (params: {locators: [Locators][12]}, use: UseLocators\<any>): [Promise][25]\<void>** A function that takes the original locators and merges them with the new ones,
-to be used in the test fixture definition.Sample usage:```typescript
-import { updateLocators } from '@inveniosoftware/invenio-e2e';
-
-myLocators = { ... }
-
-export const test = invenio_test.extend({
-  locators: updateLocators(myLocators),
-})
-```If you extend the locators with new properties and you need to use them in your
-page classes, define a new type that extends the Locators type:```typescript
-import { Locators } from '@inveniosoftware/invenio-e2e';
-import {myLocators} from './myLocators';
-
-export type MyLocators = Locators & typeof myLocators;
-```Then, create your page class with the new type:```typescript
-import { BasePage } from '@inveniosoftware/invenio-e2e';
-class MyPage extends BasePage<MyLocators> {
-    blah() {
-      console.log(this.locators.myPage.);
-    }
-```
+Returns **function (params: {locators: [Locators][12]}, use: UseLocators\<any>): [Promise][25]\<void>** A function that takes the original locators and
+merges them with the new ones, to be used in the test
+fixture definition.
 
 ## PageFixtureParams
 
@@ -271,42 +284,42 @@ Type: any
 
 [21]: #locators-1
 
-[22]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/pages/basePage.ts#L8-L60 "Source code on GitHub"
+[22]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/basePage.ts#L8-L60 "Source code on GitHub"
 
 [23]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[24]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/pages/basePage.ts#L34-L36 "Source code on GitHub"
+[24]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/basePage.ts#L34-L36 "Source code on GitHub"
 
 [25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
 
-[26]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/pages/basePage.ts#L41-L45 "Source code on GitHub"
+[26]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/basePage.ts#L41-L45 "Source code on GitHub"
 
-[27]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/pages/basePage.ts#L53-L59 "Source code on GitHub"
+[27]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/basePage.ts#L53-L59 "Source code on GitHub"
 
-[28]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/pages/homePage.ts#L10-L65 "Source code on GitHub"
+[28]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/homePage.ts#L10-L65 "Source code on GitHub"
 
-[29]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/pages/homePage.ts#L26-L29 "Source code on GitHub"
+[29]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/homePage.ts#L26-L29 "Source code on GitHub"
 
-[30]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/pages/homePage.ts#L61-L64 "Source code on GitHub"
+[30]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/homePage.ts#L61-L64 "Source code on GitHub"
 
 [31]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
-[32]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/pages/searchPage.ts#L8-L27 "Source code on GitHub"
+[32]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/searchPage.ts#L8-L27 "Source code on GitHub"
 
-[33]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/pages/searchPage.ts#L23-L26 "Source code on GitHub"
+[33]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/searchPage.ts#L23-L26 "Source code on GitHub"
 
-[34]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/locators/defaultLocators.ts#L5-L16 "Source code on GitHub"
+[34]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/locators/defaultLocators.ts#L5-L16 "Source code on GitHub"
 
-[35]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/fixtures/utils.ts#L62-L103 "Source code on GitHub"
+[35]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/fixtures/utils.ts#L62-L103 "Source code on GitHub"
 
 [36]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-[37]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/locators/index.ts#L54-L59 "Source code on GitHub"
+[37]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/locators/index.ts#L56-L61 "Source code on GitHub"
 
-[38]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/fixtures/utils.ts#L5-L8 "Source code on GitHub"
+[38]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/fixtures/utils.ts#L5-L8 "Source code on GitHub"
 
-[39]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/fixtures/utils.ts#L15-L17 "Source code on GitHub"
+[39]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/fixtures/utils.ts#L15-L17 "Source code on GitHub"
 
-[40]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/fixtures/utils.ts#L20-L23 "Source code on GitHub"
+[40]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/fixtures/utils.ts#L20-L23 "Source code on GitHub"
 
-[41]: https://github.com/oarepo/invenio-e2e/blob/a27dee336c2809c98c2cf6c3a148129bdce87a87/src/locators/index.ts#L6-L8 "Source code on GitHub"
+[41]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/locators/index.ts#L6-L8 "Source code on GitHub"
