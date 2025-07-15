@@ -12,6 +12,7 @@ export class SearchPage<T extends Locators = Locators> extends BasePage<T> {
      */
     async openPage(): Promise<void> {
         await this.page.goto('/search');
+        await this.page.waitForLoadState("networkidle");
         await this.validatePageLoaded();
     }
 
@@ -20,6 +21,7 @@ export class SearchPage<T extends Locators = Locators> extends BasePage<T> {
      * Validates that the search page has loaded by checking for the search result list.
      */
     async validatePageLoaded(): Promise<void> {
+        await super.validatePageLoaded();
         await this.page.waitForSelector(this.locators.searchPage.searchResultList);
     }
 }

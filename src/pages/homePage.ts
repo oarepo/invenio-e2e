@@ -15,6 +15,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
      */
     async openPage(): Promise<void> {
         await this.page.goto('/');
+        await this.page.waitForLoadState("networkidle");
         await this.validatePageLoaded();
     }
 
@@ -23,6 +24,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
      * Validates that the home page has loaded by checking for the search field.
      */
     async validatePageLoaded(): Promise<void> {
+        await super.validatePageLoaded();
         await this.page.waitForSelector(this.locators.homePage.searchField);
     }
 
