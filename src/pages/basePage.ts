@@ -3,9 +3,8 @@ import { Locators } from '../locators';
 import { HomePage } from './homePage';
 
 /**
- * Class representing extended search page with special footer.
+ * Class representing a base page with common functionality for all pages.
  */
-
 export class BasePage<T extends Locators = Locators> {
     protected page: Page;
     protected locators: T;

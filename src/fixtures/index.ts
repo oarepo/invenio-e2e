@@ -11,11 +11,19 @@ export const test = base.extend<{
     homePage: HomePage;
     searchPage: SearchPage;
 }>({
-    // locators
+    // locators are used to find elements on the page and they are separated
+    // from the page classes so that they can be easily overwritten in tests
+    // for different invenio flavours/instances.
     locators,
-    // all pages
+
+    // registry of all available pages. Page gets this registry in the constructor
+    // so it can navigate to other pages (for example, HomePage.submitSearch) will
+    // use this registry to navigate to the SearchPage.
     availablePages: {} as { [key: string]: BasePage },
-    // pages
+
+    // pages provide a set of methods to interact with a UI page, abstracting low-level
+    // Playwright API calls. They are registered in the availablePages registry
+    // so that they can be easily accessed from other pages and tests.
     ...registerPage('homePage', HomePage),
     ...registerPage('searchPage', SearchPage),
 })
