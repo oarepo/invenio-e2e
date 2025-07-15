@@ -13,7 +13,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
      * Navigate to the Home page.
      * @returns The home page instance to allow method chaining.
      */
-    async open_page(): Promise<void> {
+    async openPage(): Promise<void> {
         await this.page.goto('/');
         await this.validatePageLoaded();
     }

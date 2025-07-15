@@ -10,7 +10,7 @@ export class SearchPage<T extends Locators = Locators> extends BasePage<T> {
     /*
      * Navigate to the search results page.
      */
-    async open_page(): Promise<void> {
+    async openPage(): Promise<void> {
         await this.page.goto('/search');
         await this.validatePageLoaded();
     }
