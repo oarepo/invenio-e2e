@@ -12,14 +12,13 @@ export type UseFunction<L extends Locators, T extends typeof BasePage<L>> = (r: 
 
 const AsyncFunction = (async function () { }).constructor;
 
-let __extra_fixtures_counter = 0;
-
 export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
     name: string,
     PageType: T,
     { extraFixtures }: { extraFixtures: string[] } = { extraFixtures: [] }
 ): { [key: string]: (params: PageFixtureParams<L>, use: UseFunction<L, T>) => Promise<void> } {
-    const getter = async (fixtures, use) => {
+
+    const page_creator = async (fixtures, use) => {
         const pageInstance = new PageType(fixtures);
         fixtures.availablePages[name] = pageInstance;
         await use(pageInstance as InstanceType<T>);
@@ -33,13 +32,9 @@ export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
         // See innerFixtureParameterNames at 
         // https://github.com/microsoft/playwright/blob/main/packages/playwright/src/common/fixtures.ts
         //
-        // To ensure that the extra fixtures are recognized, we need to generate a function that uses them.
-        // and pass this one instead of the normal one below. We use the Function constructor
-        // that does not have access to the local scope, so we need to pass the getter
-        // function as a global variable. 
-
-        const registrationFunctionName = `__registerPage_${name}_${__extra_fixtures_counter++}`;
-        global[registrationFunctionName] = getter
+        // To ensure that the extra fixtures are recognized, we need to generate a function 
+        // that explicitly references them in object destructuring brackets and return this
+        // function to playwright.
 
         const parameters = [
             "page",
@@ -47,16 +42,15 @@ export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
             "availablePages",
             ...extraFixtures, // extra fixtures are passed as parameters
         ].join(", ");
+        const func = eval(`async ({ ${parameters} } , use) => { return await page_creator({ ${parameters} }, use); }`);
         return {
-            [name]: AsyncFunction(
-                `{${parameters}}`, "use",
-                `return await global.${registrationFunctionName}({ page, locators, availablePages }, use);`)
+            [name]: func
         }
     }
 
     return {
         [name]: async ({ page, locators, availablePages }: PageFixtureParams<L>, use: UseFunction<L, T>) => {
-            await getter({ page, locators, availablePages }, use)
+            await page_creator({ page, locators, availablePages }, use)
         }
     }
 }
