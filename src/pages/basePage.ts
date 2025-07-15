@@ -1,12 +1,12 @@
 import { expect, Page } from '@playwright/test';
-import { BASE_PAGE_LOCATORS } from '../locators';
+import { Locators } from '../locators';
 import { HomePage } from './homePage';
 
 /**
  * Class representing extended search page with special footer.
  */
 
-export class BasePage {
+export class BasePage<T extends Locators = Locators> {
     /**
      * Creates a new instance of the abstract base page.
      * 
@@ -15,29 +15,36 @@ export class BasePage {
      * @param availablePages  An object containing available pages for navigation.
      */
     constructor(
-        protected page: Page, 
-        protected basePageLocators: typeof BASE_PAGE_LOCATORS,
-        protected availablePages: {[key: string]: object}
-    ) {}
-    
+        protected page: Page,
+        protected locators: T,
+        protected availablePages: { [key: string]: object }
+    ) { }
+
     // VALIDATION
     /**
-     * Validates that the  User Profile page has loaded by checking for a specific locator.
+     * Validates that the loaded page has a logo link in the header.
      */
     async validatePageLoaded(): Promise<void> {
-        await this.page.waitForSelector(this.basePageLocators.logoLink);
+        await this.page.waitForSelector(this.locators.header.logoLink);
     }
 
+    /**
+     * Validates that the logo is visible on the page.
+     */
     async expectLogoVisible(): Promise<void> {
         await this.page.waitForLoadState('networkidle');
-        const logo = this.page.locator(this.basePageLocators.logoLink);
+        const logo = this.page.locator(this.locators.header.logoLink);
         await expect(logo).toBeVisible();
     }
 
     // NAVIGATION
-
+    /**
+     * Navigates to the home page as we should always have a home page link in the header.
+     * 
+     * @returns the home page
+     */
     async navigateToHomePage(): Promise<HomePage> {
-        const logoLink = this.page.locator(this.basePageLocators.logoLink);
+        const logoLink = await this.page.locator(this.locators.header.logoLink);
         await logoLink.click();
         const homePage: HomePage = this.availablePages['homePage'] as HomePage;
         await homePage.validatePageLoaded();

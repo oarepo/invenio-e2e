@@ -1,41 +1,25 @@
-import { expect, Page } from '@playwright/test';
-import { BASE_PAGE_LOCATORS, SEARCH_PAGE_LOCATORS } from '../locators';
+import { Locators } from '../locators';
 import { BasePage } from './basePage';
 
 /**
- * Class representing the search results page.
+ * Class representing a search page with a list of search results.
  */
 
-export class SearchPage extends BasePage {
-    /**
-     * Creates a new instance of the ExtendedHomePage.
-     * 
-     * @param page  Playwright Page object representing the current page.
-     * @param locators  An object containing locators for elements on the page.
-     * @param availablePages  An object containing available pages for navigation.
-     */
-    constructor(
-        page: Page, 
-        basePageLocators: typeof BASE_PAGE_LOCATORS,
-        protected searchPageLocators: typeof SEARCH_PAGE_LOCATORS,
-        availablePages: {[key: string]: object}
-    ) {
-        super(page, basePageLocators, availablePages);
-    }
-    
+export class SearchPage<T extends Locators = Locators> extends BasePage<T> {
+
     /*
-    * Navigate to the search results page.
-    */
-    async open_page() {
+     * Navigate to the search results page.
+     */
+    async openPage(): Promise<void> {
         await this.page.goto('/search');
         await this.validatePageLoaded();
     }
 
     // VALIDATION
     /**
-     * Validates that the  User Profile page has loaded by checking for a specific locator.
+     * Validates that the search page has loaded by checking for the search result list.
      */
     async validatePageLoaded(): Promise<void> {
-        await this.page.waitForSelector(this.searchPageLocators.searchResultList);
+        await this.page.waitForSelector(this.locators.searchPage.searchResultList);
     }
 }
