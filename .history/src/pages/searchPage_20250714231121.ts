@@ -24,8 +24,8 @@ export class SearchPage extends BasePage {
     }
     
     /*
-    * Navigate to the search results page.
-    */
+     * Navigate to the  Home page.
+     */
     async open_page() {
         await this.page.goto('/search');
         await this.validatePageLoaded();

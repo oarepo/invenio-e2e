@@ -27,7 +27,7 @@ export class HomePage extends BasePage {
     /*
      * Navigate to the  Home page.
      */
-    async openPage() {
+    async open_page() {
         await this.page.goto('/');
         await this.validatePageLoaded();
     }
@@ -37,14 +37,14 @@ export class HomePage extends BasePage {
      * Validates that the  User Profile page has loaded by checking for a specific locator.
      */
     async validatePageLoaded(): Promise<void> {
-        await this.page.waitForSelector(this.homePageLocators.searchField, { state: 'visible' });
+        await this.page.waitForSelector(this.homePageLocators.searchField);
     }
 
     // FIELDS ------------------------------------------------------------------------------
 
     // Method to fill in the search field
     async fillSearchField(query: string): Promise<void> {
-        const searchInput = this.page.locator(this.homePageLocators.searchField);
+        const searchInput = await this.page.locator(this.homePageLocators.searchField);
         await searchInput.fill(query);
         await expect(searchInput).toHaveValue(query);
     }
@@ -54,7 +54,7 @@ export class HomePage extends BasePage {
 
     // Method to submit the search
     async submitSearch(): Promise<SearchPage> {
-        const submitButton = this.page.locator(this.homePageLocators.searchButton);
+        const submitButton = await this.page.locator(this.homePageLocators.searchButton);
         await submitButton.click();
         await this.page.waitForLoadState("networkidle");
         const nextPage: SearchPage = this.availablePages['searchPage'] as SearchPage;

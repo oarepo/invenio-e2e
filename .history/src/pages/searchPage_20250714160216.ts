@@ -3,7 +3,7 @@ import { BASE_PAGE_LOCATORS, SEARCH_PAGE_LOCATORS } from '../locators';
 import { BasePage } from './basePage';
 
 /**
- * Class representing the search results page.
+ * Class representing extended search page with special footer.
  */
 
 export class SearchPage extends BasePage {
@@ -24,8 +24,8 @@ export class SearchPage extends BasePage {
     }
     
     /*
-    * Navigate to the search results page.
-    */
+     * Navigate to the  Home page.
+     */
     async open_page() {
         await this.page.goto('/search');
         await this.validatePageLoaded();

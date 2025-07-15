@@ -37,7 +37,7 @@ export class BasePage {
     // NAVIGATION
 
     async navigateToHomePage(): Promise<HomePage> {
-        const logoLink = this.page.locator(this.basePageLocators.logoLink);
+        const logoLink = await this.page.locator(this.basePageLocators.logoLink);
         await logoLink.click();
         const homePage: HomePage = this.availablePages['homePage'] as HomePage;
         await homePage.validatePageLoaded();

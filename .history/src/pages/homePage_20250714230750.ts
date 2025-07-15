@@ -37,7 +37,7 @@ export class HomePage extends BasePage {
      * Validates that the  User Profile page has loaded by checking for a specific locator.
      */
     async validatePageLoaded(): Promise<void> {
-        await this.page.waitForSelector(this.homePageLocators.searchField, { state: 'visible' });
+    await this.page.waitForSelector(this.homePageLocators.searchField, { state: 'visible' });
     }
 
     // FIELDS ------------------------------------------------------------------------------

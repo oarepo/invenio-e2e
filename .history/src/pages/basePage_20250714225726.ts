@@ -30,14 +30,14 @@ export class BasePage {
 
     async expectLogoVisible(): Promise<void> {
         await this.page.waitForLoadState('networkidle');
-        const logo = this.page.locator(this.basePageLocators.logoLink);
+        const logo = await this.page.locator(this.basePageLocators.logoLink);
         await expect(logo).toBeVisible();
     }
 
     // NAVIGATION
 
     async navigateToHomePage(): Promise<HomePage> {
-        const logoLink = this.page.locator(this.basePageLocators.logoLink);
+        const logoLink = await this.page.locator(this.basePageLocators.logoLink);
         await logoLink.click();
         const homePage: HomePage = this.availablePages['homePage'] as HomePage;
         await homePage.validatePageLoaded();
