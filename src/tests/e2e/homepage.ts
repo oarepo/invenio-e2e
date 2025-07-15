@@ -1,4 +1,4 @@
-import { InvenioTest} from '../fixtures';
+import { InvenioTest} from '../../fixtures';
 import { expect } from '@playwright/test';
 
 export function homepageTests(test: InvenioTest) {

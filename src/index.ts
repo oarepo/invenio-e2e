@@ -11,4 +11,4 @@ export { SearchPage } from './pages/searchPage';
 export { BasePage } from './pages/basePage';
 
 // tests
-export { homepageTests } from './tests/homepage';
+export { homepageTests } from './tests/e2e';
