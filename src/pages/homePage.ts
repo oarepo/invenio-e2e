@@ -1,50 +1,36 @@
-import { expect, Page } from '@playwright/test';
-import { BASE_PAGE_LOCATORS, HOME_PAGE_LOCATORS } from '../locators';
+import { expect } from '@playwright/test';
+import { Locators } from '../locators';
 import { SearchPage } from './searchPage';
 import { BasePage } from './basePage';
 
 /**
- * Class representing extended home page with special footer.
+ * Class representing a home page with search functionality.
  */
 
-export class HomePage extends BasePage {
-    /**
-     * Creates a new instance of the HomePage.
-     * 
-     * @param page  Playwright Page object representing the current page.
-     * @param locators  An object containing locators for elements on the page.
-     * @param availablePages  An object containing available pages for navigation.
-     */
-    constructor(
-        page: Page, 
-        basePageLocators: typeof BASE_PAGE_LOCATORS,
-        protected homePageLocators: typeof HOME_PAGE_LOCATORS,
-        availablePages: {[key: string]: object},
-    ) {
-        super(page, basePageLocators, availablePages);
-    }
-    
+export class HomePage<T extends Locators = Locators> extends BasePage<T> {
+
     /*
-     * Navigate to the  Home page.
+     * Navigate to the Home page.
+     * @returns The home page instance to allow method chaining.
      */
-    async open_page() {
+    async open_page(): Promise<void> {
         await this.page.goto('/');
         await this.validatePageLoaded();
     }
 
     // VALIDATION
     /**
-     * Validates that the  User Profile page has loaded by checking for a specific locator.
+     * Validates that the home page has loaded by checking for the search field.
      */
     async validatePageLoaded(): Promise<void> {
-        await this.page.waitForSelector(this.homePageLocators.searchField);
+        await this.page.waitForSelector(this.locators.homePage.searchField);
     }
 
     // FIELDS ------------------------------------------------------------------------------
 
     // Method to fill in the search field
     async fillSearchField(query: string): Promise<void> {
-        const searchInput = await this.page.locator(this.homePageLocators.searchField);
+        const searchInput = await this.page.locator(this.locators.homePage.searchField);
         await searchInput.fill(query);
         await expect(searchInput).toHaveValue(query);
     }
@@ -54,11 +40,24 @@ export class HomePage extends BasePage {
 
     // Method to submit the search
     async submitSearch(): Promise<SearchPage> {
-        const submitButton = await this.page.locator(this.homePageLocators.searchButton);
+        const submitButton = await this.page.locator(this.locators.homePage.searchButton);
         await submitButton.click();
         await this.page.waitForLoadState("networkidle");
         const nextPage: SearchPage = this.availablePages['searchPage'] as SearchPage;
         await nextPage.validatePageLoaded();
         return nextPage;
+    }
+
+    // FLOWS ------------------------------------------------------------------------------
+
+    /**
+     * Performs a search operation by filling the search field and submitting the search.
+     * 
+     * @param query  The search query to fill in the search field.
+     * @returns The search page after performing the search.
+     */
+    async performSearch(query: string): Promise<SearchPage> {
+        await this.fillSearchField(query);
+        return await this.submitSearch();
     }
 }
