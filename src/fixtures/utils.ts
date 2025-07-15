@@ -10,8 +10,6 @@ export type PageFixtureParams<L extends Locators> = {
 
 export type UseFunction<L extends Locators, T extends typeof BasePage<L>> = (r: InstanceType<T>) => Promise<void>;
 
-const AsyncFunction = (async function () { }).constructor;
-
 export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
     name: string,
     PageType: T,
