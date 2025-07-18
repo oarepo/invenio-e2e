@@ -8,9 +8,12 @@
 
 import { Page } from '@playwright/test';
 import { test as invenio_test, type InvenioTest } from '../fixtures';
-import { updateLocators } from '../locators';
+import { updateLocators, type Locators } from '../locators';
 import { HomePage } from '../pages';
 
+/**
+ * Config for repository services like translations and locators.
+ */
 export interface ServiceConfig {
   name: string;
   url: string;
@@ -22,6 +25,9 @@ export interface ServiceConfig {
   locators?: Record<string, any>;
 }
 
+/**
+ * Services for i18n and repository navigation.
+ */
 export interface Services {
   i18n: {
     languages: string[];
@@ -36,7 +42,12 @@ export interface Services {
   };
 }
 
-// Service factory - works for any repository
+/**
+ * Creates services from repository config.
+ * 
+ * @param config Repository config
+ * @returns Services with i18n and repository functions
+ */
 export const createServices = (config: ServiceConfig): Services => ({
   i18n: {
     languages: config.languages.supported,
@@ -46,8 +57,6 @@ export const createServices = (config: ServiceConfig): Services => ({
         throw new Error(`Language ${language} not supported. Available: ${config.languages.supported.join(', ')}`);
       }
       console.log(`[${config.name}] Switching to language: ${language}`);
-      // Generic implementation - repositories can override this
-      // patterns: URL params, cookies, localStorage, API calls
     },
     t: (key: string, language?: string) => {
       const lang = language || config.languages.default;
@@ -63,10 +72,13 @@ export const createServices = (config: ServiceConfig): Services => ({
   },
 });
 
-export class ServiceHomePage extends HomePage {
+/**
+ * Homepage with language switching support.
+ */
+export class ServiceHomePage<L extends Locators = Locators> extends HomePage<L> {
   constructor({ page, locators, availablePages, services }: {
     page: Page,
-    locators: any,
+    locators: L,
     availablePages: { [key: string]: object },
     services: Services
   }) {
@@ -76,6 +88,7 @@ export class ServiceHomePage extends HomePage {
 
   protected services: Services;
 
+  /** Switch page language */
   async switchLanguage(language: string) {
     if (this.services?.i18n && this.services.i18n.languages.includes(language)) {
       await this.services.i18n.switchLanguage(this.page, language);
@@ -84,6 +97,7 @@ export class ServiceHomePage extends HomePage {
     }
   }
 
+  /** Get page title in current language */
   async getLocalizedTitle(): Promise<string> {
     if (this.services?.i18n) {
       return this.services.i18n.t('page.title');
@@ -91,7 +105,7 @@ export class ServiceHomePage extends HomePage {
     return await this.page.title();
   }
 
-  // Repository info for services
+  /** Get repository info */
   getRepositoryInfo() {
     return {
       name: this.services.repository.name,
@@ -101,17 +115,34 @@ export class ServiceHomePage extends HomePage {
   }
 }
 
-export interface ServiceTest extends InvenioTest {
+export interface ServiceTest<L extends Locators = Locators> extends InvenioTest {
   serviceConfig: ServiceConfig;
   services: Services;
-  serviceHomePage: ServiceHomePage;
+  serviceHomePage: ServiceHomePage<L>;
 }
 
-export const createServiceTest = (config: ServiceConfig, customLocators?: any) => {
+/**
+ * Creates test with services fixtures.
+ * 
+ * @param config Repository configuration with translations and settings
+ * @param customLocators Optional custom locators for the repository
+ * @returns Playwright test with serviceConfig, services, and serviceHomePage fixtures
+ * 
+ * Usage:
+ * ```typescript
+ * const test = createServiceTest(myConfig, myLocators);
+ * 
+ * test('my test', async ({ services, serviceHomePage }) => {
+ *   await serviceHomePage.switchLanguage('de');
+ *   const title = services.i18n.t('page.title');
+ * });
+ * ```
+ */
+export const createServiceTest = <L extends Locators = Locators>(config: ServiceConfig, customLocators?: L) => {
   return invenio_test.extend<{
     serviceConfig: ServiceConfig;
     services: Services;
-    serviceHomePage: ServiceHomePage;
+    serviceHomePage: ServiceHomePage<L>;
   }>({
     locators: customLocators ? updateLocators(customLocators) : updateLocators({}),
 
@@ -125,7 +156,7 @@ export const createServiceTest = (config: ServiceConfig, customLocators?: any) =
     },
 
     serviceHomePage: async ({ page, locators, availablePages, services }, use) => {
-      const serviceHomePage = new ServiceHomePage({ page, locators, availablePages, services });
+      const serviceHomePage = new ServiceHomePage<L>({ page, locators: locators as L, availablePages, services });
       await use(serviceHomePage);
     },
   });
