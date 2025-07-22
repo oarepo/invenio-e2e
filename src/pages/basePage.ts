@@ -1,14 +1,19 @@
-import { expect, Page } from '@playwright/test';
+import { Page, Expect } from '@playwright/test';
 import { Locators } from '../locators';
 import { HomePage } from './homePage';
+import { Services, I18nExpect } from '../services';
 
 /**
  * Class representing a base page with common functionality for all pages.
  */
-export class BasePage<T extends Locators = Locators> {
+export class BasePage<L extends Locators = Locators, S extends Services<L> = Services<L>,
+    ExpectExtension extends I18nExpect = I18nExpect
+> {
     protected page: Page;
-    protected locators: T;
+    protected locators: L;
     protected availablePages: { [key: string]: object };
+    protected services: S;
+    protected expect: Expect<ExpectExtension>
 
     /**
      * Creates a new instance of the abstract base page.
@@ -17,14 +22,18 @@ export class BasePage<T extends Locators = Locators> {
      * @param locators  An object containing locators for elements on the page.
      * @param availablePages  An object containing available pages for navigation.
      */
-    constructor({ page, locators, availablePages }: {
+    constructor({ page, locators, availablePages, services, expect }: {
         page: Page,
-        locators: T,
-        availablePages: { [key: string]: object }
+        locators: L,
+        availablePages: { [key: string]: object },
+        services: S,
+        expect: Expect<ExpectExtension>
     }) {
         this.page = page;
         this.locators = locators;
         this.availablePages = availablePages;
+        this.services = services;
+        this.expect = expect;
     }
 
     // VALIDATION
@@ -41,7 +50,7 @@ export class BasePage<T extends Locators = Locators> {
     async expectLogoVisible(): Promise<void> {
         await this.page.waitForLoadState('networkidle');
         const logo = this.page.locator(this.locators.header.logoLink);
-        await expect(logo).toBeVisible();
+        await this.expect(logo).toBeVisible();
     }
 
     // NAVIGATION
