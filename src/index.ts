@@ -8,20 +8,21 @@
 
 // test runner
 export {test, registerPage} from './fixtures';
-export type { InvenioTest } from './fixtures';
 
-// default locators
-export { locators, Locators, updateLocators } from './locators';
+// services and i18n
+export { createServices, createServiceTest, ServiceHomePage } from './services';
+export type { ServiceConfig, Services } from './services';
+
+// i18n expect extensions
+export { createI18nExpect } from './fixtures/i18n';
+export type { I18nMatcherOptions } from './fixtures/i18n';
 
 // pages
-export { HomePage } from './pages/homePage';
-export { SearchPage } from './pages/searchPage';
-export { BasePage } from './pages/basePage';
+export * from './pages';
 
-// tests
-export { homepageTests } from './tests/e2e';
+// locators
+export * from './locators';
 
-// services
-export { createServices, createServiceTest, ServiceHomePage } from './services';
-export type { ServiceConfig, Services, ServiceTest } from './services';
+// test suites
+export * from './tests/e2e';
 

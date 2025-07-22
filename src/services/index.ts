@@ -10,6 +10,7 @@ import { Page } from '@playwright/test';
 import { test as invenio_test, type InvenioTest } from '../fixtures';
 import { updateLocators, type Locators } from '../locators';
 import { HomePage } from '../pages';
+import { createI18nExpect } from '../fixtures/i18n';
 
 /**
  * Config for repository services like translations and locators.
@@ -32,7 +33,6 @@ export interface Services {
   i18n: {
     languages: string[];
     defaultLanguage: string;
-    switchLanguage: (page: Page, language: string) => Promise<void>;
     t: (key: string, language?: string) => string;
   };
   repository: {
@@ -52,12 +52,6 @@ export const createServices = (config: ServiceConfig): Services => ({
   i18n: {
     languages: config.languages.supported,
     defaultLanguage: config.languages.default,
-    switchLanguage: async (page: Page, language: string) => {
-      if (!config.languages.supported.includes(language)) {
-        throw new Error(`Language ${language} not supported. Available: ${config.languages.supported.join(', ')}`);
-      }
-      console.log(`[${config.name}] Switching to language: ${language}`);
-    },
     t: (key: string, language?: string) => {
       const lang = language || config.languages.default;
       return config.translations[lang]?.[key] || `[${key}]`;
@@ -88,15 +82,6 @@ export class ServiceHomePage<L extends Locators = Locators> extends HomePage<L> 
 
   protected services: Services;
 
-  /** Switch page language */
-  async switchLanguage(language: string) {
-    if (this.services?.i18n && this.services.i18n.languages.includes(language)) {
-      await this.services.i18n.switchLanguage(this.page, language);
-    } else {
-      console.log(`Language '${language}' not supported by ${this.services.repository.name}`);
-    }
-  }
-
   /** Get page title in current language */
   async getLocalizedTitle(): Promise<string> {
     if (this.services?.i18n) {
@@ -122,27 +107,20 @@ export interface ServiceTest<L extends Locators = Locators> extends InvenioTest 
 }
 
 /**
- * Creates test with services fixtures.
+ * Creates test with services and i18n fixtures.
  * 
- * @param config Repository configuration with translations and settings
- * @param customLocators Optional custom locators for the repository
- * @returns Playwright test with serviceConfig, services, and serviceHomePage fixtures
- * 
- * Usage:
- * ```typescript
- * const test = createServiceTest(myConfig, myLocators);
- * 
- * test('my test', async ({ services, serviceHomePage }) => {
- *   await serviceHomePage.switchLanguage('de');
- *   const title = services.i18n.t('page.title');
+ * @example
+ * const test = createServiceTest(config);
+ * test('check translation', async ({ expect, page }) => {
+ *   await expect(page.locator('#title')).toHaveI18nText("Welcome", "messages", { locale: "de" });
  * });
- * ```
  */
 export const createServiceTest = <L extends Locators = Locators>(config: ServiceConfig, customLocators?: L) => {
   return invenio_test.extend<{
     serviceConfig: ServiceConfig;
     services: Services;
     serviceHomePage: ServiceHomePage<L>;
+    expect: ReturnType<typeof createI18nExpect<Services>>;
   }>({
     locators: customLocators ? updateLocators(customLocators) : updateLocators({}),
 
@@ -153,6 +131,11 @@ export const createServiceTest = <L extends Locators = Locators>(config: Service
     services: async ({ serviceConfig }, use) => {
       const services = createServices(serviceConfig);
       await use(services);
+    },
+
+    expect: async ({ services }, use) => {
+      const customExpect = createI18nExpect(services);
+      await use(customExpect);
     },
 
     serviceHomePage: async ({ page, locators, availablePages, services }, use) => {

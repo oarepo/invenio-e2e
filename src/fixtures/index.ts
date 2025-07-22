@@ -1,7 +1,8 @@
+import { BasePage, HomePage, SearchPage } from '../pages';
+
+import type { Locators } from '../locators';
 import { test as base } from '@playwright/test';
 import { locators } from '../locators';
-import type { Locators } from '../locators';
-import { HomePage, SearchPage, BasePage } from '../pages';
 import { registerPage } from './utils';
 export { registerPage } from './utils';
 
@@ -28,5 +29,5 @@ export const test = base.extend<{
     ...registerPage('searchPage', SearchPage),
 })
 
-export type InvenioTest = typeof test
+export type InvenioTest = typeof test;
 

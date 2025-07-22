@@ -1,6 +1,7 @@
-import { expect, Page } from '@playwright/test';
-import { Locators } from '../locators';
+import { Page, expect } from '@playwright/test';
+
 import { HomePage } from './homePage';
+import { Locators } from '../locators';
 
 /**
  * Class representing a base page with common functionality for all pages.
@@ -42,6 +43,60 @@ export class BasePage<T extends Locators = Locators> {
         await this.page.waitForLoadState('networkidle');
         const logo = this.page.locator(this.locators.header.logoLink);
         await expect(logo).toBeVisible();
+    }
+
+    // LOCALIZATION
+    /**
+     * Switch page language via UI interaction.
+     */
+    async toggleLocale(locale: string): Promise<void> {
+        const selectors = [
+            `[data-language="${locale}"]`,
+            `[lang="${locale}"]`,
+            `a[href*="?ln=${locale}"]`,
+            `button[data-locale="${locale}"]`,
+            `.language-${locale}`,
+            `#language-${locale}`
+        ];
+
+        let clicked = false;
+        for (const selector of selectors) {
+            const element = this.page.locator(selector);
+            if (await element.isVisible()) {
+                await element.click();
+                clicked = true;
+                break;
+            }
+        }
+
+        if (!clicked) {
+            const dropdown = this.page.locator('[data-toggle="dropdown"]:has-text("Language"), .language-switcher, #language-dropdown');
+            if (await dropdown.isVisible()) {
+                await dropdown.click();
+                await this.page.waitForTimeout(500);
+                
+                for (const selector of selectors) {
+                    const element = this.page.locator(selector);
+                    if (await element.isVisible()) {
+                        await element.click();
+                        clicked = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (clicked) {
+            await this.page.waitForLoadState('networkidle');
+            await this.validateAfterLanguageSwitch(locale);
+        }
+    }
+
+    /**
+     * Override for page-specific validation after language switch.
+     */
+    protected async validateAfterLanguageSwitch(locale: string): Promise<void> {
+        await this.validatePageLoaded();
     }
 
     // NAVIGATION
