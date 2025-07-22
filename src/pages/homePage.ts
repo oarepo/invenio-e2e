@@ -1,4 +1,3 @@
-import { expect } from '@playwright/test';
 import { Locators } from '../locators';
 import { SearchPage } from './searchPage';
 import { BasePage } from './basePage';
@@ -34,7 +33,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
     async fillSearchField(query: string): Promise<void> {
         const searchInput = await this.page.locator(this.locators.homePage.searchField);
         await searchInput.fill(query);
-        await expect(searchInput).toHaveValue(query);
+        await this.expect(searchInput).toHaveValue(query);
     }
 
 
