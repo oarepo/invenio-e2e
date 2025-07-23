@@ -1,6 +1,9 @@
 // test runner
-export {test, registerPage} from './fixtures';
-export type { InvenioTest } from './fixtures';
+export * from './fixtures';
+export * from './pages';
+export * from './locators';
+export * from './services';
+export * from './utils';
 
 // default locators
 export { locators, Locators, updateLocators } from "./locators";

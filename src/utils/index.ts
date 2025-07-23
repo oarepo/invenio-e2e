@@ -1,0 +1,1 @@
+export { TextCaptureUtil, TextCaptureOptions, TranslatableElement } from './textCapture'; 

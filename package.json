@@ -2,8 +2,8 @@
   "name": "@inveniosoftware/invenio-e2e",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "build": "tsc; cp package.json dist",
     "docs": "documentation build src/**/*.ts -f md -o api_docs.md --shallow --github --sort-order kind"
@@ -15,12 +15,15 @@
     "@playwright/test": "^1.54.1",
     "@types/node": "^24.0.13",
     "documentation": "^14.0.3",
+    "ts-deepmerge": "^7.0.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
-    "ts-deepmerge": "^7.0.3"
+    "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "@playwright/test": "^1.54.1",
     "ts-deepmerge": "^7.0.3"
+  },
+  "dependencies": {
+    "i18next": "^25.3.2"
   }
 }
