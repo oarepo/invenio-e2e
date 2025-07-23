@@ -1,24 +1,27 @@
-import { test as base, expect as playwrightExpect, Expect } from '@playwright/test';
-import { locators } from '../locators';
-import type { Locators } from '../locators';
-import { HomePage, SearchPage, BasePage } from '../pages';
-import { registerPage } from './utils';
-export { registerPage } from './utils';
-import { LocalLoginService, I18nService, Services, I18nExpect } from '../services';
+import { BasePage, HomePage, SearchPage } from '../pages';
+import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
+import { I18nExpected, I18nService, LocalLoginService, Services, Translations } from '../services';
 
+import type { Locators } from '../locators';
+import { locators } from '../locators';
+import { registerPage } from './utils';
+
+export { registerPage } from './utils';
 
 export const test = base.extend<{
     locators: Locators;
     availablePages: { [key: string]: object };
 
     initialLocale: string;
+    translations: Translations;
+    excludes: string[];
 
     i18nService: I18nService<Locators>;
     loginService: LocalLoginService<Locators>;
 
     services: Services<Locators>;
 
-    expect: Expect<I18nExpect>;
+    expect: Expect<I18nExpected>;
 
     homePage: HomePage;
     searchPage: SearchPage;
@@ -37,17 +40,23 @@ export const test = base.extend<{
     // initial locale (do not limit the locale by default)
     initialLocale: undefined,
 
+    // translations for i18n service - I18nService now provides its own defaults
+    translations: {},
+
+    // excludes for translation testing 
+    excludes: [],
+
     // browser context with initial locale
     context: async ({ context: originalContext, initialLocale }, use) => {
         if (initialLocale) {
-            // TODO: will this work???
+            // Set Accept-Language header to simulate browser locale preference
             await originalContext.setExtraHTTPHeaders({ "Accept-Language": initialLocale });
         }
         await use(originalContext);
     },
 
-    i18nService: async ({ page, locators }, use) => {
-        const i18nService = new I18nService(page, locators);
+    i18nService: async ({ page, locators, initialLocale, translations }, use) => {
+        const i18nService = new I18nService(page, locators, initialLocale, translations);
         await use(i18nService);
     },
 
@@ -73,6 +82,7 @@ export const test = base.extend<{
     // so that they can be easily accessed from other pages and tests.
     ...registerPage('homePage', HomePage),
     ...registerPage('searchPage', SearchPage),
+
 })
 
 export type InvenioTest = typeof test

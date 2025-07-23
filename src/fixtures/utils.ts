@@ -1,7 +1,7 @@
 import { Page, Expect } from '@playwright/test';
-import type { Locators } from '../locators';
-import { BasePage } from '../pages';
-import { Services, I18nExpect } from '../services';
+import { Locators } from '../locators';
+import { BasePage } from '../pages/basePage';
+import { Services, I18nExpected } from '../services';
 
 /**
  * PageFixtureParams defines the parameters required to create a page instance.
@@ -12,7 +12,8 @@ export type PageFixtureParams<L extends Locators> = {
     locators: L;
     availablePages: { [key: string]: object };
     services: Services<L>;
-    expect: Expect<I18nExpect>;
+    expect: Expect<I18nExpected>;
+    excludes: string[];
 }
 
 /**
@@ -92,6 +93,7 @@ export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
             "availablePages",
             "services",
             "expect",
+            "excludes",
             ...options.extraFixtures, // extra fixtures are passed as parameters
         ].join(", ");
         const func = eval(`async ({ ${parameters} } , use) => { return await page_creator({ ${parameters} }, use); }`);
@@ -101,8 +103,8 @@ export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
     }
 
     return {
-        [name]: async ({ page, locators, availablePages, services, expect }: PageFixtureParams<L>, use: UseFunction<L, T>) => {
-            await page_creator({ page, locators, availablePages, services, expect }, use)
+        [name]: async ({ page, locators, availablePages, services, expect, excludes }: PageFixtureParams<L>, use: UseFunction<L, T>) => {
+            await page_creator({ page, locators, availablePages, services, expect, excludes }, use)
         }
     }
 }
