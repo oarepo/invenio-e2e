@@ -2,6 +2,9 @@ import { Expect, Locator, Page, expect } from '@playwright/test';
 
 import type { Locators } from '../locators';
 
+/**
+ * type that adds translation checking methods to Playwright's expect function.
+ */
 export type I18nExpected = Record<string, any> & {
     toHaveI18nText(
         locator: Locator, 
@@ -14,6 +17,10 @@ export type I18nExpected = Record<string, any> & {
     }>;
 };
 
+/**
+ * structure for organizing translation data by catalogue, locale, and key
+ * example: translations['invenio-app-rdm']['en']['search.placeholder'] = 'Search records...'
+ */
 export interface Translations {
     [catalogue: string]: {
         [locale: string]: {
@@ -23,87 +30,69 @@ export interface Translations {
 }
 
 /**
- * Interface for changing languages and checking translations in tests
+ * interface for changing languages and checking translations in tests
+ * provides methods to switch locales and validate translated content
  */
 export interface I18nServiceInterface<L extends Locators> {
     switchLocale(locale: string): Promise<void>;
     currentLocale: string;
-    extendExpect(expect: Expect): Expect<I18nExpected>;
+    excludes: string[];
+    translatableSelectors: string[];
+    extendExpect<T extends Record<string, any> = {}>(expect: Expect<T>): Expect<T & I18nExpected>;
     hasTranslation(key: string, messageCatalogue: string, locale?: string): boolean;
 }
 
+/**
+ * service for handling internationalization (i18n) in E2E tests
+ * switches between languages and validates that UI elements are properly translated
+ */
 export class I18nService<L extends Locators> implements I18nServiceInterface<L> {
     private page: Page;
     private locators: L;
-    private _currentLocale: string;
+    private currentLocaleValue: string;
     private translations: Translations;
+    private untranslatedStrings: string[];
+    private translatableSelectorsValue: string[];
 
     constructor(
         page: Page,
         locators: L,
         initialLocale: string = 'en',
-        translations: Translations = {}
+        translations: Translations = {},
+        untranslatedStrings: string[] = [],
+        translatableSelectors: string[] = []
     ) {
         this.page = page;
         this.locators = locators;
-        this._currentLocale = initialLocale;
+        this.currentLocaleValue = initialLocale;
         this.translations = translations;
-        
-        if (Object.keys(translations).length === 0) {
-            this.translations = this.getDefaultTranslations();
-        }
+        this.untranslatedStrings = untranslatedStrings;
+        this.translatableSelectorsValue = translatableSelectors;
     }
 
     get currentLocale(): string {
-        return this._currentLocale;
+        return this.currentLocaleValue;
     }
 
-    /**
-     * Placeholder translations structure matching 
-     * 
-     * Future catalogue loading ideas:
-     * Query installed packages for entry points, generate registry JSON file
-     * Runtime query: fetch(`${baseUrl}/api/translations/catalogs`)
-     */
-    private getDefaultTranslations(): Translations {
-        return {
-            'test': {
-                'en': { 'repository.welcome': 'Welcome to InvenioRDM\'s Sandbox!' },
-                'de': { 'repository.welcome': 'Willkommen in InvenioRDMs Sandbox!' },
-                'cs': { 'repository.welcome': 'Vítejte v InvenioRDM Sandbox!' }
-            },
-            // Placeholder catalogue - institutions would provide real translations
-            'invenio-app-rdm-messages': {
-                'en': { 
-                    'repository.name': 'InvenioRDM Repository',
-                    'search.placeholder': 'Search records...',
-                    'nav.home': 'Home',
-                    'nav.search': 'Search'
-                },
-                'de': { 
-                    'repository.name': 'InvenioRDM Repository',
-                    'search.placeholder': 'Datensätze suchen...',
-                    'nav.home': 'Startseite', 
-                    'nav.search': 'Suchen'
-                }
-            }
-        };
+    get excludes(): string[] {
+        return this.untranslatedStrings;
     }
 
-    /** Get list of available translation catalogues */
+    get translatableSelectors(): string[] {
+        return this.translatableSelectorsValue;
+    }
+
     getAvailableCatalogues(): string[] {
         return Object.keys(this.translations);
     }
 
-    /** Check if translation exists for a key */
     hasTranslation(key: string, messageCatalogue: string, locale?: string): boolean {
-        const targetLocale = locale || this._currentLocale;
+        const targetLocale = locale || this.currentLocaleValue;
         return !!(this.translations[messageCatalogue]?.[targetLocale]?.[key]);
     }
 
-    /** Get translated text for a key */
     get_localized_text(key: string, messageCatalogue: string, locale?: string): string {
-        const targetLocale = locale || this._currentLocale;
+        const targetLocale = locale || this.currentLocaleValue;
         const translation = this.translations[messageCatalogue]?.[targetLocale]?.[key];
         
         if (!translation) {
@@ -114,20 +103,37 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
         return translation;
     }
 
-    /** Change page language using URL parameter */
     async switchLocale(locale: string): Promise<void> {
-        this._currentLocale = locale;
+        this.currentLocaleValue = locale;
 
+        try {
+            const languageSelector = this.page.locator(this.locators.footer.languageSelector);
+            if (await languageSelector.isVisible()) {
+                await languageSelector.click();
+                
+                const localeOption = this.page.locator(this.locators.footer.languageOption)
+                    .filter({ hasText: new RegExp(locale, 'i') })
+                    .or(this.page.locator(`[href*="ln=${locale}"]`))
+                    .or(this.page.locator(`[data-locale="${locale}"]`));
+                
+                if (await localeOption.first().isVisible()) {
+                    await localeOption.first().click();
+                    await this.page.waitForLoadState('networkidle');
+                    return;
+                }
+            }
+        } catch (error) {
+            console.warn('UI language switching failed, falling back to URL method:', error.message);
+        }
         const url = new URL(this.page.url());
         url.searchParams.set('ln', locale);
         await this.page.goto(url.toString());
         await this.page.waitForLoadState('networkidle');
     }
 
-    /** Add translation checking to Playwright expect */
-    extendExpect(expect: Expect): Expect<I18nExpected> {
+    extendExpect<T extends Record<string, any> = {}>(expect: Expect<T>): Expect<T & I18nExpected> {
         const i18nService = this;
-        return expect.extend<I18nExpected>({
+        return expect.extend({
             async toHaveI18nText(
                 locator: Locator, 
                 translationKey: string, 
@@ -154,6 +160,6 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
                     pass,
                 };
             },
-        });
+        }) as Expect<T & I18nExpected>;
     }
 }

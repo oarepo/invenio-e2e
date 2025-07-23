@@ -10,10 +10,9 @@ import { Services, I18nExpected } from '../services';
 export type PageFixtureParams<L extends Locators> = {
     page: Page;
     locators: L;
-    availablePages: { [key: string]: object };
+    availablePages: { [key: string]: BasePage };
     services: Services<L>;
     expect: Expect<I18nExpected>;
-    excludes: string[];
 }
 
 /**
@@ -93,7 +92,6 @@ export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
             "availablePages",
             "services",
             "expect",
-            "excludes",
             ...options.extraFixtures, // extra fixtures are passed as parameters
         ].join(", ");
         const func = eval(`async ({ ${parameters} } , use) => { return await page_creator({ ${parameters} }, use); }`);
@@ -103,8 +101,8 @@ export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
     }
 
     return {
-        [name]: async ({ page, locators, availablePages, services, expect, excludes }: PageFixtureParams<L>, use: UseFunction<L, T>) => {
-            await page_creator({ page, locators, availablePages, services, expect, excludes }, use)
+        [name]: async ({ page, locators, availablePages, services, expect }: PageFixtureParams<L>, use: UseFunction<L, T>) => {
+            await page_creator({ page, locators, availablePages, services, expect }, use)
         }
     }
 }

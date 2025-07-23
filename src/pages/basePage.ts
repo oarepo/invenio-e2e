@@ -15,7 +15,6 @@ export class BasePage<L extends Locators = Locators> {
     protected services: Services<L>;
     protected availablePages: { [key: string]: BasePage };
     protected expect: Expect<I18nExpected>;
-    protected excludes: string[];
 
     /**
      * Base class for page objects in Playwright tests.
@@ -24,20 +23,18 @@ export class BasePage<L extends Locators = Locators> {
      * @param services        An object containing services for interacting with the application.
      * @param availablePages  An object containing available pages for navigation.
      */
-    constructor({ page, locators, availablePages, services, expect, excludes }: {
+    constructor({ page, locators, availablePages, services, expect }: {
         page: Page,
         locators: L,
-        availablePages: { [key: string]: object },
+        availablePages: { [key: string]: BasePage },
         services: Services<L>,
-        expect: Expect<I18nExpected>,
-        excludes: string[]
+        expect: Expect<I18nExpected>
     }) {
         this.page = page;
         this.locators = locators;
-        this.availablePages = availablePages as { [key: string]: BasePage };
+        this.availablePages = availablePages;
         this.services = services;
         this.expect = expect;
-        this.excludes = excludes;
     }
 
     /**
@@ -62,17 +59,20 @@ export class BasePage<L extends Locators = Locators> {
      * 
      * @returns the home page
      */
-    async navigateToHomePage(): Promise<any> {
+    async navigateToHomePage<T extends BasePage = BasePage>(): Promise<T> {
         const logoLink = await this.page.locator(this.locators.header.logoLink);
         await logoLink.click();
         const homePage = this.availablePages['homePage'];
         if (homePage && 'validatePageLoaded' in homePage) {
-            await (homePage as any).validatePageLoaded();
+            await homePage.validatePageLoaded();
         }
-        return homePage;
+        return homePage as T;
     }
 
-    /** Test specific UI elements against translation keys */
+    /**
+     * tests specific UI elements against translation keys
+     * verifies that common elements like navigation and search have correct translations
+     */
     async expectElementTranslations(
         locale: string, 
         messageCatalogue: string = 'invenio-app-rdm-messages'
@@ -82,7 +82,8 @@ export class BasePage<L extends Locators = Locators> {
 
       const elements = await TextCaptureUtil.findTranslatableElements(
         this.page,
-        this.excludes
+        this.services.i18n.excludes,
+        this.services.i18n.translatableSelectors
       );
 
       console.log(`\nTranslations (${locale}):`);
@@ -93,15 +94,21 @@ export class BasePage<L extends Locators = Locators> {
       let passedCount = 0;
 
       const commonKeys = [
-        { key: "nav.home", selectors: ["nav a", ".navbar a", "header a"] },
-        { key: "nav.search", selectors: ["nav a", ".navbar a", "header a"] },
+        { 
+          key: "nav.home", 
+          selectors: [this.locators.navigation.homeLink] 
+        },
+        { 
+          key: "nav.search", 
+          selectors: [this.locators.navigation.searchLink] 
+        },
         {
           key: "search.placeholder",
-          selectors: ["input[placeholder]", ".search-input"],
+          selectors: [this.locators.homePage.searchPlaceholder, this.locators.searchPage.searchInput],
         },
         {
           key: "repository.name",
-          selectors: ["h1", ".site-title", ".logo-text"],
+          selectors: [this.locators.homePage.repositoryName],
         },
       ];
 
@@ -149,18 +156,20 @@ export class BasePage<L extends Locators = Locators> {
         if (testedCount === 0){}
     }
 
-    /** Capture text, switch language, compare to find untranslated content */
+    /**
+     * captures text, switches language, compares to find untranslated content
+     * approach to identify text that remains unchanged between languages
+     */
     async expectTranslation(
         fromLang: string, 
         toLang: string, 
         options: TextCaptureOptions = {}
     ): Promise<void> {
         await this.services.i18n.switchLocale(fromLang);
-        const beforeTexts = await TextCaptureUtil.capture(this.page, this.excludes, options);
+        const beforeTexts = await TextCaptureUtil.capture(this.page, this.services.i18n.excludes, options);
 
         await this.services.i18n.switchLocale(toLang);
-        const afterTexts = await TextCaptureUtil.capture(this.page, this.excludes, options);
-
+        const afterTexts = await TextCaptureUtil.capture(this.page, this.services.i18n.excludes, options);
         const unchanged = beforeTexts.filter(word => afterTexts.includes(word));
 
         console.log(`\nTranslation Analysis (${fromLang} → ${toLang}):`);
