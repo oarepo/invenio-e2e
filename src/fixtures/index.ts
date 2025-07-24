@@ -1,4 +1,4 @@
-import { AllPages, BasePage, HomePage, LoginPage, SearchPage } from '../pages';
+import { HomePage, SearchPage, BasePage, LoginPage, DepositPage, PreviewPage } from '../pages';
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
 import { I18nExpected, I18nService, LocalLoginService, Services, Translations } from '../services';
 
@@ -152,6 +152,8 @@ const _test = base.extend<{
     // so that they can be easily accessed from other pages and tests.
     ...registerPage('homePage', HomePage),
     ...registerPage('searchPage', SearchPage),
+    ...registerPage('depositPage', DepositPage),
+    ...registerPage('previewPage', PreviewPage),
     ...registerPage("loginPage", LoginPage),
 })
 
