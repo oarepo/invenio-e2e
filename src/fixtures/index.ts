@@ -1,7 +1,7 @@
 import { test as base, expect as playwrightExpect, Expect } from '@playwright/test';
 import { locators } from '../locators';
 import type { Locators } from '../locators';
-import { HomePage, SearchPage, BasePage } from '../pages';
+import { HomePage, SearchPage, BasePage, DepositPage, PreviewPage } from '../pages';
 import { registerPage } from './utils';
 export { registerPage } from './utils';
 import { LocalLoginService, I18nService, Services, I18nExpect } from '../services';
@@ -73,6 +73,8 @@ export const test = base.extend<{
     // so that they can be easily accessed from other pages and tests.
     ...registerPage('homePage', HomePage),
     ...registerPage('searchPage', SearchPage),
+    ...registerPage('depositPage', DepositPage),
+    ...registerPage('previewPage', PreviewPage),
 })
 
 export type InvenioTest = typeof test
