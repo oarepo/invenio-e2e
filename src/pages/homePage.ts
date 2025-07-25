@@ -31,7 +31,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
 
     // Method to fill in the search field
     async fillSearchField(query: string): Promise<void> {
-        const searchInput = await this.page.locator(this.locators.homePage.searchField);
+        const searchInput = this.page.locator(this.locators.homePage.searchField);
         await searchInput.fill(query);
         await this.expect(searchInput).toHaveValue(query);
     }
@@ -41,7 +41,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
 
     // Method to submit the search
     async submitSearch(): Promise<SearchPage> {
-        const submitButton = await this.page.locator(this.locators.homePage.searchButton);
+        const submitButton = this.page.locator(this.locators.homePage.searchButton);
         await submitButton.click();
         await this.page.waitForLoadState("networkidle");
         const nextPage = this.availablePages.searchPage;
