@@ -17,10 +17,12 @@
     "documentation": "^14.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "ts-deepmerge": "^7.0.3"
+    "ts-deepmerge": "^7.0.3",
+    "dotenv": "^17.0.0"
   },
   "peerDependencies": {
     "@playwright/test": "^1.54.1",
-    "ts-deepmerge": "^7.0.3"
+    "ts-deepmerge": "^7.0.3",
+    "dotenv": "^17.0.0"
   }
 }
