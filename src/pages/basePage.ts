@@ -28,7 +28,7 @@ export class BasePage<L extends Locators = Locators,
     constructor({ page, locators, availablePages, services, expect }: {
         page: Page,
         locators: L,
-        availablePages: { [key: string]: object },
+        availablePages: P,
         services: S,
         expect: Expect<ExpectExtension>
     }) {

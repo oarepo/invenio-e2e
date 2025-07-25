@@ -1,6 +1,6 @@
 import { Page, Expect } from '@playwright/test';
 import type { Locators } from '../locators';
-import { BasePage } from '../pages';
+import { AllPages, BasePage } from '../pages';
 import { Services, I18nExpect } from '../services';
 
 /**
@@ -10,7 +10,7 @@ import { Services, I18nExpect } from '../services';
 export type PageFixtureParams<L extends Locators> = {
     page: Page;
     locators: L;
-    availablePages: { [key: string]: object };
+    availablePages: AllPages;
     services: Services<L>;
     expect: Expect<I18nExpect>;
 }
