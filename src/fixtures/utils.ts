@@ -10,7 +10,7 @@ import { Services, I18nExpect } from '../services';
 export type PageFixtureParams<L extends Locators> = {
     page: Page;
     locators: L;
-    availablePages: AllPages;
+    availablePages: AllPages<L>;
     services: Services<L>;
     expect: Expect<I18nExpect>;
 }

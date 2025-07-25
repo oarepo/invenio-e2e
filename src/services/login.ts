@@ -1,7 +1,7 @@
 import { expect, Page } from '@playwright/test';
 import { Locators } from '../locators';
 import { Config } from '../config';
-import { BasePage } from '../pages';
+import { AllPages, BasePage } from '../pages';
 import { LoginPage } from '../pages/loginPage';
 
 export interface LoginServiceInterface<L extends Locators> {
@@ -17,7 +17,7 @@ export class LocalLoginService<L extends Locators> implements LoginServiceInterf
         protected config: Config,
         protected page: Page,
         protected locators: L,
-        protected availablePages: { [key: string]: object } = {},
+        protected availablePages: AllPages<L>,
     ) { }
 
     async isUserLoggedIn(): Promise<boolean> {
@@ -35,7 +35,7 @@ export class LocalLoginService<L extends Locators> implements LoginServiceInterf
         const username = credentials?.username || this.config.userEmail;
         const password = credentials?.password || this.config.userPassword;
 
-        const loginPage = this.availablePages['loginPage'] as LoginPage<L>;
+        const loginPage = this.availablePages.loginPage;
         await loginPage.openPage({ nextURL: this.page.url() });
         return await loginPage.loginUser(username, password, currentPage);
     }

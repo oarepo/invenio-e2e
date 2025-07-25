@@ -12,7 +12,7 @@ import type { Config } from '../config';
 export const test = base.extend<{
     config: Config;
     locators: Locators;
-    availablePages: AllPages;
+    availablePages: AllPages<Locators>;
 
     initialLocale: string;
 
