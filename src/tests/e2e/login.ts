@@ -20,8 +20,8 @@ export function loginTests(test: InvenioTest, options: { skip?: string[] } = {})
         runner('Login user', async ({ loginPage, homePage, availablePages }) => {
             // Open the login page
             await homePage.openPage();
-            const hp = await homePage.login()
-            expect(hp).toBe(homePage);
+            const loggedInHomePage = await homePage.login()
+            expect(loggedInHomePage).toBe(homePage);
         });
 
         runner('Logged in fixture works', async ({ defaultUserLoggedIn, loginService }) => {
