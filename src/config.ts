@@ -13,7 +13,7 @@ import path from 'path';
 // Load the appropriate .env file based on ENV variable
 const ENV = process.env.ENV || 'dev';
 const configPath = path.resolve(__dirname, `../.env.${ENV}`);
-dotenv.config({ path: path.resolve(__dirname, `../.env.${ENV}`) });
+dotenv.config({ path: configPath });
 
 export const config = {
     // Load user credentials from environment variables

@@ -70,4 +70,15 @@ export class BasePage<L extends Locators = Locators,
         await homePage.validatePageLoaded();
         return homePage;
     }
+
+    // FLOWS
+    async login(credentials?: any): Promise<this> {
+        const loginService = this.services.login;
+        await loginService.login(this, credentials);
+        this.expect(
+            await loginService.isUserLoggedIn(),
+            'User should be logged in after login flow.'
+        ).toBe(true);
+        return this;
+    }
 }

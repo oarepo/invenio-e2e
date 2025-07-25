@@ -4,6 +4,7 @@ import { SearchPage } from './searchPage'
 export { BasePage } from './basePage';
 export { HomePage } from './homePage';
 export { SearchPage } from './searchPage';
+export { LoginPage } from './loginPage';
 
 import { Locators } from '../locators';
 
