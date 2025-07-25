@@ -44,7 +44,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
         const submitButton = await this.page.locator(this.locators.homePage.searchButton);
         await submitButton.click();
         await this.page.waitForLoadState("networkidle");
-        const nextPage: SearchPage = this.availablePages['searchPage'] as SearchPage;
+        const nextPage = this.availablePages.searchPage;
         await nextPage.validatePageLoaded();
         return nextPage;
     }

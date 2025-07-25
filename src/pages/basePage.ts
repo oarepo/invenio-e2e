@@ -1,17 +1,20 @@
 import { Page, Expect } from '@playwright/test';
 import { Locators } from '../locators';
 import { HomePage } from './homePage';
+import { AllPages } from '.';
 import { Services, I18nExpect } from '../services';
 
 /**
  * Class representing a base page with common functionality for all pages.
  */
-export class BasePage<L extends Locators = Locators, S extends Services<L> = Services<L>,
-    ExpectExtension extends I18nExpect = I18nExpect
+export class BasePage<L extends Locators = Locators,
+    S extends Services<L> = Services<L>,
+    ExpectExtension extends I18nExpect = I18nExpect,
+    P extends AllPages<L> = AllPages<L>
 > {
     protected page: Page;
     protected locators: L;
-    protected availablePages: { [key: string]: object };
+    protected availablePages: P;
     protected services: S;
     protected expect: Expect<ExpectExtension>
 
@@ -62,7 +65,8 @@ export class BasePage<L extends Locators = Locators, S extends Services<L> = Ser
     async navigateToHomePage(): Promise<HomePage> {
         const logoLink = await this.page.locator(this.locators.header.logoLink);
         await logoLink.click();
-        const homePage: HomePage = this.availablePages['homePage'] as HomePage;
+
+        const homePage = this.availablePages.homePage;
         await homePage.validatePageLoaded();
         return homePage;
     }

@@ -1,7 +1,7 @@
 import { test as base, expect as playwrightExpect, Expect } from '@playwright/test';
 import { locators } from '../locators';
 import type { Locators } from '../locators';
-import { HomePage, SearchPage, BasePage } from '../pages';
+import { AllPages, HomePage, SearchPage, BasePage } from '../pages';
 import { registerPage } from './utils';
 export { registerPage } from './utils';
 import { LocalLoginService, I18nService, Services, I18nExpect } from '../services';
@@ -9,7 +9,7 @@ import { LocalLoginService, I18nService, Services, I18nExpect } from '../service
 
 export const test = base.extend<{
     locators: Locators;
-    availablePages: { [key: string]: object };
+    availablePages: AllPages;
 
     initialLocale: string;
 
@@ -32,7 +32,7 @@ export const test = base.extend<{
     // registry of all available pages. Page gets this registry in the constructor
     // so it can navigate to other pages (for example, HomePage.submitSearch) will
     // use this registry to navigate to the SearchPage.
-    availablePages: {} as { [key: string]: BasePage },
+    availablePages: {} as AllPages,
 
     // initial locale (do not limit the locale by default)
     initialLocale: undefined,
