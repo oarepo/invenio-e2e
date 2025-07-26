@@ -9,7 +9,7 @@ import { config } from '../config';
 import type { Config } from '../config';
 
 
-export const test = base.extend<{
+const _test = base.extend<{
     config: Config;
     locators: Locators;
     availablePages: AllPages<Locators>;
@@ -90,5 +90,82 @@ export const test = base.extend<{
     ...registerPage("loginPage", LoginPage),
 })
 
-export type InvenioTest = typeof test
+type _invenio_base_test = typeof _test;
+
+/*
+ * Support for skipping tests based on a list of skipped tests.
+ * As we can not replace the test implementation, we use a Proxy to intercept
+ * the calls to the test object and skip tests based on the skipped tests list.
+ * 
+ * To be type safe, we extend the base test type with our own InvenioTest type.
+ */
+export interface InvenioTest extends _invenio_base_test {
+    __skipped_tests?: string[];
+    /**
+     * Call the callback function with the skipped tests list. If a test inside the callback
+     * has a title that is in the skipped tests list, it will be skipped.
+     * 
+     * @param skippedTests  a list of test titles to skip
+     * @param callback      a callback function that contains the tests to run
+     */
+    skipTests: (skippedTests: string[], callback: () => void) => void;
+}
+
+/**
+ * InvenioTest is a normal Playwright test object with additional functionality
+ * to skip tests based on a list of skipped tests.
+ */
+export const test = new Proxy(_test as InvenioTest, {
+
+    /**
+     * Proxy getter to handle .describe and .skipTests methods.
+     */
+    get: (target, prop) => {
+        switch (prop) {
+            case 'describe':
+                // return a wrapper around the describe method that can skip tests
+                return (title: string, annotation?: any, callback?: () => void) => {
+                    const skippedTests = target.__skipped_tests || [];
+                    if (skippedTests.includes(title)) {
+                        return target.describe.skip(title, annotation, callback);
+                    } else {
+                        return target.describe(title, annotation, callback);
+                    }
+                }
+            case 'skipTests':
+                // implementation of the skipTests method. If this method is nested,
+                // the skip list will be extended with the new skipped tests for the
+                // duration of the callback function and restored after the callback.
+                return (skippedTests: string[], callback: () => void) => {
+                    // save the original skipped tests list
+                    const originalSkippedTests = target.__skipped_tests || [];
+                    target.__skipped_tests = skippedTests.concat(originalSkippedTests);
+                    try {
+                        // run the test inside the callback
+                        callback();
+                    } finally {
+                        // Restore the original skipped tests list
+                        target.__skipped_tests = originalSkippedTests;
+                    }
+                }
+            default:
+                return target[prop];
+        }
+    },
+    /**
+     * Handles the case test("test title", ({fixtures}) => { test body })
+     * If the test has a title that is in the skipped tests list, the test
+     * will be marked as .skip
+     */
+    apply: (target, thisArg, args) => {
+        const skippedTests = target.__skipped_tests || [];
+        // if the first argument is a string, it is a test title
+        if (typeof args[0] === 'string' && skippedTests.includes(args[0])) {
+            // skip the test if it is in the skipped tests list
+            // @ts-ignore
+            return target.skip(...args);
+        }
+        return target.apply(thisArg, args);
+    }
+});
 
