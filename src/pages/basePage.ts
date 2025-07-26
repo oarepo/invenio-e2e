@@ -28,7 +28,7 @@ export class BasePage<L extends Locators = Locators,
     constructor({ page, locators, availablePages, services, expect }: {
         page: Page,
         locators: L,
-        availablePages: { [key: string]: object },
+        availablePages: P,
         services: S,
         expect: Expect<ExpectExtension>
     }) {
@@ -69,5 +69,16 @@ export class BasePage<L extends Locators = Locators,
         const homePage = this.availablePages.homePage;
         await homePage.validatePageLoaded();
         return homePage;
+    }
+
+    // FLOWS
+    async login(credentials?: any): Promise<this> {
+        const loginService = this.services.login;
+        await loginService.login(this, credentials);
+        this.expect(
+            await loginService.isUserLoggedIn(),
+            'User should be logged in after login flow.'
+        ).toBe(true);
+        return this;
     }
 }

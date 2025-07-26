@@ -4,7 +4,8 @@
  */
 export const locators = {
     header: {
-        logoLink: '#invenio-nav a.logo-link',
+        logoLink: '#invenio-nav a.logo-link, a[href="/"]',
+        logInButton: 'a[href^="/login/"]',
     },
     homePage: {
         searchField: 'input[name="q"]',
@@ -12,5 +13,10 @@ export const locators = {
     },
     searchPage: {
         searchResultList: 'section[aria-label="Search results"]',
+    },
+    loginPage: {
+        usernameField: 'input#email',
+        passwordField: 'input#password',
+        submitButton: 'button[type="submit"]',
     }
 }

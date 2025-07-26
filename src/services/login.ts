@@ -1,19 +1,42 @@
-import { Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 import { Locators } from '../locators';
+import { Config } from '../config';
+import { AllPages, BasePage } from '../pages';
+import { LoginPage } from '../pages/loginPage';
 
 export interface LoginServiceInterface<L extends Locators> {
-    isUserLoggedIn: boolean;
-    login(username: string, password: string): Promise<void>;
+    isUserLoggedIn: () => Promise<boolean>;
+    login<S extends BasePage<L>>(
+        currentPage: S,
+        credentials?: any,
+    ): Promise<S>;
 }
 
 export class LocalLoginService<L extends Locators> implements LoginServiceInterface<L> {
     constructor(
+        protected config: Config,
         protected page: Page,
-        protected locators: L) { }
-    // methods here
-    get isUserLoggedIn(): boolean {
-        return false;
+        protected locators: L,
+        protected availablePages: AllPages<L>,
+    ) { }
+
+    async isUserLoggedIn(): Promise<boolean> {
+        const loginLink = this.page.locator(this.locators.header.logInButton);
+        if (await loginLink.isVisible()) {
+            return false; // User is not logged in if the login link is visible
+        }
+        return true;
     }
-    async login(username: string, password: string): Promise<void> {
+
+    async login<S extends BasePage<L>>(
+        currentPage: S,
+        credentials?: { username: string, password: string },
+    ): Promise<S> {
+        const username = credentials?.username || this.config.userEmail;
+        const password = credentials?.password || this.config.userPassword;
+
+        const loginPage = this.availablePages.loginPage;
+        await loginPage.openPage({ nextURL: this.page.url() });
+        return await loginPage.loginUser(username, password, currentPage);
     }
 }
