@@ -122,3 +122,6 @@ test-results
 playwright-report
 
 .history/
+
+# translation files
+src/translations/

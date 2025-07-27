@@ -90,13 +90,7 @@ function main() {
     }
     
     runCommand('npm run build', 'Building project');
-    
     console.log('\nReady for testing');
-    console.log('Commands:');
-    console.log('  npx playwright test tests/translation-demo.spec.ts');
-    console.log('  npx playwright test tests/translation-demo.spec.ts --headed');
-    
-    console.log('\nTest skipping features enabled');
 }
 
 main(); 
