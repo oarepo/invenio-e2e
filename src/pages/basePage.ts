@@ -1,8 +1,9 @@
-import { Page, Expect } from '@playwright/test';
-import { Locators } from '../locators';
-import { HomePage } from './homePage';
+import { Expect, Page } from '@playwright/test';
+import { I18nExpect, Services } from '../services';
+
 import { AllPages } from '.';
-import { Services, I18nExpect } from '../services';
+import { HomePage } from './homePage';
+import { Locators } from '../locators';
 
 /**
  * Class representing a base page with common functionality for all pages.
@@ -74,7 +75,7 @@ export class BasePage<L extends Locators = Locators,
     // FLOWS
     async login(credentials?: any): Promise<this> {
         const loginService = this.services.login;
-        await loginService.login(this, credentials);
+        await loginService.login(this as any, credentials);
         this.expect(
             await loginService.isUserLoggedIn(),
             'User should be logged in after login flow.'
