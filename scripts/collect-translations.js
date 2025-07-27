@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Script to collect translations from Invenio packages
- * Creates a pre-compiled translations.json for faster test execution
+ * Collect translations from Invenio packages into a pre-compiled JSON file
  */
 
 const fs = require('fs');
@@ -10,90 +9,56 @@ const path = require('path');
 
 const OUTPUT_FILE = path.join(__dirname, '../src/translations/translations.json');
 
-/**
- * Main function to collect translations
- */
 function collectTranslations() {
     const translations = {};
-    
-    // Get package names from command line arguments
     const args = process.argv.slice(2);
-    let packageDirs;
     
-    if (args.length > 0) {
-        // Use specified packages
-        packageDirs = args.map(pkg => `../${pkg}`);
-        console.log(`Collecting translations for specified packages: ${args.join(', ')}`);
-    } else {
-        // Default packages
-        packageDirs = [
-            '../invenio-app-rdm',
-            '../invenio-rdm-records'
-        ];
-        console.log('Collecting translations for default packages (use "npm run collect-translations package1 package2" to specify)');
-    }
+    const packageDirs = args.length > 0 
+        ? args.map(pkg => `../${pkg}`)
+        : ['../invenio-app-rdm', '../invenio-rdm-records'];
+    
+    console.log(`Collecting translations from ${args.length > 0 ? 'specified' : 'default'} packages`);
 
     for (const packageDir of packageDirs) {
         const fullPath = path.resolve(__dirname, '..', packageDir);
-        console.log(`Checking ${packageDir} at ${fullPath}...`);
         if (fs.existsSync(fullPath)) {
-            console.log(`Scanning ${packageDir}...`);
             scanPackage(fullPath, translations);
-        } else {
-            console.log(`Package not found: ${fullPath}`);
         }
     }
 
-    // Ensure output directory exists
     const outputDir = path.dirname(OUTPUT_FILE);
     if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    // Write compiled JSON file
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(translations, null, 2));
-    console.log(`Translations written to ${OUTPUT_FILE}`);
-    console.log(`Found ${Object.keys(translations).length} locales`);
     
-    // Show sample counts per locale
-    for (const locale of Object.keys(translations).slice(0, 3)) {
-        const count = Object.keys(translations[locale]).length;
-        console.log(`  ${locale}: ${count} translation strings`);
-    }
+    const localeCount = Object.keys(translations).length;
+    console.log(`Written ${localeCount} locales to ${OUTPUT_FILE}`);
 }
 
-/**
- * Scan a package for translation files
- */
 function scanPackage(packagePath, translations) {
     const packageName = path.basename(packagePath).replace(/-/g, '_');
     const translationsDir = path.join(packagePath, packageName, 'translations');
     
-    if (fs.existsSync(translationsDir)) {
-        console.log(`  Found translations directory: ${translationsDir}`);
-        // Find locale directories
-        const entries = fs.readdirSync(translationsDir);
-        for (const entry of entries) {
-            const entryPath = path.join(translationsDir, entry);
-            if (fs.statSync(entryPath).isDirectory()) {
-                // This is a locale directory (en, de, fr, etc.)
-                const poFile = path.join(entryPath, 'LC_MESSAGES/messages.po');
-                if (fs.existsSync(poFile)) {
-                    console.log(`  Found ${entry} translations at ${poFile}`);
-                    if (!translations[entry]) translations[entry] = {};
-                    parseSimplePo(poFile, translations[entry], packageName);
-                }
+    if (!fs.existsSync(translationsDir)) {
+        return;
+    }
+
+    const entries = fs.readdirSync(translationsDir);
+    for (const entry of entries) {
+        const entryPath = path.join(translationsDir, entry);
+        if (fs.statSync(entryPath).isDirectory()) {
+            const poFile = path.join(entryPath, 'LC_MESSAGES/messages.po');
+            if (fs.existsSync(poFile)) {
+                if (!translations[entry]) translations[entry] = {};
+                parsePoFile(poFile, translations[entry], packageName);
             }
         }
-    } else {
-        console.log(`  No translations directory found at ${translationsDir}`);
     }
 }
 
-/**
- * Simple .po file parser
- */
-function parseSimplePo(poFile, localeTranslations, packageName) {
+function parsePoFile(poFile, localeTranslations, packageName) {
     const content = fs.readFileSync(poFile, 'utf-8');
     const lines = content.split('\n');
     
@@ -118,12 +83,8 @@ function parseSimplePo(poFile, localeTranslations, packageName) {
         } else if (trimmed.startsWith('"') && inMsgstr) {
             msgstr += trimmed.replace(/^"|"$/g, '');
         } else if (trimmed === '') {
-            // End of entry
             if (msgid && msgstr && msgid !== '') {
-                // Store both flat and package-scoped translations
                 localeTranslations[msgid] = msgstr;
-                
-                // Also store with package prefix for specific lookups
                 if (!localeTranslations[`${packageName}:${msgid}`]) {
                     localeTranslations[`${packageName}:${msgid}`] = msgstr;
                 }
@@ -136,5 +97,4 @@ function parseSimplePo(poFile, localeTranslations, packageName) {
     }
 }
 
-// Run the script
 collectTranslations(); 

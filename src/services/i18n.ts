@@ -3,7 +3,7 @@ import { Expect, Locator, Page, expect } from '@playwright/test';
 import type { Locators } from '../locators';
 
 /**
- * type that adds translation checking methods to Playwright's expect function.
+ * Type that adds translation checking methods to Playwright's expect function
  */
 export type I18nExpected = Record<string, any> & {
     toHaveI18nText(
@@ -18,9 +18,7 @@ export type I18nExpected = Record<string, any> & {
 };
 
 /**
- * Simplified structure for pre-compiled translations
- * example: translations['en']['search.placeholder'] = 'Search records...'
- * or: translations['en']['invenio_app_rdm:Home'] = 'Startseite'
+ * Structure for pre-compiled translations
  */
 export interface Translations {
     [locale: string]: {
@@ -29,8 +27,7 @@ export interface Translations {
 }
 
 /**
- * interface for changing languages and checking translations in tests
- * provides methods to switch locales and validate translated content
+ * Interface for changing languages and checking translations in tests
  */
 export interface I18nServiceInterface<L extends Locators> {
     switchLocale(locale: string): Promise<void>;
@@ -44,8 +41,7 @@ export interface I18nServiceInterface<L extends Locators> {
 }
 
 /**
- * service for handling internationalization (i18n) in E2E tests
- * switches between languages and validates that UI elements are properly translated
+ * Service for handling internationalization (i18n) in E2E tests
  */
 export class I18nService<L extends Locators> implements I18nServiceInterface<L> {
     private page: Page;
