@@ -65,6 +65,11 @@ const _test = base.extend<{
                     'Home': 'Startseite',
                     'Search': 'Suchen',
                     'repository.welcome': 'Willkommen in InvenioRDMs Sandbox!'
+                },
+                'cs': { 
+                    'Home': 'Domů',
+                    'Search': 'Hledat',
+                    'repository.welcome': 'Vítejte v InvenioRDM Sandbox!'
                 }
             };
         }

@@ -106,7 +106,11 @@ function createConsolidatedIndex() {
 }
 
 function scanPackage(packagePath, translations, packageName) {
-    const translationsDir = path.join(packagePath, packageName, 'translations');
+    let translationsDir = path.join(packagePath, packageName, 'translations');
+    
+    if (!fs.existsSync(translationsDir)) {
+        translationsDir = path.join(packagePath, 'translations');
+    }
     
     if (!fs.existsSync(translationsDir)) {
         return;

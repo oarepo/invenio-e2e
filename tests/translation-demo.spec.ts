@@ -41,12 +41,12 @@ if (!translations) {
             }
         }
 
-        if (availableLocales.includes('fr')) {
+        if (availableLocales.includes('cs')) {
             const commonKeys = ['Home', 'Submit', 'Communities'];
             for (const key of commonKeys) {
-                if (services.i18n.hasTranslation(key, 'fr')) {
-                    const text = services.i18n.get_localized_text(key, 'fr');
-                    console.log(`French "${key}": "${text}"`);
+                if (services.i18n.hasTranslation(key, 'cs')) {
+                    const text = services.i18n.get_localized_text(key, 'cs');
+                    console.log(`Czech "${key}": "${text}"`);
                 }
             }
         }
@@ -74,6 +74,19 @@ test.describe('Locale-specific translation tests', () => {
         test('German translation validation', async ({ services }) => {
             const hasGermanHome = services.i18n.hasTranslation('Home', 'de');
             console.log(`German Home available: ${hasGermanHome}`);
+        });
+    }
+
+    if (!availableLocales.includes('cs')) {
+        test.skipTests(['Czech translation validation'], () => {
+            test('Czech translation validation', async ({ services }) => {
+                // Skipped - Czech translations not available
+            });
+        });
+    } else {
+        test('Czech translation validation', async ({ services }) => {
+            const hasCzechHome = services.i18n.hasTranslation('Home', 'cs');
+            console.log(`Czech Home available: ${hasCzechHome}`);
         });
     }
 
