@@ -18,5 +18,9 @@ export const locators = {
         usernameField: 'input#email',
         passwordField: 'input#password',
         submitButton: 'button[type="submit"]',
+    },
+    footer: {
+        languageSelector: '.language-selector, [data-bs-toggle="dropdown"].language',
+        languageOption: '.language-selector a, .dropdown-menu a[data-locale]',
     }
 }

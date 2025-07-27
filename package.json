@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc; cp package.json dist",
-    "docs": "documentation build src/**/*.ts -f md -o api_docs.md --shallow --github --sort-order kind"
+    "docs": "documentation build src/**/*.ts -f md -o api_docs.md --shallow --github --sort-order kind",
+    "collect-translations": "node scripts/collect-translations.js"
   },
   "keywords": [],
   "author": "",

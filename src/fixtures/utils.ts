@@ -1,7 +1,7 @@
 import { Page, Expect } from '@playwright/test';
 import type { Locators } from '../locators';
 import { AllPages, BasePage } from '../pages';
-import { Services, I18nExpect } from '../services';
+import { Services, I18nExpected } from '../services';
 
 /**
  * PageFixtureParams defines the parameters required to create a page instance.
@@ -12,7 +12,7 @@ export type PageFixtureParams<L extends Locators> = {
     locators: L;
     availablePages: AllPages<L>;
     services: Services<L>;
-    expect: Expect<I18nExpect>;
+    expect: Expect<I18nExpected>;
 }
 
 /**
