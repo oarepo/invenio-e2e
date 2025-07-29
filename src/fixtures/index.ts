@@ -49,32 +49,21 @@ const _test = base.extend<{
 
     // translations loaded from pre-compiled file
     translations: async ({}, use) => {
-        let translations = {};
-        try {
-            const translationsFile = require('../translations/translations.json');
-            translations = translationsFile;
-        } catch (error) {
-            console.warn('Could not load pre-compiled translations, using defaults');
-            translations = {
-                'en': { 
-                    'Home': 'Home',
-                    'Search': 'Search',
-                    'repository.welcome': 'Welcome to InvenioRDM\'s Sandbox!'
-                },
-                'de': { 
-                    'Home': 'Startseite',
-                    'Search': 'Suchen',
-                    'repository.welcome': 'Willkommen in InvenioRDMs Sandbox!'
-                },
-                'cs': { 
-                    'Home': 'Domů',
-                    'Search': 'Hledat',
-                    'repository.welcome': 'Vítejte v InvenioRDM Sandbox!'
-                }
-            };
-        }
-        await use(translations);
-    },
+    let translations = {};
+    try {
+        const translationsFile = require('../translations/translations.json');
+        translations = translationsFile;
+    } catch (error) {
+        throw new Error(
+            'Pre-compiled translations not found. Please generate translations first:\n\n' +
+            'run: npm run collect-translations\n' +
+            'or specify packages: npm run collect-translations invenio-app-rdm repository-tugraz\n' +
+            'then rebuild: npm run build\n\n' +
+            'this will create src/translations/translations.json with actual translations from your Invenio packages.\n'
+        );
+    }
+    await use(translations);
+},
 
     // untranslated strings for translation testing 
     untranslatedStrings: [],

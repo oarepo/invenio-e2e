@@ -1,6 +1,7 @@
 import { Expect, Locator, Page, expect } from '@playwright/test';
 
 import type { Locators } from '../locators';
+import i18next from 'i18next';
 
 /**
  * Type that adds translation checking methods to Playwright's expect function
@@ -37,7 +38,7 @@ export interface I18nServiceInterface<L extends Locators> {
     translations: Translations;
     extendExpect<T extends Record<string, any> = {}>(expect: Expect<T>): Expect<T & I18nExpected>;
     hasTranslation(key: string, locale?: string, packageName?: string): boolean;
-    get_localized_text(key: string, locale?: string, packageName?: string): string;
+    getLocalizedText(key: string, locale?: string, packageName?: string): string;
 }
 
 /**
@@ -47,6 +48,7 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
     private page: Page;
     private locators: L;
     private currentLocaleValue: string;
+    private i18nextInstances: Map<string, typeof i18next> = new Map();
     public translations: Translations;
     public untranslatedStrings: string[];
     public translatableSelectors: string[];
@@ -65,13 +67,37 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
         this.translations = translations;
         this.untranslatedStrings = untranslatedStrings;
         this.translatableSelectors = translatableSelectors;
+        
+        this.initializeI18next();
+    }
+
+    /**
+     * Initialize i18next instances for each locale to handle language nuances
+     */
+    private async initializeI18next(): Promise<void> {
+        for (const locale of Object.keys(this.translations)) {
+            const instance = i18next.createInstance();
+            await instance.init({
+                lng: locale,
+                resources: {
+                    [locale]: {
+                        translation: this.translations[locale]
+                    }
+                },
+                // handle Czech and other slavic language plurals properly
+                pluralSeparator: '_',
+                contextSeparator: '_',
+                interpolation: {
+                    escapeValue: false 
+                }
+            });
+            this.i18nextInstances.set(locale, instance);
+        }
     }
 
     get currentLocale(): string {
         return this.currentLocaleValue;
     }
-
-
 
     getAvailableCatalogues(): string[] {
         return Object.keys(this.translations);
@@ -83,18 +109,46 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
         return !!this.translations[targetLocale]?.[lookupKey];
     }
 
-    get_localized_text(key: string, locale?: string, packageName?: string): string {
+    /**
+     * Get localized text using i18next for better language handling.
+     * 
+     * This method uses i18next to properly handle language nuances, including:
+     * - Czech plural forms and cases
+     * - Proper interpolation and formatting
+     * - Context-sensitive translations
+     * 
+     * @param key - Translation key to look up
+     * @param locale - Locale defaults to current locale
+     * @param packageName - Optional package namespace for scoped lookups
+     * @returns Translated text or a fallback indicator
+     */
+    getLocalizedText(key: string, locale?: string, packageName?: string): string {
         const targetLocale = locale || this.currentLocaleValue;
         const lookupKey = packageName ? `${packageName}:${key}` : key;
+        
+        // Try using i18next instance for better language handling
+        const i18nextInstance = this.i18nextInstances.get(targetLocale);
+        if (i18nextInstance) {
+            try {
+                const translation = i18nextInstance.t(lookupKey);
+                if (translation && translation !== lookupKey) {
+                    return translation;
+                }
+            } catch (error) {
+                console.warn(`i18next translation failed for key "${key}":`, error.message);
+            }
+        }
+        
+        // Fallback to direct lookup
         const translation = this.translations[targetLocale]?.[lookupKey];
         
-        if (!translation) {
+        if (translation === undefined) {
             const packageInfo = packageName ? ` in package "${packageName}"` : '';
             console.warn(`Missing translation for key "${key}"${packageInfo} for locale "${targetLocale}"`);
             return `[MISSING: ${key}]`;
         }
         
-        return translation;
+        return translation.trim() || key;
     }
 
     async switchLocale(locale: string): Promise<void> {
@@ -134,7 +188,7 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
                 options: { locale?: string; package?: string } = {}
             ) {
                 const targetLocale = options.locale || i18nService.currentLocale;
-                const expectedText = i18nService.get_localized_text(translationKey, targetLocale, options.package);
+                const expectedText = i18nService.getLocalizedText(translationKey, targetLocale, options.package);
                 
                 if (expectedText.startsWith('[MISSING:')) {
                     const packageInfo = options.package ? ` in package "${options.package}"` : '';
