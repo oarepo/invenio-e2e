@@ -1,12 +1,14 @@
-import { test as base, expect as playwrightExpect, Expect } from '@playwright/test';
-import { locators } from '../locators';
-import type { Locators } from '../locators';
-import { AllPages, HomePage, SearchPage, BasePage, LoginPage } from '../pages';
-import { registerPage } from './utils';
-export { registerPage } from './utils';
-import { LocalLoginService, I18nService, Services, I18nExpect } from '../services';
-import { config } from '../config';
+import { AllPages, BasePage, HomePage, LoginPage, SearchPage } from '../pages';
+import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
+import { I18nExpected, I18nService, LocalLoginService, Services, Translations } from '../services';
+
 import type { Config } from '../config';
+import type { Locators } from '../locators';
+import { config } from '../config';
+import { locators } from '../locators';
+import { registerPage } from './utils';
+
+export { registerPage } from './utils';
 
 
 const _test = base.extend<{
@@ -15,6 +17,9 @@ const _test = base.extend<{
     availablePages: AllPages<Locators>;
 
     initialLocale: string;
+    translations: Translations;
+    untranslatedStrings: string[];
+    translatableSelectors: string[];
 
     i18nService: I18nService<Locators>;
     loginService: LocalLoginService<Locators>;
@@ -22,7 +27,7 @@ const _test = base.extend<{
 
     services: Services<Locators>;
 
-    expect: Expect<I18nExpect>;
+    expect: Expect<I18nExpected>;
 
     homePage: HomePage;
     searchPage: SearchPage;
@@ -42,6 +47,66 @@ const _test = base.extend<{
     // initial locale (do not limit the locale by default)
     initialLocale: undefined,
 
+    // translations loaded from pre-compiled file
+    translations: async ({}, use) => {
+    let translations = {};
+    try {
+        const translationsFile = require('../translations/translations.json');
+        translations = translationsFile;
+    } catch (error) {
+        throw new Error(
+            'Pre-compiled translations not found. Please generate translations first:\n\n' +
+            'run: npm run collect-translations\n' +
+            'or specify packages: npm run collect-translations invenio-app-rdm repository-tugraz\n' +
+            'then rebuild: npm run build\n\n' +
+            'this will create src/translations/translations.json with actual translations from your Invenio packages.\n'
+        );
+    }
+    await use(translations);
+},
+
+    // untranslated strings for translation testing 
+    untranslatedStrings: [],
+
+    // selectors for elements that should be translatable
+    translatableSelectors: [
+        "nav a:not(:empty)",
+        "nav button:not(:empty)",
+        "nav span:not(:empty)",
+        ".navbar a:not(:empty)",
+        ".navbar button:not(:empty)",
+        ".navbar span:not(:empty)",
+        "header a:not(:empty)",
+        "header button:not(:empty)",
+        "header span:not(:empty)",
+
+        "label:not(:empty)",
+        ".form-label:not(:empty)",
+        "legend:not(:empty)",
+        "button:not(:empty)",
+        'input[type="submit"][value]',
+
+        "h1:not(:empty)",
+        "h2:not(:empty)",
+        "h3:not(:empty)",
+        "h4:not(:empty)",
+        "h5:not(:empty)",
+        "h6:not(:empty)",
+        ".alert:not(:empty)",
+        ".error:not(:empty)",
+        ".warning:not(:empty)",
+        ".success:not(:empty)",
+        ".help-text:not(:empty)",
+        ".tooltip:not(:empty)",
+
+        '[role="menuitem"]:not(:empty)',
+        '[role="tab"]:not(:empty)',
+        '[role="button"]:not(:empty)',
+        ".menu-item:not(:empty)",
+        ".tab-label:not(:empty)",
+        ".btn:not(:empty)",
+    ],
+
     config,
 
     // browser context with initial locale
@@ -53,8 +118,8 @@ const _test = base.extend<{
         await use(originalContext);
     },
 
-    i18nService: async ({ page, locators }, use) => {
-        const i18nService = new I18nService(page, locators);
+    i18nService: async ({ page, locators, initialLocale, translations, untranslatedStrings, translatableSelectors }, use) => {
+        const i18nService = new I18nService(page, locators, initialLocale, translations, untranslatedStrings, translatableSelectors);
         await use(i18nService);
     },
 

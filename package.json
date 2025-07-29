@@ -6,7 +6,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc; cp package.json dist",
-    "docs": "documentation build src/**/*.ts -f md -o api_docs.md --shallow --github --sort-order kind"
+    "docs": "documentation build src/**/*.ts -f md -o api_docs.md --shallow --github --sort-order kind",
+    "collect-translations": "node scripts/collect-translations.js",
+    "i18n-setup": "node scripts/i18n-setup.js"
   },
   "keywords": [],
   "author": "",
@@ -15,14 +17,16 @@
     "@playwright/test": "^1.54.1",
     "@types/node": "^24.0.13",
     "documentation": "^14.0.3",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
+    "dotenv": "^17.0.0",
+    "i18next-conv": "^15.1.1",
     "ts-deepmerge": "^7.0.3",
-    "dotenv": "^17.0.0"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "@playwright/test": "^1.54.1",
-    "ts-deepmerge": "^7.0.3",
-    "dotenv": "^17.0.0"
+    "dotenv": "^17.0.0",
+    "i18next": "^25.0.0",
+    "ts-deepmerge": "^7.0.3"
   }
 }
