@@ -6,6 +6,8 @@ export { BasePage } from './basePage';
 export { HomePage } from './homePage';
 export { SearchPage } from './searchPage';
 export { LoginPage } from './loginPage';
+export { DepositPage } from './depositPage';
+export { PreviewPage } from './previewPage';
 
 import { Locators } from '../locators';
 

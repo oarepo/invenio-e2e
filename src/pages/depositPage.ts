@@ -1,4 +1,4 @@
-import { Locators } from "../locators/defaultLocators";
+import { Locators } from "../locators";
 import { BasePage } from "./basePage";
 import { PreviewPage } from "./previewPage";
 import { expect } from "@playwright/test";
@@ -135,7 +135,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   private async verifyToastMessage(expectedText: string): Promise<void> {
     const toast = this.page.locator(
-      Locators.uploadPage.toastMessage(expectedText)
+      this.locators.uploadPage.toastMessage(expectedText)
     );
     await expect(toast).toBeVisible();
     await expect(toast).toHaveText(new RegExp(expectedText, "i"));
