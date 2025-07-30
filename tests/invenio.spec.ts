@@ -1,8 +1,12 @@
 import { test } from '../src/fixtures';
 
 import { homepageTests, loginTests } from '../src/tests/e2e';
+import { uploadTests } from '../src/tests/e2e/upload';
+import { homepageTests } from '../src/tests/e2e/homepage';
 
 // Run all tests
+// Register the homepage tests to be run when the test suite is executed
+console.log('Registering homepageTests');
 homepageTests(test);
 loginTests(test);
 
@@ -17,3 +21,7 @@ loginTests(test);
  * })
  *  
  */
+
+
+console.log('Registering uploadTests');
+uploadTests(test);

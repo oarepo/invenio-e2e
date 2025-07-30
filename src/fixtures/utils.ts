@@ -106,3 +106,9 @@ export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
         }
     }
 }
+
+// Utility function to get current date formatted as YYYY-MM-DD
+export function getCurrentDateFormatted(): string {
+  const date = new Date();
+  return date.toISOString().split('T')[0];
+}

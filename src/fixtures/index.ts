@@ -9,6 +9,8 @@ import { locators } from '../locators';
 import { registerPage } from './utils';
 
 export { registerPage } from './utils';
+import { LocalLoginService, I18nService, Services, I18nExpect } from '../services';
+import { FileUploadHelper } from '../helpers/fileUploadHelper';
 
 
 const _test = base.extend<{
@@ -32,6 +34,10 @@ const _test = base.extend<{
     homePage: HomePage;
     searchPage: SearchPage;
     loginPage: LoginPage;
+    depositPage: DepositPage;
+    previewPage: PreviewPage;
+
+    uploadHelper: FileUploadHelper;
 
 }>({
     // locators are used to find elements on the page and they are separated
@@ -147,6 +153,11 @@ const _test = base.extend<{
         await use(i18nService.extendExpect(playwrightExpect));
     },
 
+    uploadHelper: async ({ page }, use) => {
+    const helper = new FileUploadHelper(page);
+    await use(helper);
+  },
+
     // pages provide a set of methods to interact with a UI page, abstracting low-level
     // Playwright API calls. They are registered in the availablePages registry
     // so that they can be easily accessed from other pages and tests.
@@ -155,6 +166,7 @@ const _test = base.extend<{
     ...registerPage("loginPage", LoginPage),
 })
 
+export type InvenioTest = typeof test
 type _invenio_base_test = typeof _test;
 
 /*

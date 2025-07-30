@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2019",
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020", "DOM"],
     "declaration": true,
-    "outDir": "./dist",
+    "outDir": "dist",
+    "moduleResolution": "node",
     "esModuleInterop": true,
+    "strict": true,
+    "types": ["@playwright/test", "node"],
+    "resolveJsonModule": true,
+    "skipLibCheck": true
   },
-  "include": [
-    "src/**/*"
-  ]
+  "include": ["src", "tests"]
 }
