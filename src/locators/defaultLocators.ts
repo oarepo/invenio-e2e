@@ -2,23 +2,7 @@
  * This module defines locators for various elements in the Invenio E2E tests.
  * It provides a structured way to access elements on the page using CSS selectors.
  */
-export const Locators = {
-
-    // ----- LOGIN---
-
-     loginPage: {
-        usernameField: 'input#email',
-        passwordField: 'input#password',
-        submitButton: 'button[type="submit"]',
-    },
-    footer: {
-        languageSelector: '.language-selector, [data-bs-toggle="dropdown"].language',
-         languageOption: '.language-selector a, .dropdown-menu a[data-locale]',
-        },
-
- 
-    },
-
+export const locators = {
   // ------------------------ HEADER ------------------------
   header: {
     logoLink: '#invenio-nav a.logo-link, a[href="/"]',
@@ -81,8 +65,16 @@ export const Locators = {
     selectedCommunityLabel: '[data-testid="community-label"]',
     browseFilesButton: "button.uppy-Dashboard-browse",
     uploadFilesButton: 'button.uppy-StatusBar-actionBtn--upload',
+  },
 
+  // ----- LOGIN---------
+  loginPage: {
+    usernameField: 'input#email',
+    passwordField: 'input#password',
+    submitButton: 'button[type="submit"]',
+  },
+  footer: {
+    languageSelector: '.language-selector, [data-bs-toggle="dropdown"].language',
+    languageOption: '.language-selector a, .dropdown-menu a[data-locale]',
   },
 };
-
-export type Locators = typeof Locators;

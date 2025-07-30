@@ -56,6 +56,8 @@ type UseLocators<L> = (r: L & Locators) => Promise<void>;
 export function updateLocators<T>(locators: T): (
     (params: { locators: Locators }, use: UseLocators<T & Locators>) => Promise<void>) {
     return async ({ locators: origLocators }, use) => {
-        await use(merge(origLocators, locators) as T & Locators);
+        // NOTE: https://github.com/voodoocreation/ts-deepmerge/issues/30: When working with generic declared types/interfaces
+        // TODO: Create a type-safe interfaces like ILocatorsObject
+        await use(merge(origLocators, locators as Object) as T & Locators);
     };
 }

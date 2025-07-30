@@ -8,6 +8,8 @@ export { SearchPage } from './searchPage';
 export { DepositPage } from './depositPage';
 export { PreviewPage } from './previewPage';
 export { LoginPage } from './loginPage';
+export { DepositPage } from './depositPage';
+export { PreviewPage } from './previewPage';
 
 import { Locators } from '../locators';
 
