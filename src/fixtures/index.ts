@@ -23,7 +23,7 @@ const _test = base.extend<{
 
     i18nService: I18nService<Locators>;
     loginService: LocalLoginService<Locators>;
-    defaultUserLoggedIn: () => Promise<void>;
+    defaultUserLoggedIn: (() => Promise<void>) | undefined;
 
     services: Services<Locators>;
 
@@ -192,9 +192,9 @@ export const test = new Proxy(_test as InvenioTest, {
                 return (title: string, annotation?: any, callback?: () => void) => {
                     const skippedTests = target.__skipped_tests || [];
                     if (skippedTests.includes(title)) {
-                        return target.describe.skip(title, annotation, callback);
+                        return target.describe.skip(title, annotation, callback || (() => {}));
                     } else {
-                        return target.describe(title, annotation, callback);
+                        return target.describe(title, annotation, callback || (() => {}));
                     }
                 }
             case 'skipTests':
@@ -214,7 +214,7 @@ export const test = new Proxy(_test as InvenioTest, {
                     }
                 }
             default:
-                return target[prop];
+                return (target as any)[prop];
         }
     },
     /**
@@ -230,7 +230,7 @@ export const test = new Proxy(_test as InvenioTest, {
             // @ts-ignore
             return target.skip(...args);
         }
-        return target.apply(thisArg, args);
+        return target.apply(thisArg, args as any);
     }
 });
 
