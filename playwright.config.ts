@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import { readFileSync } from 'fs';
+
+const authUserFilePath = 'playwright/.auth/user.json';
+const authUserFile = JSON.parse(readFileSync(authUserFilePath, 'utf-8'));
 
 /**
  * Read environment variables from file.
@@ -43,9 +47,9 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      testIgnore: /api\/.*/,
       use: { ...devices['Desktop Chrome'] },
     },
-
     // {
     //   name: 'firefox',
     //   use: { ...devices['Desktop Firefox'] },
@@ -55,6 +59,25 @@ export default defineConfig({
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },
     // },
+
+    /* API Testing */
+    { name: 'API Testing Setup', 
+      testMatch: /api\/.*\.setup\.ts$/ 
+    },
+    {
+      name: 'API',
+      testMatch: /api\/.*\.spec.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        // Use prepared auth state.
+        storageState: authUserFilePath,
+        extraHTTPHeaders: {
+          'X-CSRFToken': authUserFile.cookies.find(cookie => cookie.name === 'csrftoken')?.value || '',
+          'Referer': process.env.BASE_URL || 'https://127.0.0.1:5000',
+        },
+      },
+      dependencies: ['API Testing Setup'],
+    },
 
     /* Test against mobile viewports. */
     // {
