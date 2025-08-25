@@ -1,6 +1,6 @@
 /**
  * This module defines locators for various elements in the Invenio E2E tests.
- * It provides a structured way to access elements on the page using CSS selectors.
+ * It provides a structured way to access elements on the page using selectors.
  */
 export const locators = {
   // ------------------------ HEADER ------------------------
@@ -13,6 +13,9 @@ export const locators = {
   homePage: {
     searchField: 'input[name="q"]',
     searchButton: 'button[type="submit"]',
+    quickCreateButton: '#quick-create-dropdown-btn',
+    newCommunityMenuItem: 'a[role="menuitem"][href="/communities-new"]:visible',
+    newUploadMenuItem: 'a[role="menuitem"][href="/uploads/new"]:visible', 
   },
 
   // ------------------------ SEARCH PAGE ------------------------
@@ -22,13 +25,14 @@ export const locators = {
 
   // ------------------------ UPLOAD PAGE ------------------------
   uploadPage: {
-    titleField: 'input[name="title"]',
+    titleField: '#metadata\\.title',
     descriptionField: 'textarea[name="description"]',
-    resourceTypeDropdown: '[name="resource_type"]',
+    resourceTypeDropdown: '[name="metadata.resource_type"]',
     resourceTypeOption: (optionText: string) =>
       `//div[contains(@role, "listbox")]//div[contains(text(), "${optionText}")]`,
     addCreatorButton: 'button:has-text("Add creator")',
     familyNameField: 'input[name="person_or_org.family_name"]',
+    saveAddCreatorButton:'button[name="submit"].ui.primary.button',
     publicationDateField: 'input#metadata\\.publication_date',
     uploadButton: 'input[type="file"]',
     uploadedFile: '[data-testid="uploaded-file"]',
@@ -42,7 +46,7 @@ export const locators = {
     previewButton: 'button:has-text("Preview")',
     backToEditButton: 'button:has-text("Back to edit")',
     toastMessage: (text: string) => `[role="status"]:has-text("${text}")`,
-    recordTitleHeader: "h1.record-title",
+    recordTitleHeader: "#record-title",
     communityInputField: '[aria-labelledby="community-selection-label"] input',
     communityOption: (communityName: string) =>
       `ul[role="listbox"] >> text=${communityName}`,
@@ -67,7 +71,18 @@ export const locators = {
     uploadFilesButton: 'button.uppy-StatusBar-actionBtn--upload',
   },
 
-  // ----- LOGIN---------
+   // ------------------------ PREVIEW PAGE -----------------------
+  previewPage: {
+    saveDraftInfoMessage:
+      "div.ui.info.flashed.bottom.attached.manage.message",
+    saveDraftVersionsInfoMessage:
+      "div.ui.info.message.no-border-radius.m-0",
+    recordDescription: "#description > div",
+    uploadedFilesRows:
+      "table.ui.striped.table.files.fluid.open tbody tr",
+  },
+
+  // ---------------------------- LOGIN ----------------------------
   loginPage: {
     usernameField: 'input#email',
     passwordField: 'input#password',

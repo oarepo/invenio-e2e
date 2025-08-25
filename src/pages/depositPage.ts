@@ -5,11 +5,12 @@ import { expect } from "@playwright/test";
 import { ExpectedTexts } from "../locators/expectedTexts";
 import { getCurrentDateFormatted } from "../fixtures/utils";
 import { FileUploadHelper } from "../helpers/fileUploadHelper";
+import { uploadData } from "../data/uploadData";
 
 /**
- * Class representing a deposit page.
+ * Class representing a Deposit page in the application.
+ * Contains methods to interact with fields, buttons, and perform verifications.
  */
-
 export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     // NAVIGATION ------------------------------------------------------------------------
 
@@ -19,6 +20,15 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
      */
     async openPage(url?: string): Promise<void> {
         // TODO: if no url, new deposition
+        await this.page.goto("/");
+        await this.page.waitForLoadState("networkidle");
+        await this.validatePageLoaded();
+    }
+    /*
+     * Navigate to the Deposit page.
+     * @param url Optional URL to navigate to (if not provided, defaults to "/")
+     */
+    async openPage(url?: string): Promise<void> {
         await this.page.goto("/");
         await this.page.waitForLoadState("networkidle");
         await this.validatePageLoaded();
@@ -133,13 +143,6 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
     // VERIFICATION ------------------------------------------------------------------------
 
-    private async verifyToastMessage(expectedText: string): Promise<void> {
-        const toast = this.page.locator(
-            Locators.uploadPage.toastMessage(expectedText)
-        );
-        await expect(toast).toBeVisible();
-        await expect(toast).toHaveText(new RegExp(expectedText, "i"));
-    }
     private async verifyToastMessage(expectedText: string): Promise<void> {
         const toast = this.page.locator(
             this.locators.uploadPage.toastMessage(expectedText)
