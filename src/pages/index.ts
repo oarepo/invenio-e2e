@@ -1,6 +1,9 @@
-import { HomePage } from './homePage'
-import { SearchPage } from './searchPage'
+import { HomePage } from './homePage';
+import { SearchPage } from './searchPage';
 import { LoginPage } from './loginPage';
+import { DepositPage } from './depositPage';
+import { PreviewPage } from './previewPage';
+
 
 export { BasePage } from './basePage';
 export { HomePage } from './homePage';
@@ -8,6 +11,7 @@ export { SearchPage } from './searchPage';
 export { LoginPage } from './loginPage';
 export { DepositPage } from './depositPage';
 export { PreviewPage } from './previewPage';
+
 
 import { Locators } from '../locators';
 
@@ -18,5 +22,7 @@ export interface AllPages<L extends Locators = Locators> {
     homePage: HomePage<L>;
     searchPage: SearchPage<L>;
     loginPage: LoginPage<L>;
+    depositPage: DepositPage<L>;
+    previewPage: PreviewPage<L>; 
 }
 
