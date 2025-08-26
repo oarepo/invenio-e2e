@@ -1,0 +1,66 @@
+name: i18n-ci
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  i18n:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.0.0
+
+      - name: Install Node deps
+        working-directory: invenio-e2e
+        run: pnpm install --frozen-lockfile
+
+      - name: Install uv
+        run: pipx install uv
+
+      - name: Create Python venv and install Invenio pkgs
+        working-directory: invenio-app-rdm
+        run: |
+          uv venv --python 3.13
+          uv add babel invenio-i18n invenio-app-rdm invenio-rdm-records
+
+      - name: Generate POT (Python/Jinja2)
+        working-directory: invenio-e2e
+        env:
+          VENV_PATH: ${{ github.workspace }}/invenio-app-rdm/.venv
+        run: pnpm run generate-pot
+
+      - name: Fail if POT drift
+        working-directory: invenio-e2e
+        run: |
+          git add -N src/translations/messages.pot
+          git diff --exit-code -- src/translations/messages.pot
+
+      - name: Collect translations + validate
+        working-directory: invenio-e2e
+        env:
+          INVENIO_PACKAGES_DIR: ${{ github.workspace }}
+        run: pnpm run collect-translations:validate
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: i18n-reports
+          path: |
+            invenio-e2e/src/translations/messages.pot
+            invenio-e2e/src/translations/translations.json
+            invenio-e2e/src/translations/validation-report.json
+            invenio-e2e/src/translations/pot-comparison-report.json
+
+

@@ -1,19 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Collect translations from Invenio packages into package-specific JSON files.
+ * Collect translations from Invenio packages into JSON files.
  * 
- * 
- * Package Location: the script looks for packages in the following locations - in order:
- * environment variable INVENIO_PACKAGES_DIR if set
- * parent directory of invenio-e2e (../../package-name)
- * current directory (./package-name)
- * 
- * Installation Scenarios:
- * - clone packages alongside invenio-e2e in parent directory
- * - NPM package: Set INVENIO_PACKAGES_DIR to point to your packages location
- * - instance: Use relative path from your RDM instance structure
- * 
+ * Scans PO files from Invenio packages and converts them to JSON format
+ * for validation and testing purposes.
  */
 
 const fs = require('fs');
@@ -82,17 +73,112 @@ async function parsePoFile(poFilePath, packageName) {
 }
 
 /**
+ * Analyzes PO file for untranslated strings and quality issues.
+ * 
+ * @param {string} poFilePath - Path to the .po file
+ * @param {string} packageName - Package name for context
+ * @param {string} locale - Locale being analyzed
+ * @returns {Object} Validation report
+ */
+function validatePoFile(poFilePath, packageName, locale) {
+    try {
+        const poContent = fs.readFileSync(poFilePath, 'utf8');
+        const lines = poContent.split('\n');
+        
+        const issues = {
+            untranslated: [],
+            fuzzyTranslations: [],
+            obsoleteTranslations: []
+        };
+        
+        let currentMsgid = '';
+        let currentMsgstr = '';
+        let isFuzzy = false;
+        let isObsolete = false;
+        let inMsgid = false;
+        let inMsgstr = false;
+        
+        for (const line of lines) {
+            const trimmed = line.trim();
+            
+            // Check for flags
+            if (trimmed.startsWith('#,') && trimmed.includes('fuzzy')) {
+                isFuzzy = true;
+            }
+            if (trimmed.startsWith('#~')) {
+                isObsolete = true;
+            }
+            
+            // Parse msgid and msgstr
+            if (trimmed.startsWith('msgid ')) {
+                currentMsgid = trimmed.substring(6).replace(/^"(.*)"$/, '$1');
+                inMsgid = true;
+                inMsgstr = false;
+            } else if (inMsgid && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+                currentMsgid += trimmed.replace(/^"(.*)"$/, '$1');
+            } else if (trimmed.startsWith('msgstr ')) {
+                currentMsgstr = trimmed.substring(7).replace(/^"(.*)"$/, '$1');
+                inMsgid = false;
+                inMsgstr = true;
+            } else if (inMsgstr && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+                currentMsgstr += trimmed.replace(/^"(.*)"$/, '$1');
+            } else if (trimmed === '' || trimmed.startsWith('msgid ')) {
+                // End of entry - process it
+                if (currentMsgid && currentMsgid !== '') {
+                    if (isObsolete) {
+                        issues.obsoleteTranslations.push(currentMsgid);
+                    } else if (isFuzzy) {
+                        issues.fuzzyTranslations.push(currentMsgid);
+                    } else if (!currentMsgstr || currentMsgstr === '') {
+                        issues.untranslated.push(currentMsgid);
+                    }
+                }
+                
+                // Reset for next entry
+                currentMsgid = '';
+                currentMsgstr = '';
+                isFuzzy = false;
+                isObsolete = false;
+                inMsgid = false;
+                inMsgstr = false;
+                
+                if (trimmed.startsWith('msgid ')) {
+                    currentMsgid = trimmed.substring(6).replace(/^"(.*)"$/, '$1');
+                    inMsgid = true;
+                }
+            }
+        }
+        
+        return {
+            package: packageName,
+            locale: locale,
+            file: poFilePath,
+            issues: issues,
+            counts: {
+                untranslated: issues.untranslated.length,
+                fuzzyTranslations: issues.fuzzyTranslations.length,
+                obsoleteTranslations: issues.obsoleteTranslations.length
+            }
+        };
+    } catch (error) {
+        console.warn(`Failed to validate ${poFilePath}:`, error.message);
+        return null;
+    }
+}
+
+/**
  * Scans an Invenio package directory for translation files and extracts all translations.
  * 
  * This function looks for translations in the standard Invenio directory structure:
- * - First tries: packagePath/packageName/translations/
- * - Falls back to: packagePath/translations/
+ * - first tries: packagePath/packageName/translations/
+ * - falls back to: packagePath/translations/
  * 
  * Within the translations directory, it scans for locale subdirectories containing
  * LC_MESSAGES/messages.po files following the GNU gettext convention.
  * 
  * @param {string} packagePath - Path to the package directory
  * @param {string} packageName - Name of the package (used for namespacing)
+ * @param {boolean} includeValidation - Whether to include validation analysis
  * @returns {Promise<Object>} Object mapping locale codes to their translations
  * 
  * @example
@@ -102,17 +188,18 @@ async function parsePoFile(poFilePath, packageName) {
  *   "de": { "Home": "Startseite", "invenio_app_rdm:Home": "Startseite" }
  * }
  */
-async function scanPackage(packagePath, packageName) {
+async function scanPackage(packagePath, packageName, includeValidation = false) {
     const translations = {};
+    const validationReport = [];
     
-    // Try standard Invenio structure first, then fallback
+    // Find translations directory
     let translationsDir = path.join(packagePath, packageName, 'translations');
     if (!fs.existsSync(translationsDir)) {
         translationsDir = path.join(packagePath, 'translations');
     }
     
     if (!fs.existsSync(translationsDir)) {
-        return translations;
+        return { translations, validationReport };
     }
     
     // Scan locale directories
@@ -123,68 +210,63 @@ async function scanPackage(packagePath, packageName) {
             const poFile = path.join(localePath, 'LC_MESSAGES/messages.po');
             if (fs.existsSync(poFile)) {
                 translations[locale] = await parsePoFile(poFile, packageName);
+                
+                if (includeValidation) {
+                    const validation = validatePoFile(poFile, packageName, locale);
+                    if (validation) {
+                        validationReport.push(validation);
+                    }
+                }
             }
         }
     }
     
-    return translations;
+    return { translations, validationReport };
 }
 
 /**
  * Main function that collects translations from Invenio packages.
  * 
- * Uses the pre-processing approach - we parse .po files once at build time
- * 
  * Creates two outputs:
- * - Individual package translation files (src/translations/package_name/)
- * - One combined file with everything (src/translations/translations.json)
+ * - individual package translation files (src/translations/package_name/)
+ * - one combined file with everything (src/translations/translations.json)
+ * - validation report with missing translations and untranslated strings
  * 
  * Command line usage:
  * - `npm run collect-translations` - Uses default packages (invenio-app-rdm, invenio-rdm-records)
  * - `npm run collect-translations package1 package2` - Collects from specified packages
  * - `INVENIO_PACKAGES_DIR=/path/to/packages npm run collect-translations` - Collects from packages in the specified directory
- * 
- * Output structure:
- * ```
- * src/translations/
- * ├── translations.json              # translations from all packages
- * ├── invenio_app_rdm/
- * │   └── translations.json          # package-specific translations
- * └── repository_tugraz/
- *     └── translations.json          # package-specific translations
- * ```
- * 
+ * - `npm run collect-translations --validate` - Also generates validation report
  */
 async function main() {
     const args = process.argv.slice(2);
-    const packages = args.length > 0 ? args : ['invenio-app-rdm', 'invenio-rdm-records'];
+    const includeValidation = args.includes('--validate');
+    const packages = args.filter(arg => !arg.startsWith('--'));
+    const packageList = packages.length > 0 ? packages : ['invenio-app-rdm', 'invenio-rdm-records'];
     
-    console.log(`Collecting translations from ${args.length > 0 ? 'specified' : 'default'} packages`);
+    console.log(`Collecting translations from ${packages.length > 0 ? 'specified' : 'default'} packages`);
+    if (includeValidation) {
+        console.log('Validation enabled - generating translation quality report');
+    }
     
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
     
     const allTranslations = {};
+    const allValidationReports = [];
     let packageCount = 0;
     
-    for (const pkg of packages) {
+    for (const pkg of packageList) {
         const packagePath = resolvePackagePath(pkg);
         if (!packagePath) {
             console.warn(`Package not found: ${pkg}`);
-            console.warn('Tried locations:');
-            if (process.env.INVENIO_PACKAGES_DIR) {
-                console.warn(`  - ${path.join(process.env.INVENIO_PACKAGES_DIR, pkg)}`);
-            }
-            console.warn(`  - ${path.resolve(__dirname, '../..', pkg)}`);
-            console.warn(`  - ${path.resolve(__dirname, '..', pkg)}`);
             continue;
         }
         
         const packageName = pkg.replace(/-/g, '_');
-        const translations = await scanPackage(packagePath, packageName);
+        const { translations, validationReport } = await scanPackage(packagePath, packageName, includeValidation);
         
         if (Object.keys(translations).length === 0) continue;
         
-        // save package-specific file
         const packageDir = path.join(OUTPUT_DIR, packageName);
         fs.mkdirSync(packageDir, { recursive: true });
         fs.writeFileSync(
@@ -192,21 +274,52 @@ async function main() {
             JSON.stringify(translations, null, 2)
         );
         
-        // merge into consolidated translations
         for (const [locale, localeTranslations] of Object.entries(translations)) {
             if (!allTranslations[locale]) allTranslations[locale] = {};
             Object.assign(allTranslations[locale], localeTranslations);
+        }
+        
+        if (includeValidation && validationReport.length > 0) {
+            allValidationReports.push(...validationReport);
         }
         
         console.log(`${packageName}: ${Object.keys(translations).length} locales (${packagePath})`);
         packageCount++;
     }
     
-    // save consolidated file
     fs.writeFileSync(
         path.join(OUTPUT_DIR, 'translations.json'),
         JSON.stringify(allTranslations, null, 2)
     );
+    
+    if (includeValidation && allValidationReports.length > 0) {
+        const validationSummary = {
+            generatedAt: new Date().toISOString(),
+            packages: packageList,
+            summary: {
+                totalPackages: packageCount,
+                totalLocales: Object.keys(allTranslations).length,
+                totalIssues: allValidationReports.reduce((sum, report) => 
+                    sum + Object.values(report.counts).reduce((a, b) => a + b, 0), 0),
+                untranslatedStrings: allValidationReports.reduce((sum, report) => 
+                    sum + report.counts.untranslated, 0),
+                fuzzyTranslations: allValidationReports.reduce((sum, report) => 
+                    sum + report.counts.fuzzyTranslations, 0)
+            },
+            reports: allValidationReports
+        };
+        
+        fs.writeFileSync(
+            path.join(OUTPUT_DIR, 'validation-report.json'),
+            JSON.stringify(validationSummary, null, 2)
+        );
+        
+        console.log(`\nValidation Summary:`);
+        console.log(`  Total issues found: ${validationSummary.summary.totalIssues}`);
+        console.log(`  Untranslated strings: ${validationSummary.summary.untranslatedStrings}`);
+        console.log(`  Fuzzy translations: ${validationSummary.summary.fuzzyTranslations}`);
+        console.log(`  Report saved: src/translations/validation-report.json`);
+    }
     
     const totalLocales = Object.keys(allTranslations).length;
     console.log(`Total: ${totalLocales} locales across ${packageCount} packages`);

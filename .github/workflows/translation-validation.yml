@@ -1,0 +1,82 @@
+name: Translation Validation
+
+on:
+  push:
+    branches: [ main, master, i18n_service_clean ]
+  pull_request:
+    branches: [ main, master, i18n_service_clean ]
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'Package to validate'
+        required: false
+        default: 'invenio-app-rdm'
+
+jobs:
+  translation-validation:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 9.0.0
+    
+    - name: Install UV
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    
+    - name: Install Python dependencies with UV
+      run: |
+        source $HOME/.cargo/env
+        uv venv --python ${{ matrix.python-version }}
+        uv pip install Babel
+        # Install Invenio packages for POT generation
+        uv pip install invenio-app-rdm invenio-rdm-records
+    
+    - name: Install Node.js dependencies
+      run: pnpm install
+    
+    - name: Generate POT file from virtual environment
+      run: |
+        source $HOME/.cargo/env
+        # Try invenio i18n create-global-pot first (preferred)
+        if uv run invenio i18n create-global-pot --output src/translations/messages.pot; then
+          echo "Used invenio i18n create-global-pot (core command)"
+        else
+          echo "Falling back to pnpm script wrapper"
+          pnpm run generate-pot
+        fi
+    
+    - name: Collect translations with validation
+      run: pnpm run collect-translations:validate
+    
+    - name: Upload validation reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: translation-reports-${{ matrix.python-version }}
+        path: |
+          src/translations/validation-report.json
+          src/translations/pot-comparison-report.json
+          src/translations/messages.pot
+        retention-days: 30

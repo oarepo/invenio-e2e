@@ -132,7 +132,7 @@ const _test = base.extend<{
         // this fixture logs in the default user
         await homePage.openPage();
         await loginService.login(homePage);
-        await use(undefined);
+        await use(async () => {});
     },
 
     services: async ({ i18nService, loginService }, use) => {
@@ -192,9 +192,9 @@ export const test = new Proxy(_test as InvenioTest, {
                 return (title: string, annotation?: any, callback?: () => void) => {
                     const skippedTests = target.__skipped_tests || [];
                     if (skippedTests.includes(title)) {
-                        return target.describe.skip(title, annotation, callback);
+                        return target.describe.skip(title, annotation, callback || (() => {}));
                     } else {
-                        return target.describe(title, annotation, callback);
+                        return target.describe(title, annotation, callback || (() => {}));
                     }
                 }
             case 'skipTests':
@@ -214,7 +214,7 @@ export const test = new Proxy(_test as InvenioTest, {
                     }
                 }
             default:
-                return target[prop];
+                return (target as any)[prop];
         }
     },
     /**
@@ -222,15 +222,15 @@ export const test = new Proxy(_test as InvenioTest, {
      * If the test has a title that is in the skipped tests list, the test
      * will be marked as .skip
      */
-    apply: (target, thisArg, args) => {
+    apply: (target, thisArg, args: any[]) => {
         const skippedTests = target.__skipped_tests || [];
         // if the first argument is a string, it is a test title
         if (typeof args[0] === 'string' && skippedTests.includes(args[0])) {
             // skip the test if it is in the skipped tests list
             // @ts-ignore
-            return target.skip(...args);
+            return (target as any).skip(...args);
         }
-        return target.apply(thisArg, args);
+        return (target as any).apply(thisArg, args);
     }
 });
 

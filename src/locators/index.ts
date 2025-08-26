@@ -1,5 +1,5 @@
-import { merge } from 'ts-deepmerge';
 import { locators } from './defaultLocators';
+import { merge } from 'ts-deepmerge';
 
 export { locators } from './defaultLocators';
 
@@ -53,7 +53,7 @@ type UseLocators<L> = (r: L & Locators) => Promise<void>;
  *          merges them with the new ones, to be used in the test 
  *          fixture definition.
  */
-export function updateLocators<T>(locators: T): (
+export function updateLocators<T extends Record<string, any>>(locators: T): (
     (params: { locators: Locators }, use: UseLocators<T & Locators>) => Promise<void>) {
     return async ({ locators: origLocators }, use) => {
         await use(merge(origLocators, locators) as T & Locators);
