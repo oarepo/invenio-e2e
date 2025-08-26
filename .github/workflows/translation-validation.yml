@@ -14,7 +14,7 @@ on:
 
 jobs:
   translation-validation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     strategy:
       matrix:
@@ -34,40 +34,41 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
-        cache: 'pnpm'
+        node-version: 20
     
     - name: Install pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 9.0.0
+      run: |
+        curl -fsSL https://get.pnpm.io/install.sh | sh -
+        echo "$HOME/.local/share/pnpm" >> $GITHUB_PATH
+
+    - name: Install Node.js dependencies
+      run: pnpm install --prefer-offline
     
+    - name: Clone Invenio packages
+      run: |
+        git clone https://github.com/inveniosoftware/invenio-app-rdm.git
+        git clone https://github.com/inveniosoftware/invenio-rdm-records.git
+
     - name: Install UV
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
-    
+
     - name: Install Python dependencies with UV
       run: |
         source $HOME/.cargo/env
         uv venv --python ${{ matrix.python-version }}
-        uv pip install Babel
-        # Install Invenio packages for POT generation
-        uv pip install invenio-app-rdm invenio-rdm-records
+        uv pip install babel invenio-i18n
+        # Install packages 
+        uv pip install -e ./invenio-app-rdm
+        uv pip install -e ./invenio-rdm-records
     
-    - name: Install Node.js dependencies
-      run: pnpm install
-    
-    - name: Generate POT file from virtual environment
-      run: |
-        source $HOME/.cargo/env
-        # Try invenio i18n create-global-pot first (preferred)
-        if uv run invenio i18n create-global-pot --output src/translations/messages.pot; then
-          echo "Used invenio i18n create-global-pot (core command)"
-        else
-          echo "Falling back to pnpm script wrapper"
-          pnpm run generate-pot
-        fi
-    
+    - name: Generate POT file
+      env:
+        VENV_PATH: ${{ github.workspace }}/.venv
+      run: pnpm run generate-pot
+
     - name: Collect translations with validation
+      env:
+        INVENIO_PACKAGES_DIR: ${{ github.workspace }}
       run: pnpm run collect-translations:validate
     
     - name: Upload validation reports

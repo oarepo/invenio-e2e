@@ -14,40 +14,47 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9.0.0
-
-      - name: Install Node deps
-        working-directory: invenio-e2e
-        run: pnpm install --frozen-lockfile
-
-      - name: Install uv
-        run: pipx install uv
-
-      - name: Create Python venv and install Invenio pkgs
-        working-directory: invenio-app-rdm
         run: |
-          uv venv --python 3.13
-          uv add babel invenio-i18n invenio-app-rdm invenio-rdm-records
+          curl -fsSL https://get.pnpm.io/install.sh | sh -
+          echo "$HOME/.local/share/pnpm" >> $GITHUB_PATH
+      
+      - name: Install Node deps
+        run: pnpm install --prefer-offline
 
-      - name: Generate POT (Python/Jinja2)
-        working-directory: invenio-e2e
+      - name: Clone Invenio packages
+        run: |
+          git clone https://github.com/inveniosoftware/invenio-app-rdm.git
+          git clone https://github.com/inveniosoftware/invenio-rdm-records.git
+
+      - name: Install UV
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install Python dependencies with UV
+        run: |
+          source $HOME/.cargo/env
+          uv venv --python 3.13
+          uv pip install babel invenio-i18n
+          # Install packages 
+          uv pip install -e ./invenio-app-rdm
+          uv pip install -e ./invenio-rdm-records
+
+      - name: Generate POT file
         env:
-          VENV_PATH: ${{ github.workspace }}/invenio-app-rdm/.venv
+          VENV_PATH: ${{ github.workspace }}/.venv
         run: pnpm run generate-pot
 
-      - name: Fail if POT drift
-        working-directory: invenio-e2e
+      - name: Check POT file generation
         run: |
-          git add -N src/translations/messages.pot
-          git diff --exit-code -- src/translations/messages.pot
+          git add -f src/translations/messages.pot
+          git diff --exit-code -- src/translations/messages.pot || {
+            echo "POT file has changed - source strings may have been modified"
+            exit 1
+          }
+          echo "POT file is up to date"
 
       - name: Collect translations + validate
-        working-directory: invenio-e2e
         env:
           INVENIO_PACKAGES_DIR: ${{ github.workspace }}
         run: pnpm run collect-translations:validate
@@ -58,9 +65,9 @@ jobs:
         with:
           name: i18n-reports
           path: |
-            invenio-e2e/src/translations/messages.pot
-            invenio-e2e/src/translations/translations.json
-            invenio-e2e/src/translations/validation-report.json
-            invenio-e2e/src/translations/pot-comparison-report.json
+            src/translations/messages.pot
+            src/translations/translations.json
+            src/translations/validation-report.json
+            src/translations/pot-comparison-report.json
 
 
