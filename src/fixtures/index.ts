@@ -1,6 +1,7 @@
 import { HomePage, SearchPage, BasePage, LoginPage, DepositPage, PreviewPage } from '../pages';
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
-import { I18nExpected, I18nService, LocalLoginService, Services, Translations } from '../services';
+import { I18nExpected, I18nService, LocalLoginService, Services, Translations, DepositionService, DepositionData } from '../services';
+import { defaultDepositionData } from "./depositionData";
 
 import type { Config } from '../config';
 import type { Locators } from '../locators';
@@ -9,6 +10,7 @@ import { locators } from '../locators';
 import { registerPage } from './utils';
 
 export { registerPage } from './utils';
+
 
 
 const _test = base.extend<{
@@ -25,6 +27,11 @@ const _test = base.extend<{
     loginService: LocalLoginService<Locators>;
     defaultUserLoggedIn: () => Promise<void>;
 
+    depositionData: {
+        [key: string]: DepositionData
+    };
+    depositionService: DepositionService<Locators, DepositPage>;
+
     services: Services<Locators>;
 
     expect: Expect<I18nExpected>;
@@ -32,7 +39,8 @@ const _test = base.extend<{
     homePage: HomePage;
     searchPage: SearchPage;
     loginPage: LoginPage;
-
+    depositPage: DepositPage;
+    previewPage: PreviewPage;
 }>({
     // locators are used to find elements on the page and they are separated
     // from the page classes so that they can be easily overwritten in tests
@@ -135,6 +143,15 @@ const _test = base.extend<{
         await use(undefined);
     },
 
+    depositionData: async ({ }, use) => {
+        await use(defaultDepositionData)
+    },
+
+    depositionService: async ({ config, depositPage, availablePages }, use) => {
+        const depositionService = new DepositionService(config, depositPage, availablePages);
+        await use(depositionService);
+    },
+
     services: async ({ i18nService, loginService }, use) => {
         // services are used to interact with the application, for example,
         // loginService is used to log in the user, i18nService is used to
@@ -219,6 +236,7 @@ export const test = new Proxy(_test as InvenioTest, {
                 return target[prop];
         }
     },
+
     /**
      * Handles the case test("test title", ({fixtures}) => { test body })
      * If the test has a title that is in the skipped tests list, the test
@@ -235,4 +253,3 @@ export const test = new Proxy(_test as InvenioTest, {
         return target.apply(thisArg, args);
     }
 });
-
