@@ -48,22 +48,22 @@ const _test = base.extend<{
     initialLocale: undefined,
 
     // translations loaded from pre-compiled file
-    translations: async ({}, use) => {
-    let translations = {};
-    try {
-        const translationsFile = require('../translations/translations.json');
-        translations = translationsFile;
-    } catch (error) {
-        throw new Error(
-            'Pre-compiled translations not found. Please generate translations first:\n\n' +
-            'run: npm run collect-translations\n' +
-            'or specify packages: npm run collect-translations invenio-app-rdm repository-tugraz\n' +
-            'then rebuild: npm run build\n\n' +
-            'this will create src/translations/translations.json with actual translations from your Invenio packages.\n'
-        );
-    }
-    await use(translations);
-},
+    translations: async ({ }, use) => {
+        let translations = {};
+        try {
+            const translationsFile = require('@collected-translations/translations.json');
+            translations = translationsFile;
+        } catch (error) {
+            throw new Error(
+                'Pre-compiled translations not found. Please generate translations first:\n\n' +
+                'run: npm run collect-translations\n' +
+                'or specify packages: npm run collect-translations invenio-app-rdm repository-tugraz\n' +
+                'then rebuild: npm run build\n\n' +
+                'this will create src/translations/translations.json with actual translations from your Invenio packages.\n'
+            );
+        }
+        await use(translations);
+    },
 
     // untranslated strings for translation testing 
     untranslatedStrings: [],
