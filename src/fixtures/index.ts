@@ -1,4 +1,4 @@
-import { AllPages, BasePage, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage } from '../pages';
+import { AllPages, BasePage, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
 import { I18nExpected, I18nService, LocalLoginService, Services, Translations } from '../services';
 
@@ -35,6 +35,11 @@ const _test = base.extend<{
     loginPage: LoginPage;
     depositPage: DepositPage;
     previewPage: PreviewPage;
+    communitiesPage: CommunitiesPage;
+    communityDetailPage: CommunityDetailPage;
+    communitySearchPage: CommunitySearchPage;
+    myDashboardPage: MyDashboardPage;
+    newCommunityPage: NewCommunityPage;
 
     uploadHelper: FileUploadHelper;
 
@@ -165,6 +170,12 @@ const _test = base.extend<{
     ...registerPage("loginPage", LoginPage),
     ...registerPage("depositPage", DepositPage),
     ...registerPage("previewPage", PreviewPage),
+    ...registerPage("communitiesPage", CommunitiesPage),
+    ...registerPage("communityDetailPage", CommunityDetailPage),
+    ...registerPage("communitySearchPage", CommunitySearchPage),
+    ...registerPage("myDashboardPage", MyDashboardPage),
+    ...registerPage("newCommunityPage", NewCommunityPage),
+
 })
 
 type _invenio_base_test = typeof _test;

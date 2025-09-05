@@ -8,6 +8,9 @@ import { DepositPage } from "./depositPage";
  */
 
 export class HomePage<T extends Locators = Locators> extends BasePage<T> {
+
+  // NAVIGATION -------------------------------------------------------------------------
+
   /*
    * Navigate to the Home page.
    * @returns The home page instance to allow method chaining.
@@ -18,7 +21,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
     await this.validatePageLoaded();
   }
 
-  // VALIDATION
+  // VALIDATION --------------------------------------------------------------------------
   /**
    * Validates that the home page has loaded by checking for the search field.
    */
@@ -59,6 +62,20 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
     await this.page.waitForLoadState("networkidle");
   }
 
+  /**
+   * Navigates to the Communities page by clicking the header link.
+   */
+  async goToCommunitiesPage(): Promise<void> {
+    const communitiesLink = this.page.locator(
+      this.locators.header.communitiesLink
+    );
+    await communitiesLink.click();
+    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForSelector(this.locators.communitiesPage.pageTitle, {
+      state: "visible",
+    });
+  }
+
   // FLOWS -------------------------------------------------------------------------------
 
   /**
@@ -97,14 +114,14 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
     await newUploadItem.click();
     await this.page.waitForLoadState("networkidle");
 
-    const depositPage = new DepositPage({ 
-        page: this.page, 
-        locators: this.locators, 
-        availablePages: this.availablePages, 
-        services: this.services, 
-        expect: this.expect 
+    const depositPage = new DepositPage({
+      page: this.page,
+      locators: this.locators,
+      availablePages: this.availablePages,
+      services: this.services,
+      expect: this.expect,
     });
     await depositPage.validatePageLoaded();
     return depositPage;
-}
+  }
 }
