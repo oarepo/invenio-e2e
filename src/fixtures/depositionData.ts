@@ -1,4 +1,4 @@
-import { Fill, Save, ExpectErrors } from '../services/form'
+import { Fill, Save, UploadFile, ExpectErrors } from '../services/form'
 
 
 export const defaultDepositionData = {
@@ -18,7 +18,7 @@ export const defaultDepositionData = {
             ["creator", { givenName: "John", familyName: "Doe" }],
         ),
         new Save(),
-        new ExpectErrors(),
+        new ExpectErrors([]), // expect no errors
     ],
     "recordWithFile": [
         new Fill(
@@ -27,9 +27,10 @@ export const defaultDepositionData = {
             ["creator", { givenName: "Jane", familyName: "Doe" }],
             ["creator", { givenName: "John", familyName: "Doe" }],
         ),
-        // new UploadFile("Anon.jpg"),
+        new UploadFile("Anon.jpg"),
         new Save(),
-    ],
+        new ExpectErrors([]), // expect no errors
+    ]
 }
 
 export type DepositionData = typeof defaultDepositionData;

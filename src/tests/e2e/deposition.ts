@@ -5,7 +5,7 @@ import { expect } from "@playwright/test";
 
 export function depositionTests(test: InvenioTest) {
   test.describe("Deposition Tests", () => {
-    test("Create and publish metadata-only deposition", async ({ homePage, previewPage, defaultUserLoggedIn, formService, depositionData }) => {
+    test("Create and publish metadata-only record", async ({ homePage, previewPage, defaultUserLoggedIn, formService, depositionData }) => {
       console.log("Running metadata-only deposition test...");
 
       // Navigate to 'New upload'
@@ -16,40 +16,21 @@ export function depositionTests(test: InvenioTest) {
       await formService.fillForm(depositPage, depositionData["metadataOnlyRecord"]);
     });
 
-    // test("Upload a file", async ({ homePage, previewPage, defaultUserLoggedIn, depositionService, depositionData }) => {
-    //   console.log("Running upload file test...");
+    test("Upload a file", async ({ homePage, previewPage, defaultUserLoggedIn, formService, depositionData }) => {
+      console.log("Running upload file test...");
 
-    //   // Navigate to 'New upload'
-    //   await homePage.openPage();
-    //   const depositPage = await homePage.selectNewUpload();
+      // Navigate to 'New upload'
+      await homePage.openPage();
+      const depositPage = await homePage.selectNewUpload();
 
-    //   // Fill the deposition form by following the provided steps
-    //   depositionService.fillDepositionForm(depositPage, depositionData[dataProfile]);
+      // Fill the deposition form by following the provided steps and check for errors
+      const { filledData } = await formService.fillForm(depositPage, depositionData["recordWithFile"], {
+        order: 123
+      });
 
-    //   // // Upload random file (folder: UploadFiles)
-    //   // await depositPage.uploadRandomFile();
-
-    //   // // Fill in 'Creators' field - by faker
-    //   // await depositPage.clickAddCreatorButton();
-    //   // const fakeName = faker.person.lastName();
-    //   // await depositPage.fillCreatorName(fakeName);
-    //   // await depositPage.clickAddcreatorSaveButton();
-
-    //   // // Fill in 'Title' field - by faker
-    //   // const fakeTitle = uploadData.recordTitle();
-    //   // await depositPage.fillTitleField(fakeTitle);
-
-    //   // // Fill in 'Resource type' field - random from the list - UploadData.ts
-    //   // const resourceType = uploadData.resourceType();
-    //   // await depositPage.selectResourceType(resourceType);
-
-    //   // // Confirm by clicking 'Publish' button
-    //   // await depositPage.clickPublish();
-    //   // await depositPage.confirmPublication();
-
-    //   // // Check the title of the new created record in the detail
-    //   // const exists = await previewPage.checkRecordExists(fakeTitle);
-    //   // expect(exists).toBeTruthy();
-    // });
+      // // check that the file can be downloaded
+      // const previewPage = depositPage.clickPreview();
+      // previewPage.verifyData(filledData);
+    });
   });
 }

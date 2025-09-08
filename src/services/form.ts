@@ -10,6 +10,7 @@ import { BasePage } from '../pages';
  */
 export interface FormStep {
     apply: (page: BasePage) => Promise<void | BasePage>;
+    getFilledData: () => any[]; // returns the data filled in this step, for verification purposes
 }
 
 /**
@@ -44,6 +45,10 @@ export class Fill implements FormStep {
             }
         }
         throw new Error(`No method found for filling field ${field}. Tried: ${triedMethods.join(', ')}`);
+    }
+
+    getFilledData(): any[] {
+        return this.data;
     }
 }
 
@@ -94,6 +99,13 @@ export class ExpectErrors implements FormStep {
         await _p.verifyErrorMessages(this.expectedErrors, this.onlyTheseErrors);
         return page;
     }
+
+    getFilledData(): any[] {
+        return [];
+    }
+}
+
+export class UploadFile implements FormStep {
 }
 
 export interface FormServiceInterface<L extends Locators = Locators> {
@@ -102,7 +114,7 @@ export interface FormServiceInterface<L extends Locators = Locators> {
      * @param page      the deposition page instance
      * @param steps     the steps to follow
      */
-    fillForm: (page: BasePage, steps: FormStep[]) => Promise<BasePage>;
+    fillForm: (page: BasePage, steps: FormStep[]) => Promise<{ page: BasePage, filledData: any[][] }>;
 }
 
 export class FormService<L extends Locators> implements FormServiceInterface<L> {
@@ -113,10 +125,12 @@ export class FormService<L extends Locators> implements FormServiceInterface<L> 
         protected config: Config,
     ) { }
 
-    async fillForm(page: BasePage, steps: FormStep[]): Promise<BasePage> {
+    async fillForm(page: BasePage, steps: FormStep[]): Promise<{ page: BasePage, filledData: any[][] }> {
+        const filledData = []
         for (const step of steps) {
             page = await step.apply(page) || page;
+            filledData.push(step.getFilledData());
         }
-        return page;
+        return { page, filledData };
     }
 }

@@ -92,7 +92,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   }
 
   // Upload a random file using the FileUploadHelper
-  async uploadRandomFile(): Promise<void> {
+  async uploadFile(filename: string): Promise<void> {
     const helper = new FileUploadHelper(this.page);
     await helper.uploadRandomFileAndConfirm();
   }
