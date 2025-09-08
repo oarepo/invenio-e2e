@@ -292,18 +292,15 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   }
 
   private async _getErrorFieldAndMessage(field: Locator) {
-    console.log("Getting error message from field", await (await field.elementHandle()).evaluate(el => el.outerHTML));
     const errorMessage = await field.locator(this.locators.uploadPage.errorMessageInsideField).innerText({ timeout: 100 });
 
     try {
-      console.log("Trying to get field name from label");
       return { errorMessage, fieldName: await field.locator('label[for]').first({ timeout: 100 }).getAttribute('for') };
     } catch (e) {
       // ignore
     }
     try {
-      console.log("Trying to get field name from input/textarea/select");
-      return { errorMessage, fieldName: await field.locator('input, textarea, select').first({ timeout: 100 }).getAttribute('name') };
+      return { errorMessage, fieldName: await field.locator('input[name], textarea[name], select[name]').first({ timeout: 100 }).getAttribute('name') };
     } catch (e) {
       // ignore
     }
