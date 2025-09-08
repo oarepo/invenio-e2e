@@ -1,7 +1,9 @@
 import { AllPages, BasePage, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
-import { I18nExpected, I18nService, LocalLoginService, Services, Translations, DepositionService, DepositionData } from '../services';
-import { defaultDepositionData } from "./depositionData";
+import {
+    I18nExpected, I18nService, LocalLoginService, Services, Translations, FormService,
+} from '../services';
+import { defaultDepositionData, DepositionData } from "./depositionData";
 
 import type { Config } from '../config';
 import type { Locators } from '../locators';
@@ -25,12 +27,10 @@ const _test = base.extend<{
 
     i18nService: I18nService<Locators>;
     loginService: LocalLoginService<Locators>;
-    defaultUserLoggedIn: () => Promise<void>;
+    defaultUserLoggedIn: true;
 
-    depositionData: {
-        [key: string]: DepositionData
-    };
-    depositionService: DepositionService<Locators, DepositPage>;
+    depositionData: DepositionData;
+    formService: FormService<Locators>;
 
     services: Services<Locators>;
 
@@ -148,23 +148,23 @@ const _test = base.extend<{
         // this fixture logs in the default user
         await homePage.openPage();
         await loginService.login(homePage);
-        await use(undefined);
+        await use(true);
     },
 
     depositionData: async ({ }, use) => {
         await use(defaultDepositionData)
     },
 
-    depositionService: async ({ config, depositPage, availablePages }, use) => {
-        const depositionService = new DepositionService(config, depositPage, availablePages);
-        await use(depositionService);
+    formService: async ({ config }, use) => {
+        const formService = new FormService(config);
+        await use(formService);
     },
 
-    services: async ({ i18nService, loginService }, use) => {
+    services: async ({ i18nService, loginService, formService }, use) => {
         // services are used to interact with the application, for example,
         // loginService is used to log in the user, i18nService is used to
         // interact with the internationalization service.
-        await use({ i18n: i18nService, login: loginService });
+        await use({ i18n: i18nService, login: loginService, form: formService });
     },
 
     expect: async ({ i18nService }, use) => {

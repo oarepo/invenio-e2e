@@ -33,6 +33,7 @@ export const locators = {
       `//div[contains(@role, "listbox")]//div[contains(text(), "${optionText}")]`,
     addCreatorButton: 'button:has-text("Add creator")',
     familyNameField: 'input[name="person_or_org.family_name"]',
+    givenNameField: 'input[name="person_or_org.given_name"]',
     saveAddCreatorButton: 'button[name="submit"].ui.primary.button',
     publicationDateField: "input#metadata\\.publication_date",
     uploadButton: 'input[type="file"]',
@@ -70,6 +71,9 @@ export const locators = {
     selectedCommunityLabel: '[data-testid="community-label"]',
     browseFilesButton: "button.uppy-Dashboard-browse",
     uploadFilesButton: "button.uppy-StatusBar-actionBtn--upload",
+    warningMessage: '#warning-feedback-div[i.exclamation',
+    fieldWithError: 'div.field.error',
+    errorMessageInsideField: 'div.ui.pointing.prompt.label'
   },
 
   // ------------------------ PREVIEW PAGE -----------------------

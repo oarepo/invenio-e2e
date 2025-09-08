@@ -2,10 +2,11 @@
   "name": "@inveniosoftware/invenio-e2e",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.ts",
+  "types": "src/index.d.ts",
+  "type": "module",
   "scripts": {
-    "build": "tsc; cp package.json dist; cp -r scripts dist/",
+    "build": "tsc; cat package.json | sed '@src/index.ts@src/index.js@' > dist/package.json; cp -r scripts dist/",
     "docs": "documentation build src/**/*.ts -f md -o api_docs.md --shallow --github --sort-order kind"
   },
   "bin": {
@@ -16,19 +17,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@faker-js/faker": "^9.9.0",
-    "@playwright/test": "^1.54.1",
     "@types/i18next": "^12.1.0",
     "@types/node": "^24.1.0",
     "documentation": "^14.0.3",
-    "dotenv": "^17.0.0",
-    "i18next-conv": "^15.1.1",
     "playwright-qase-reporter": "^2.1.5",
-    "ts-deepmerge": "^7.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
+    "i18next-conv": "^15.1.1",
+    "@faker-js/faker": "^9.9.0",
     "@playwright/test": "^1.54.1",
     "dotenv": "^17.0.0",
     "i18next": "^25.3.6",

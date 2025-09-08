@@ -1,13 +1,12 @@
 import { BasePage } from "./basePage";
 import { Locators } from "../locators";
-import { uploadData } from "../data/uploadData";
 
 /**
  * Class representing the New Community creation page.
  */
 
 export class NewCommunityPage<T extends Locators = Locators> extends BasePage<T> {
-    
+
   // NAVIGATION --------------------------------------------------------------------------
 
   /**

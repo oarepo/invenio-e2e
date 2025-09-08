@@ -1,8 +1,12 @@
+/**
+ * This file is just for testing this library, it is not intended to be used for real repositories.
+ * For those, please use invenio-cli init with the appropriate template.
+ */
 import { defineConfig, devices } from "@playwright/test";
-import { appConfig } from "./src/config/env"; //  use centralized config
+import { appConfig } from "../src/config/env"; //  use centralized config
 
 export default defineConfig({
-  testDir: "./tests",
+  testDir: ".",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -12,9 +16,7 @@ export default defineConfig({
   reporter: [
     ["list"],
     ["html", { outputFolder: "playwright-report", open: "never" }],
-    /* 
-
-   [
+    appConfig.qase ? [
       "playwright-qase-reporter",
       {
         apiToken: appConfig.qase.token,
@@ -24,9 +26,7 @@ export default defineConfig({
         rootSuiteTitle: "Playwright E2E",
         runComplete: appConfig.qase.runComplete,
       },
-    ],
-
-    */
+    ] : [],
   ],
 
   use: {
