@@ -16,6 +16,7 @@ export const defaultDepositionData = {
             ["resourceType", "Dataset"],
             ["creator", { givenName: "Jane", familyName: "Doe" }],
             ["creator", { givenName: "John", familyName: "Doe" }],
+            ["metadataOnly", true]
         ),
         new Save(),
         new ExpectErrors([]), // expect no errors

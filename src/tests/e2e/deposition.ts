@@ -13,7 +13,10 @@ export function depositionTests(test: InvenioTest) {
       const depositPage = await homePage.selectNewUpload();
 
       // Fill the deposition form by following the provided steps and check for errors
-      await formService.fillForm(depositPage, depositionData["metadataOnlyRecord"]);
+      const { filledData } = await formService.fillForm(depositPage, depositionData["metadataOnlyRecord"]);
+
+      await expect(await depositPage.clickPreview()).toBe(previewPage);
+      await previewPage.verifyData(filledData);
     });
 
     test("Upload a file", async ({ homePage, previewPage, defaultUserLoggedIn, formService, depositionData }) => {
@@ -28,9 +31,8 @@ export function depositionTests(test: InvenioTest) {
         order: 123
       });
 
-      // // check that the file can be downloaded
-      // const previewPage = depositPage.clickPreview();
-      // previewPage.verifyData(filledData);
+      await expect(await depositPage.clickPreview()).toBe(previewPage);
+      await previewPage.verifyData(filledData);
     });
   });
 }

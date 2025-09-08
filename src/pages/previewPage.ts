@@ -50,7 +50,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
    * @param expectedTitle The title to verify.
    * @returns True if the title matches, false otherwise.
    */
-  async checkRecordExists(expectedTitle: string): Promise<boolean> {
+  async verifyTitle(expectedTitle: string): Promise<void> {
     const titleLocator = this.page.locator(
       this.locators.uploadPage.recordTitleHeader
     );
@@ -61,14 +61,27 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
 
     if (titleText === expectedTitle.trim()) {
       console.log(`Record with title "${expectedTitle}" exists.`);
-      return true;
     } else {
-      console.error(
+      expect.fail(
         `Expected title "${expectedTitle}", but found "${titleText}".`
       );
-      return false;
     }
   }
+
+
+  async verifyData(filledData: any[][]): Promise<void> {
+    for (const data of filledData) {
+      const [field, value] = data;
+      // call verify<FieldName> method on this
+      const methodName = `verify${field.charAt(0).toUpperCase() + field.slice(1)}`;
+      if (typeof (this as any)[methodName] === 'function') {
+        await (this as any)[methodName](value);
+      } else {
+        throw new Error(`No verification method found for field ${field}`);
+      }
+    }
+  }
+
 
   // GETTERS ---------------------------------------------------------------------------
 
