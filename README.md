@@ -1,12 +1,12 @@
-# E2E testing framework for Invenio
+# E2E Testing Framework for Invenio
 
-Note: Suggestion only, might be changed or abandoned anytime.
+**Note:** This is a suggestion only; it might be changed or abandoned at any time.
 
-## How to try it out
+## How to Try It Out
 
-### Directory structure
+### Directory Structure
 
-At the begining, you have just your repository:
+At the beginning, you have just your repository:
 
 ```text
 parent-directory
@@ -14,7 +14,7 @@ parent-directory
         +-- site
 ```
 
-You will need to get it to the following structure:
+You will need to change it to the following structure:
 
 ```text
 parent-directory
@@ -28,23 +28,23 @@ parent-directory
 
 ### Steps
 
-1. Create a `pnpm-workspace.yaml` file in the root of your repository (i.e. at the same level as `site`):
+1. Create a `pnpm-workspace.yaml` file in the root of your repository (i.e., at the same level as `site`):
 
     ```yaml
     # pnpm-workspace.yaml
     packages:
-    - <my-repository>/e2e
-    - invenio-e2e
+      - <my-repository>/e2e
+      - invenio-e2e
     ```
 
 2. Clone the `invenio-e2e` repository from GitHub:
 
     ```bash
     gh repo clone oarepo/invenio-e2e
-    # switch to a feature branch if needed
+    # Switch to a feature branch if needed
     ```
 
-3. Create the `e2e` directory inside your repository
+3. Create the `e2e` directory inside your repository:
 
     ```bash
     gh repo clone mesemus/sample-e2e-repository temp-repository
@@ -52,14 +52,14 @@ parent-directory
     rm -rf temp-repository
     ```
 
-4. Install dependencies
+4. Install dependencies:
 
     ```bash
     cd <my-repository>/e2e
     pnpm install
     ```
 
-5. Configure environment variables
+5. Configure environment variables:
 
     You will need a test user that can deposit records in your InvenioRDM instance.
 
@@ -68,14 +68,14 @@ parent-directory
     export INVENIO_USER_PASSWORD=...
     ```
 
-6. Run your server in another terminal
+6. Run your server in another terminal:
 
     ```bash
     cd <my-repository>
     invenio-cli run
     ```
 
-7. Run tests
+7. Run tests:
 
     ```bash
     cd <my-repository>/e2e
