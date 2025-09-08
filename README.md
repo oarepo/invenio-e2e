@@ -28,7 +28,7 @@ parent-directory
 
 ### Steps
 
-1. Create a `pnpm-workspace.yaml` file in the root of your repository (i.e., at the same level as `site`):
+1. Create a `pnpm-workspace.yaml` file in parent directory:
 
     ```yaml
     # pnpm-workspace.yaml
