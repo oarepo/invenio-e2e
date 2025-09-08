@@ -1,6 +1,9 @@
-import { AllPages, BasePage, HomePage, LoginPage, SearchPage } from '../pages';
+import { AllPages, BasePage, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
-import { I18nExpected, I18nService, LocalLoginService, Services, Translations } from '../services';
+import {
+    I18nExpected, I18nService, LocalLoginService, Services, Translations, FormService,
+} from '../services';
+import { defaultDepositionData, DepositionData } from "./depositionData";
 
 import type { Config } from '../config';
 import type { Locators } from '../locators';
@@ -9,6 +12,7 @@ import { locators } from '../locators';
 import { registerPage } from './utils';
 
 export { registerPage } from './utils';
+import { FileUploadHelper } from '../helpers/fileUploadHelper';
 
 
 const _test = base.extend<{
@@ -23,7 +27,10 @@ const _test = base.extend<{
 
     i18nService: I18nService<Locators>;
     loginService: LocalLoginService<Locators>;
-    defaultUserLoggedIn: () => Promise<void>;
+    defaultUserLoggedIn: true;
+
+    depositionData: DepositionData;
+    formService: FormService<Locators>;
 
     services: Services<Locators>;
 
@@ -32,6 +39,15 @@ const _test = base.extend<{
     homePage: HomePage;
     searchPage: SearchPage;
     loginPage: LoginPage;
+    depositPage: DepositPage;
+    previewPage: PreviewPage;
+    communitiesPage: CommunitiesPage;
+    communityDetailPage: CommunityDetailPage;
+    communitySearchPage: CommunitySearchPage;
+    myDashboardPage: MyDashboardPage;
+    newCommunityPage: NewCommunityPage;
+
+    uploadHelper: FileUploadHelper;
 
 }>({
     // locators are used to find elements on the page and they are separated
@@ -48,22 +64,22 @@ const _test = base.extend<{
     initialLocale: undefined,
 
     // translations loaded from pre-compiled file
-    translations: async ({}, use) => {
-    let translations = {};
-    try {
-        const translationsFile = require('../translations/translations.json');
-        translations = translationsFile;
-    } catch (error) {
-        throw new Error(
-            'Pre-compiled translations not found. Please generate translations first:\n\n' +
-            'run: npm run collect-translations\n' +
-            'or specify packages: npm run collect-translations invenio-app-rdm repository-tugraz\n' +
-            'then rebuild: npm run build\n\n' +
-            'this will create src/translations/translations.json with actual translations from your Invenio packages.\n'
-        );
-    }
-    await use(translations);
-},
+    translations: async ({ }, use) => {
+        let translations = {};
+        try {
+            const translationsFile = require('@collected-translations/translations.json');
+            translations = translationsFile;
+        } catch (error) {
+            throw new Error(
+                'Pre-compiled translations not found. Please generate translations first:\n\n' +
+                'run: npm run collect-translations\n' +
+                'or specify packages: npm run collect-translations invenio-app-rdm repository-tugraz\n' +
+                'then rebuild: npm run build\n\n' +
+                'this will create src/translations/translations.json with actual translations from your Invenio packages.\n'
+            );
+        }
+        await use(translations);
+    },
 
     // untranslated strings for translation testing 
     untranslatedStrings: [],
@@ -132,14 +148,23 @@ const _test = base.extend<{
         // this fixture logs in the default user
         await homePage.openPage();
         await loginService.login(homePage);
-        await use(undefined);
+        await use(true);
     },
 
-    services: async ({ i18nService, loginService }, use) => {
+    depositionData: async ({ }, use) => {
+        await use(defaultDepositionData)
+    },
+
+    formService: async ({ config }, use) => {
+        const formService = new FormService(config);
+        await use(formService);
+    },
+
+    services: async ({ i18nService, loginService, formService }, use) => {
         // services are used to interact with the application, for example,
         // loginService is used to log in the user, i18nService is used to
         // interact with the internationalization service.
-        await use({ i18n: i18nService, login: loginService });
+        await use({ i18n: i18nService, login: loginService, form: formService });
     },
 
     expect: async ({ i18nService }, use) => {
@@ -147,12 +172,27 @@ const _test = base.extend<{
         await use(i18nService.extendExpect(playwrightExpect));
     },
 
+    uploadHelper: async ({ page }, use) => {
+        const helper = new FileUploadHelper(page);
+        await use(helper);
+    },
+
     // pages provide a set of methods to interact with a UI page, abstracting low-level
     // Playwright API calls. They are registered in the availablePages registry
     // so that they can be easily accessed from other pages and tests.
     ...registerPage('homePage', HomePage),
     ...registerPage('searchPage', SearchPage),
+    ...registerPage('depositPage', DepositPage),
+    ...registerPage('previewPage', PreviewPage),
     ...registerPage("loginPage", LoginPage),
+    ...registerPage("depositPage", DepositPage),
+    ...registerPage("previewPage", PreviewPage),
+    ...registerPage("communitiesPage", CommunitiesPage),
+    ...registerPage("communityDetailPage", CommunityDetailPage),
+    ...registerPage("communitySearchPage", CommunitySearchPage),
+    ...registerPage("myDashboardPage", MyDashboardPage),
+    ...registerPage("newCommunityPage", NewCommunityPage),
+
 })
 
 type _invenio_base_test = typeof _test;
@@ -192,9 +232,9 @@ export const test = new Proxy(_test as InvenioTest, {
                 return (title: string, annotation?: any, callback?: () => void) => {
                     const skippedTests = target.__skipped_tests || [];
                     if (skippedTests.includes(title)) {
-                        return target.describe.skip(title, annotation, callback);
+                        return target.describe.skip(title, annotation, callback || (() => { }));
                     } else {
-                        return target.describe(title, annotation, callback);
+                        return target.describe(title, annotation, callback || (() => { }));
                     }
                 }
             case 'skipTests':
@@ -214,9 +254,10 @@ export const test = new Proxy(_test as InvenioTest, {
                     }
                 }
             default:
-                return target[prop];
+                return (target as any)[prop];
         }
     },
+
     /**
      * Handles the case test("test title", ({fixtures}) => { test body })
      * If the test has a title that is in the skipped tests list, the test
@@ -230,7 +271,6 @@ export const test = new Proxy(_test as InvenioTest, {
             // @ts-ignore
             return target.skip(...args);
         }
-        return target.apply(thisArg, args);
+        return target.apply(thisArg, args as any);
     }
 });
-

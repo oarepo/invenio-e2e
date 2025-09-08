@@ -1,5 +1,4 @@
 import { Locators } from '../locators';
-import { SearchPage } from './searchPage';
 import { BasePage } from './basePage';
 
 /**

@@ -1,6 +1,5 @@
 import { Expect, Page } from '@playwright/test';
 import { I18nExpected, Services } from '../services';
-
 import { AllPages } from '.';
 import { HomePage } from './homePage';
 import { Locators } from '../locators';
