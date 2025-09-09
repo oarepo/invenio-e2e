@@ -1,4 +1,4 @@
-import { AllPages, BasePage, HomePage, LoginPage, SearchPage } from '../pages';
+import { AllPages, BasePage, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
 import { I18nExpected, I18nService, LocalLoginService, Services, Translations } from '../services';
 
@@ -9,6 +9,7 @@ import { locators } from '../locators';
 import { registerPage } from './utils';
 
 export { registerPage } from './utils';
+import { FileUploadHelper } from '../helpers/fileUploadHelper';
 
 
 const _test = base.extend<{
@@ -23,7 +24,7 @@ const _test = base.extend<{
 
     i18nService: I18nService<Locators>;
     loginService: LocalLoginService<Locators>;
-    defaultUserLoggedIn: () => Promise<void>;
+    defaultUserLoggedIn: (() => Promise<void>) | undefined;
 
     services: Services<Locators>;
 
@@ -32,6 +33,15 @@ const _test = base.extend<{
     homePage: HomePage;
     searchPage: SearchPage;
     loginPage: LoginPage;
+    depositPage: DepositPage;
+    previewPage: PreviewPage;
+    communitiesPage: CommunitiesPage;
+    communityDetailPage: CommunityDetailPage;
+    communitySearchPage: CommunitySearchPage;
+    myDashboardPage: MyDashboardPage;
+    newCommunityPage: NewCommunityPage;
+
+    uploadHelper: FileUploadHelper;
 
 }>({
     // locators are used to find elements on the page and they are separated
@@ -147,12 +157,25 @@ const _test = base.extend<{
         await use(i18nService.extendExpect(playwrightExpect));
     },
 
+    uploadHelper: async ({ page }, use) => {
+        const helper = new FileUploadHelper(page);
+        await use(helper);
+    },
+
     // pages provide a set of methods to interact with a UI page, abstracting low-level
     // Playwright API calls. They are registered in the availablePages registry
     // so that they can be easily accessed from other pages and tests.
     ...registerPage('homePage', HomePage),
     ...registerPage('searchPage', SearchPage),
     ...registerPage("loginPage", LoginPage),
+    ...registerPage("depositPage", DepositPage),
+    ...registerPage("previewPage", PreviewPage),
+    ...registerPage("communitiesPage", CommunitiesPage),
+    ...registerPage("communityDetailPage", CommunityDetailPage),
+    ...registerPage("communitySearchPage", CommunitySearchPage),
+    ...registerPage("myDashboardPage", MyDashboardPage),
+    ...registerPage("newCommunityPage", NewCommunityPage),
+
 })
 
 type _invenio_base_test = typeof _test;
@@ -192,9 +215,9 @@ export const test = new Proxy(_test as InvenioTest, {
                 return (title: string, annotation?: any, callback?: () => void) => {
                     const skippedTests = target.__skipped_tests || [];
                     if (skippedTests.includes(title)) {
-                        return target.describe.skip(title, annotation, callback);
+                        return target.describe.skip(title, annotation, callback || (() => {}));
                     } else {
-                        return target.describe(title, annotation, callback);
+                        return target.describe(title, annotation, callback || (() => {}));
                     }
                 }
             case 'skipTests':
@@ -214,7 +237,7 @@ export const test = new Proxy(_test as InvenioTest, {
                     }
                 }
             default:
-                return target[prop];
+                return (target as any)[prop];
         }
     },
     /**
@@ -230,7 +253,7 @@ export const test = new Proxy(_test as InvenioTest, {
             // @ts-ignore
             return target.skip(...args);
         }
-        return target.apply(thisArg, args);
+        return target.apply(thisArg, args as any);
     }
 });
 
