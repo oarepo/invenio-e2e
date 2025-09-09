@@ -64,11 +64,13 @@ jobs:
     - name: Generate POT file
       env:
         VENV_PATH: ${{ github.workspace }}/.venv
+        I18N_OUTPUT_DIR: src/translations
       run: pnpm run generate-pot
 
     - name: Collect translations with validation
       env:
         INVENIO_PACKAGES_DIR: ${{ github.workspace }}
+        I18N_OUTPUT_DIR: src/translations
       run: pnpm run collect-translations:validate
     
     - name: Upload validation reports
@@ -78,6 +80,5 @@ jobs:
         name: translation-reports-${{ matrix.python-version }}
         path: |
           src/translations/validation-report.json
-          src/translations/pot-comparison-report.json
           src/translations/messages.pot
         retention-days: 30

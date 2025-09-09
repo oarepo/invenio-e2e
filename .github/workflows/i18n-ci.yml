@@ -43,6 +43,7 @@ jobs:
       - name: Generate POT file
         env:
           VENV_PATH: ${{ github.workspace }}/.venv
+          I18N_OUTPUT_DIR: src/translations
         run: pnpm run generate-pot
 
       - name: Check POT file generation
@@ -57,6 +58,7 @@ jobs:
       - name: Collect translations + validate
         env:
           INVENIO_PACKAGES_DIR: ${{ github.workspace }}
+          I18N_OUTPUT_DIR: src/translations
         run: pnpm run collect-translations:validate
 
       - name: Upload artifacts
@@ -68,6 +70,5 @@ jobs:
             src/translations/messages.pot
             src/translations/translations.json
             src/translations/validation-report.json
-            src/translations/pot-comparison-report.json
 
 
