@@ -53,7 +53,20 @@ export interface ExpectedError {
 }
 
 /**
- * Class representing a step to save the form and verify expected error messages.
+ * Class representing a step to save the form. To verify expected error messages,
+ * use the `ExpectErrors` step after this one.
+ */
+export class Save implements FormStep {
+    async apply(page: BasePage): Promise<void | BasePage> {
+        // dynamically call clickSave and verifyErrorMessages on the page instance.        // will fail if these methods do not exist
+        const _p = page as any;
+        const newPage = await _p.clickSave() || _p;
+        return newPage;
+    }
+}
+
+/**
+ * Class representing a step that checks the form and verifies expected error messages.
  * The expectedErrors array contains strings or regex patterns to match against 
  * error messages. If string is used, the whole error message must match this string.
  * 
@@ -61,7 +74,7 @@ export interface ExpectedError {
  * or allow others. The default is strict checking (onlyTheseErrors = true), that is, 
  * the caller must provide all expected errors or the check will fail.
  */
-export class Save implements FormStep {
+export class ExpectErrors implements FormStep {
     expectedErrors: ExpectedError[];
     onlyTheseErrors: boolean;
 
@@ -72,15 +85,14 @@ export class Save implements FormStep {
     async apply(page: BasePage): Promise<void | BasePage> {
         // dynamically call clickSave and verifyErrorMessages on the page instance.        // will fail if these methods do not exist
         const _p = page as any;
-        const newPage = await _p.clickSave() || _p;
-        if (newPage.verifyErrorMessages === undefined) {
+        if (_p.verifyErrorMessages === undefined) {
             if (this.expectedErrors.length > 0) {
                 throw new Error("The page does not implement verifyErrorMessages method");
             }
-            return newPage;
+            return page;
         }
-        await newPage.verifyErrorMessages(this.expectedErrors, this.onlyTheseErrors);
-        return newPage;
+        await _p.verifyErrorMessages(this.expectedErrors, this.onlyTheseErrors);
+        return page;
     }
 }
 
