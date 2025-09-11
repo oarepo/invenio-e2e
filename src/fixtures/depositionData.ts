@@ -15,8 +15,8 @@ export const defaultDepositionData = {
             ["title", "My metadata only record {order}"],
             ["resourceType", "Dataset"],
             ["creator", { givenName: "Jane", familyName: "Doe" }],
-            ["creator", { givenName: "John", familyName: "Doe" }],
-            ["metadataOnly", true]
+          //  ["creator", { givenName: "John", familyName: "Doe" }],
+            ["metadataOnly", true] // checked
         ),
         new Save(),
         new ExpectErrors([]), // expect no errors
@@ -27,6 +27,7 @@ export const defaultDepositionData = {
             ["resourceType", "Dataset"],
             ["creator", { givenName: "Jane", familyName: "Doe" }],
             ["creator", { givenName: "John", familyName: "Doe" }],
+            ["metadataOnly", false]
         ),
         new UploadFile("Anon.jpg"),
         new Save(),

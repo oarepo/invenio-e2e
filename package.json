@@ -18,18 +18,18 @@
   "license": "ISC",
   "devDependencies": {
     "@types/i18next": "^12.1.0",
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.3.1",
     "documentation": "^14.0.3",
     "playwright-qase-reporter": "^2.1.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
-    "i18next-conv": "^15.1.1",
     "@faker-js/faker": "^9.9.0",
     "@playwright/test": "^1.54.1",
     "dotenv": "^17.0.0",
     "i18next": "^25.3.6",
+    "i18next-conv": "^15.1.1",
     "ts-deepmerge": "^7.0.3"
   }
 }

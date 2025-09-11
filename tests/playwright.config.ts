@@ -16,17 +16,21 @@ export default defineConfig({
   reporter: [
     ["list"],
     ["html", { outputFolder: "playwright-report", open: "never" }],
-    appConfig.qase ? [
-      "playwright-qase-reporter",
-      {
-        apiToken: appConfig.qase.token,
-        projectCode: appConfig.qase.project,
-        runName: `E2E Run - ${new Date().toISOString()}`,
-        environment: appConfig.qase.environment,
-        rootSuiteTitle: "Playwright E2E",
-        runComplete: appConfig.qase.runComplete,
-      },
-    ] : [],
+    ...(appConfig.qase
+      ? [
+          [
+            "playwright-qase-reporter",
+            {
+              apiToken: appConfig.qase.token,
+              projectCode: appConfig.qase.project,
+              runName: `E2E Run - ${new Date().toISOString()}`,
+              environment: appConfig.qase.environment,
+              rootSuiteTitle: "Playwright E2E",
+              runComplete: appConfig.qase.runComplete,
+            } as const,
+          ] as const,
+        ]
+      : []),
   ],
 
   use: {

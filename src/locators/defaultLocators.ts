@@ -28,6 +28,7 @@ export const locators = {
   uploadPage: {
     titleField: "#metadata\\.title",
     descriptionField: 'textarea[name="description"]',
+    metadataOnlyCheckbox: 'div.ui.checkbox:has-text("Metadata-only record")',
     resourceTypeDropdown: '[name="metadata.resource_type"]',
     resourceTypeOption: (optionText: string) =>
       `//div[contains(@role, "listbox")]//div[contains(text(), "${optionText}")]`,
@@ -37,7 +38,8 @@ export const locators = {
     saveAddCreatorButton: 'button[name="submit"].ui.primary.button',
     publicationDateField: "input#metadata\\.publication_date",
     uploadButton: 'input[type="file"]',
-    uploadedFile: '[data-testid="uploaded-file"]',
+    uploadedFile: (filename: string) =>
+      `.uppy-Dashboard-Item-name:has-text("${filename}")`,
     removeFileButton: '[data-testid="remove-file"]',
     saveDraftButton: 'button:has-text("Save draft")',
     publishButton: 'button:has-text("Publish")',
@@ -71,9 +73,11 @@ export const locators = {
     selectedCommunityLabel: '[data-testid="community-label"]',
     browseFilesButton: "button.uppy-Dashboard-browse",
     uploadFilesButton: "button.uppy-StatusBar-actionBtn--upload",
-    warningMessage: '#warning-feedback-div[i.exclamation',
-    fieldWithError: 'div.field.error',
-    errorMessageInsideField: 'div.ui.pointing.prompt.label'
+    warningMessage: "#warning-feedback-div[i.exclamation",
+    fieldWithError: "div.field.error",
+    errorMessageInsideField: "div.ui.pointing.prompt.label",
+    uploadCompleteBar: (fileName: string) =>
+      `.file-upload-progress[data-percent="100"]`,
   },
 
   // ------------------------ PREVIEW PAGE -----------------------
@@ -82,6 +86,9 @@ export const locators = {
     saveDraftVersionsInfoMessage: "div.ui.info.message.no-border-radius.m-0",
     recordDescription: "#description > div",
     uploadedFilesRows: "table.ui.striped.table.files.fluid.open tbody tr",
+    resourceType: 'dl.details-list dt:has-text("Resource type") + dd',
+    creator: '#creatibutors ul.creatibutors li .creatibutor-name',
+    metadataOnlyLabel: 'span[aria-label="No files are available for this record."]:has-text("Metadata-only")',
   },
 
   // ------------------------ NEW COMMUNITY PAGE ------------------------

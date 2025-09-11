@@ -1,8 +1,10 @@
-import { expect, Page } from '@playwright/test';
-import { Locators } from '../locators';
-import { Config } from '../config';
-import { BasePage } from '../pages';
-
+import { expect, Page } from "@playwright/test";
+import fs from "fs";
+import path from "path";
+import { Locators } from "../locators";
+import { Config } from "../config";
+import { BasePage, DepositPage } from "../pages";
+import { FileUploadHelper } from "../helpers/fileUploadHelper";
 
 /**
  * Interface representing a single step in the deposition process.
@@ -16,12 +18,12 @@ export interface FormStep {
 /**
  * Class representing a step to fill data into the deposition form.
  * It will call `fill<FieldName>` method for each provided field on the DepositPage instance.
- * 
+ *
  * Fill(["title", "My Title"], ...)
  */
 export class Fill implements FormStep {
     data: Array<[string, any]>;
-    methodPrefixes = ['fill', 'select', 'add'];
+    methodPrefixes = ["fill", "select", "add"];
 
     constructor(...data: Array<[string, any]>) {
         this.data = data;
@@ -30,25 +32,54 @@ export class Fill implements FormStep {
     async apply(page: BasePage): Promise<void | BasePage> {
         const _p: any = page; // cast to any to allow dynamic method calls
         for (const [key, value] of this.data) {
-            const method = this.getMethod(_p, key);
-            await _p[method](value);
+            if (key === "metadataOnly") {
+                await _p.fillMetadataOnly(value);
+            } else {
+                const method = this.getMethod(_p, key);
+                await _p[method](value);
+            }
         }
     }
 
     getMethod(page: any, field: string): string {
         const triedMethods = [];
         for (const prefix of this.methodPrefixes) {
-            const methodName = `${prefix}${field.charAt(0).toUpperCase() + field.slice(1)}`;
+            const methodName = `${prefix}${field.charAt(0).toUpperCase() + field.slice(1)
+                }`;
             triedMethods.push(methodName);
-            if (typeof page[methodName] === 'function') {
+            if (typeof page[methodName] === "function") {
                 return methodName;
             }
         }
-        throw new Error(`No method found for filling field ${field}. Tried: ${triedMethods.join(', ')}`);
+        throw new Error(
+            `No method found for filling field ${field}. Tried: ${triedMethods.join(
+                ", "
+            )}`
+        );
     }
 
     getFilledData(): any[] {
-        return this.data;
+        return this.data.map(([field, value]) => {
+            if (field === "creator") {
+                if (Array.isArray(value)) {
+                    return [
+                        field,
+                        value.map((v) => `${v.familyName}, ${v.givenName}`).join(" ; "),
+                    ];
+                }
+                return [field, `${value.familyName}, ${value.givenName}`];
+            }
+
+            if (Array.isArray(value)) {
+                return [field, value.join(" ; ")];
+            }
+
+            if (typeof value === "object" && value !== null && "name" in value) {
+                return [field, value.name];
+            }
+
+            return [field, value];
+        });
     }
 }
 
@@ -74,9 +105,9 @@ export class Save implements FormStep {
  * Class representing a step that checks the form and verifies expected error messages.
  * The expectedErrors array contains strings or regex patterns to match against 
  * error messages. If string is used, the whole error message must match this string.
- * 
- * The onlyTheseErrors flag indicates whether to check for only the expected errors 
- * or allow others. The default is strict checking (onlyTheseErrors = true), that is, 
+ *
+ * The onlyTheseErrors flag indicates whether to check for only the expected errors
+ * or allow others. The default is strict checking (onlyTheseErrors = true), that is,
  * the caller must provide all expected errors or the check will fail.
  */
 export class ExpectErrors implements FormStep {
@@ -105,7 +136,28 @@ export class ExpectErrors implements FormStep {
     }
 }
 
+/**
+ * Class representing a step to upload a specific file from UploadFiles folder.
+ */
 export class UploadFile implements FormStep {
+    fileName: string;
+
+    /**
+     * @param fileName Name of the file to upload from the UploadFiles folder
+     */
+    constructor(fileName: string) {
+        this.fileName = fileName;
+    }
+
+    async apply(page: BasePage): Promise<void | BasePage> {
+        // Use the public method from BasePage
+        await (page as DepositPage).uploadFileAndConfirm(this.fileName);
+        return page;
+    }
+
+    getFilledData(): any[] {
+        return [["uploadedFile", this.fileName]];
+    }
 }
 
 export interface FormServiceInterface<L extends Locators = Locators> {
@@ -114,22 +166,27 @@ export interface FormServiceInterface<L extends Locators = Locators> {
      * @param page      the deposition page instance
      * @param steps     the steps to follow
      */
-    fillForm: (page: BasePage, steps: FormStep[]) => Promise<{ page: BasePage, filledData: any[][] }>;
+    fillForm: (
+        page: BasePage,
+        steps: FormStep[]
+    ) => Promise<{ page: BasePage; filledData: any[][] }>;
 }
 
-export class FormService<L extends Locators> implements FormServiceInterface<L> {
+export class FormService<L extends Locators>
+    implements FormServiceInterface<L> {
     /**
      * Implementation of the deposition service that invokes deposition & checking steps.
      */
-    constructor(
-        protected config: Config,
-    ) { }
+    constructor(protected config: Config) { }
 
-    async fillForm(page: BasePage, steps: FormStep[]): Promise<{ page: BasePage, filledData: any[][] }> {
-        const filledData = []
+    async fillForm(
+        page: BasePage,
+        steps: FormStep[]
+    ): Promise<{ page: BasePage; filledData: any[][] }> {
+        const filledData = [];
         for (const step of steps) {
-            page = await step.apply(page) || page;
-            filledData.push(step.getFilledData());
+            page = (await step.apply(page)) || page;
+            filledData.push(...step.getFilledData());
         }
         return { page, filledData };
     }
