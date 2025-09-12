@@ -1,38 +1,46 @@
-import { Fill, Save, UploadFile, ExpectErrors } from '../services/form'
+import { ExpectedError } from "../services/form";
 
+export interface FormData {
+    data: Array<[string, any]>;
+    files: string[];
+    errors: Array<ExpectedError>;
+}
 
-export const defaultDepositionData = {
-    "metadataOnlyRecord": [
-        new Save(),
-        new ExpectErrors(
-            [
-                { "field": "metadata.resource_type", "message": "Missing data for required field." },
-                { "field": "metadata.title", "message": "Missing data for required field." },
-                { "field": "metadata.creators", "message": "Missing data for required field." }
-            ]
-        ),
-        new Fill(
+export const defaultDepositionData: Record<string, FormData> = {
+    metadataOnlyRecord: {
+        data: [
             ["title", "My metadata only record {order}"],
             ["resourceType", "Dataset"],
             ["creator", { givenName: "Jane", familyName: "Doe" }],
-          //  ["creator", { givenName: "John", familyName: "Doe" }],
+            // ["creator", { givenName: "John", familyName: "Doe" }],
             ["metadataOnly", true] // checked
-        ),
-        new Save(),
-        new ExpectErrors([]), // expect no errors
-    ],
-    "recordWithFile": [
-        new Fill(
+        ],
+        files: [],
+        errors: [] // expect no errors
+    },
+    recordWithFile: {
+        data: [
             ["title", "My record with file"],
             ["resourceType", "Dataset"],
             ["creator", { givenName: "Jane", familyName: "Doe" }],
             ["creator", { givenName: "John", familyName: "Doe" }],
             ["metadataOnly", false]
-        ),
-        new UploadFile("Anon.jpg"),
-        new Save(),
-        new ExpectErrors([]), // expect no errors
-    ]
-}
+        ],
+        files: [
+            "Anon.jpg"
+        ],
+        errors: []
+    },
+    emptyRecord: {
+        data: [],
+        files: [],
+        errors: [
+            // TODO: handle localization
+            { "field": "metadata.resource_type", "message": "Missing data for required field." },
+            { "field": "metadata.title", "message": "Missing data for required field." },
+            { "field": "metadata.creators", "message": "Missing data for required field." }
+        ]
+    },
+};
 
 export type DepositionData = typeof defaultDepositionData;
