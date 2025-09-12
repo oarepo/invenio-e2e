@@ -12,7 +12,7 @@ export class BasePage<L extends Locators = Locators,
     ExpectExtension extends I18nExpected = I18nExpected,
     P extends AllPages<L> = AllPages<L>
 > {
-    readonly page: Page;
+    protected page: Page;
     protected locators: L;
     protected availablePages: P;
     protected services: S;
