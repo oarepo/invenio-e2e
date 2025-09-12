@@ -1,4 +1,4 @@
-import { Fill, Save, ExpectErrors } from '../services/form'
+import { Fill, Save, UploadFile, ExpectErrors } from '../services/form'
 
 
 export const defaultDepositionData = {
@@ -15,10 +15,11 @@ export const defaultDepositionData = {
             ["title", "My metadata only record {order}"],
             ["resourceType", "Dataset"],
             ["creator", { givenName: "Jane", familyName: "Doe" }],
-            ["creator", { givenName: "John", familyName: "Doe" }],
+          //  ["creator", { givenName: "John", familyName: "Doe" }],
+            ["metadataOnly", true] // checked
         ),
         new Save(),
-        new ExpectErrors(),
+        new ExpectErrors([]), // expect no errors
     ],
     "recordWithFile": [
         new Fill(
@@ -26,10 +27,12 @@ export const defaultDepositionData = {
             ["resourceType", "Dataset"],
             ["creator", { givenName: "Jane", familyName: "Doe" }],
             ["creator", { givenName: "John", familyName: "Doe" }],
+            ["metadataOnly", false]
         ),
-        // new UploadFile("Anon.jpg"),
+        new UploadFile("Anon.jpg"),
         new Save(),
-    ],
+        new ExpectErrors([]), // expect no errors
+    ]
 }
 
 export type DepositionData = typeof defaultDepositionData;

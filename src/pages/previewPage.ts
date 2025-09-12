@@ -46,28 +46,134 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
   }
 
   /**
-   * Checks if a record with the given title exists on the page.
-   * @param expectedTitle The title to verify.
-   * @returns True if the title matches, false otherwise.
+   * Verifies that an uploaded file with the given filename is visible in the preview page.
+   *
+   * @param filename - The expected filename of the uploaded file.
    */
-  async checkRecordExists(expectedTitle: string): Promise<boolean> {
+  async verifyUploadedFile(filename: string): Promise<void> {
+    await this.waitForUploadedFilesTable();
+
+    const uploaded = this.page.locator(
+      this.locators.uploadPage.uploadedFile(filename)
+    );
+
+    await expect(uploaded).toBeVisible({ timeout: 10000 });
+    console.log(`Verified uploaded file is visible: ${filename}`);
+  }
+
+  /**
+   * Verifies that the creator matches the expected value.
+   *
+   * @param expectedValue - Expected creator name
+   */
+  async verifyCreator(expected: string | { name: string }): Promise<void> {
+    const creatorLocator = this.page.locator(this.locators.previewPage.creator);
+    await creatorLocator.first().waitFor({ state: "visible", timeout: 10000 });
+
+    const actualValue = (await creatorLocator.first().textContent())?.trim();
+    const expectedValue =
+      typeof expected === "string" ? expected : expected.name;
+
+    if (actualValue !== expectedValue) {
+      throw new Error(
+        `Expected Creator "${expectedValue}", but found "${actualValue}"`
+      );
+    }
+
+    console.log(`Verified Creator: ${actualValue}`);
+  }
+
+  /**
+   * Verifies that the record title on the page matches the expected title.
+   * Fails the test if the title does not match.
+   *
+   * @param expectedTitle - The title string that should appear on the page.
+   */
+  async verifyTitle(expectedTitle: string): Promise<void> {
     const titleLocator = this.page.locator(
       this.locators.uploadPage.recordTitleHeader
     );
 
     // Wait until the record title becomes visible
     await titleLocator.waitFor({ state: "visible", timeout: 10000 });
+
     const titleText = (await titleLocator.textContent())?.trim();
 
     if (titleText === expectedTitle.trim()) {
       console.log(`Record with title "${expectedTitle}" exists.`);
-      return true;
     } else {
-      console.error(
+      throw new Error(
         `Expected title "${expectedTitle}", but found "${titleText}".`
       );
-      return false;
     }
+  }
+
+  /**
+   * Verifies that the resource type matches the expected value.
+   *
+   * @param expectedValue - Expected resource type text.
+   */
+  async verifyResourceType(expectedValue: string): Promise<void> {
+    const locator = this.page.locator(this.locators.previewPage.resourceType);
+    await locator.waitFor({ state: "visible", timeout: 10000 });
+    const actualValue = (await locator.textContent())?.trim();
+    if (actualValue !== expectedValue) {
+      throw new Error(
+        `Expected Resource type "${expectedValue}", but found "${actualValue}"`
+      );
+    } else {
+      console.log(`Verified Resource type: ${actualValue}`);
+    }
+  }
+
+  /**
+   * Verifies that the description matches the expected value.
+   *
+   * @param expectedValue - Expected description text.
+   */
+  async verifyDescription(expectedValue: string): Promise<void> {
+    const locator = this.page.locator(
+      this.locators.previewPage.recordDescription
+    );
+    const actualValue = (await locator.textContent())?.trim();
+
+    if (actualValue !== expectedValue) {
+      throw new Error(
+        `Expected description "${expectedValue}", but got "${actualValue}"`
+      );
+    }
+
+    console.log(`Description verified: ${actualValue}`);
+  }
+
+  async verifyData(filledData: any[][]): Promise<void> {
+    for (const data of filledData) {
+      console.log("verifyData got:", JSON.stringify(data)); // DEBUG
+
+      const [field, value] = data;
+      if (!field) {
+        throw new Error(
+          `verifyData: expected [field, value], but got ${JSON.stringify(data)}`
+        );
+      }
+
+      const methodName = `verify${
+        field.charAt(0).toUpperCase() + field.slice(1)
+      }`;
+      if (typeof (this as any)[methodName] === "function") {
+        await (this as any)[methodName](value);
+      } else {
+        throw new Error(`No verification method found for field ${field}`);
+      }
+    }
+  }
+
+  async verifyMetadataOnly(): Promise<void> {
+    const locator = this.page.locator(
+      this.locators.previewPage.metadataOnlyLabel
+    );
+    await expect(locator).toBeVisible({ timeout: 5000 });
+    console.log("Verified record is metadata-only");
   }
 
   // GETTERS ---------------------------------------------------------------------------

@@ -30,8 +30,12 @@ export class FileUploadHelper {
     }
   }
 
-  // Upload a random file from the UploadFiles folder
-  async uploadRandomFileAndConfirm(): Promise<void> {
+  /**
+   * Upload a random file from the UploadFiles folder.
+   * 
+   * @param filename name of the file to upload, relative to data/UploadFiles
+   */
+  async uploadRandomFileAndConfirm(filename: string): Promise<void> {
     const files = fs.readdirSync(this.uploadFolderPath); // Read files in the folder
 
     if (files.length === 0) {
@@ -45,7 +49,7 @@ export class FileUploadHelper {
 
     // Log file upload for debugging purposes
     console.log(`Uploading file: ${filePath}`);
-    
+
     // Click confirmation 'Upload' button
     const uploadButton = this.page.locator(
       'button.uppy-StatusBar-actionBtn--upload'
