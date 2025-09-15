@@ -1,13 +1,10 @@
 const fs = require("fs");
 const path = require("path");
 
-/**
- * Find package in multiple fallback locations.
- */
+// Look for an Invenio package in a few different folders
 function resolvePackagePath(packageName) {
   const locations = [
-    process.env.INVENIO_PACKAGES_DIR &&
-      path.join(process.env.INVENIO_PACKAGES_DIR, packageName),
+    process.env.INVENIO_PACKAGES_DIR && path.join(process.env.INVENIO_PACKAGES_DIR, packageName),
     path.resolve(__dirname, "../../..", packageName),
     path.resolve(__dirname, "../..", packageName),
   ].filter(Boolean);
@@ -15,9 +12,7 @@ function resolvePackagePath(packageName) {
   return locations.find(fs.existsSync) || null;
 }
 
-/**
- * Parses a .po file using the i18next-conv library and converts it to translation format.
- */
+// Read a .po file and turn it into JSON translations we can use
 async function parsePoFile(poFilePath, packageName) {
   try {
     const { gettextToI18next } = await import("i18next-conv");
@@ -41,14 +36,11 @@ async function parsePoFile(poFilePath, packageName) {
 
     return output;
   } catch (error) {
-    console.warn(`Failed to parse ${poFilePath}:`, error.message);
     return {};
   }
 }
 
-/**
- * Creates a validation report for PO file analyzing untranslated strings and issues.
- */
+// Go through a .po file and find missing translations, fuzzy ones, etc.
 function createValidationReportOfPoFile(poFilePath, packageName, locale) {
   try {
     const poContent = fs.readFileSync(poFilePath, "utf8");
@@ -129,23 +121,15 @@ function createValidationReportOfPoFile(poFilePath, packageName, locale) {
       },
     };
   } catch (error) {
-    console.warn(`Failed to validate ${poFilePath}:`, error.message);
     return null;
   }
 }
 
-/**
- * Scans an Invenio package directory for translation files and extracts all translations.
- */
-async function scanPackage(
-  packagePath,
-  packageName,
-  includeValidation = false
-) {
+// Scan package for translation files
+async function scanPackage(packagePath, packageName, includeValidation = false) {
   const translations = {};
   const validationReport = [];
 
-  // find translations directory
   let translationsDir = path.join(packagePath, packageName, "translations");
   if (!fs.existsSync(translationsDir)) {
     translationsDir = path.join(packagePath, "translations");
@@ -155,7 +139,6 @@ async function scanPackage(
     return { translations, validationReport };
   }
 
-  // scan locale directories
   const locales = fs.readdirSync(translationsDir);
   for (const locale of locales) {
     const localePath = path.join(translationsDir, locale);
@@ -165,11 +148,7 @@ async function scanPackage(
         translations[locale] = await parsePoFile(poFile, packageName);
 
         if (includeValidation) {
-          const validation = createValidationReportOfPoFile(
-            poFile,
-            packageName,
-            locale
-          );
+          const validation = createValidationReportOfPoFile(poFile, packageName, locale);
           if (validation) {
             validationReport.push(validation);
           }
@@ -181,9 +160,4 @@ async function scanPackage(
   return { translations, validationReport };
 }
 
-module.exports = {
-  resolvePackagePath,
-  parsePoFile,
-  createValidationReportOfPoFile,
-  scanPackage,
-};
+module.exports = { resolvePackagePath, parsePoFile, createValidationReportOfPoFile, scanPackage };

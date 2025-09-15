@@ -1,43 +1,36 @@
 #!/usr/bin/env node
 
 /**
- * Collect translations from Invenio packages into JSON files.
+ * Collect translations from Invenio packages
  *
- * Scans PO files from Invenio packages and converts them to JSON format
- * for validation and testing purposes.
+ * This script finds all the .po translation files in Invenio packages and
+ * converts them to JSON format that we can use in tests.
+ *
+ * It looks for packages in different places and scans each one for translations.
+ * Can also check for missing translations if you use --validate.
+ *
+ * How to use:
+ * - npm run collect-translations (basic usage)
+ * - npm run collect-translations --validate (also check for problems)
+ * - npm run collect-translations invenio-app-rdm (specific package)
  */
 
 const fs = require("fs");
 const path = require("path");
 const { resolvePackagePath, scanPackage } = require("./lib/translationUtils");
+const { TranslationLogger } = require("./lib/logger");
 
-const OUTPUT_DIR =
-  process.env.I18N_OUTPUT_DIR || path.join("src", "translations");
+const OUTPUT_DIR = process.env.I18N_OUTPUT_DIR || path.join("src", "translations");
 
-/**
- * MAIN ALGORITHM: Translation Collection
- *
- * 1: Find Invenio packages in various locations
- * 2: Scan each package for PO files
- * 3: Parse PO files to JSON format
- * 4: Optionally validate translations for issues
- * 5: Write combined translations.json + validation report
- */
+// Comment: Algorithm - Find packages, scan PO files, convert to JSON, optionally validate
 async function main() {
   const args = process.argv.slice(2);
   const includeValidation = args.includes("--validate");
   const packages = args.filter((arg) => !arg.startsWith("--"));
-  const packageList =
-    packages.length > 0 ? packages : ["invenio-app-rdm", "invenio-rdm-records"];
+  const packageList = packages.length > 0 ? packages : ["invenio-app-rdm", "invenio-rdm-records"];
+  const logger = new TranslationLogger();
 
-  console.log(
-    `Collecting translations from ${
-      packages.length > 0 ? "specified" : "default"
-    } packages`
-  );
-  if (includeValidation) {
-    console.log("Validation enabled - generating translation quality report");
-  }
+  logger.logStart(packages, includeValidation);
 
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -48,7 +41,7 @@ async function main() {
   for (const pkg of packageList) {
     const packagePath = resolvePackagePath(pkg);
     if (!packagePath) {
-      console.warn(`Package not found: ${pkg}`);
+      logger.logPackageNotFound(pkg);
       continue;
     }
 
@@ -59,17 +52,16 @@ async function main() {
       includeValidation
     );
 
-    if (Object.keys(translations).length === 0) continue;
+    if (Object.keys(translations).length === 0) {
+      continue;
+    }
 
-    const packageDir = path.join(OUTPUT_DIR, packageName);
-    fs.mkdirSync(packageDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(packageDir, "translations.json"),
-      JSON.stringify(translations, null, 2)
-    );
+    writeTranslations(OUTPUT_DIR, packageName, translations);
 
     for (const [locale, localeTranslations] of Object.entries(translations)) {
-      if (!allTranslations[locale]) allTranslations[locale] = {};
+      if (!allTranslations[locale]) {
+        allTranslations[locale] = {};
+      }
       Object.assign(allTranslations[locale], localeTranslations);
     }
 
@@ -77,63 +69,70 @@ async function main() {
       allValidationReports.push(...validationReport);
     }
 
-    console.log(
-      `${packageName}: ${
-        Object.keys(translations).length
-      } locales (${packagePath})`
-    );
+    logger.logPackageProcessed(packageName, Object.keys(translations).length, packagePath);
     packageCount++;
   }
 
-  fs.writeFileSync(
-    path.join(OUTPUT_DIR, "translations.json"),
-    JSON.stringify(allTranslations, null, 2)
-  );
+  writeJsonFile(OUTPUT_DIR, "translations.json", allTranslations);
 
   if (includeValidation && allValidationReports.length > 0) {
-    const validationSummary = {
-      generatedAt: new Date().toISOString(),
-      packages: packageList,
-      summary: {
-        totalPackages: packageCount,
-        totalLocales: Object.keys(allTranslations).length,
-        totalIssues: allValidationReports.reduce(
-          (sum, report) =>
-            sum + Object.values(report.counts).reduce((a, b) => a + b, 0),
-          0
-        ),
-        untranslatedStrings: allValidationReports.reduce(
-          (sum, report) => sum + report.counts.untranslated,
-          0
-        ),
-        fuzzyTranslations: allValidationReports.reduce(
-          (sum, report) => sum + report.counts.fuzzyTranslations,
-          0
-        ),
-      },
-      reports: allValidationReports,
-    };
-
-    fs.writeFileSync(
-      path.join(OUTPUT_DIR, "validation-report.json"),
-      JSON.stringify(validationSummary, null, 2)
+    const validationSummary = createValidationSummary(
+      packageList,
+      packageCount,
+      allTranslations,
+      allValidationReports
     );
 
-    console.log(`\nValidation Summary:`);
-    console.log(
-      `  Total issues found: ${validationSummary.summary.totalIssues}`
-    );
-    console.log(
-      `  Untranslated strings: ${validationSummary.summary.untranslatedStrings}`
-    );
-    console.log(
-      `  Fuzzy translations: ${validationSummary.summary.fuzzyTranslations}`
-    );
-    console.log(`  Report saved: src/translations/validation-report.json`);
+    writeJsonFile(OUTPUT_DIR, "validation-report.json", validationSummary);
+
+    logger.logValidationSummary(validationSummary.summary);
   }
 
   const totalLocales = Object.keys(allTranslations).length;
-  console.log(`Total: ${totalLocales} locales across ${packageCount} packages`);
+  logger.logFinalSummary(totalLocales, packageCount);
+}
+
+/**
+ * Write JSON data to a file.
+ */
+function writeJsonFile(outputDir, fileName, data) {
+  fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(path.join(outputDir, fileName), JSON.stringify(data, null, 2));
+}
+
+/**
+ * Create validation summary with calculated statistics.
+ */
+function createValidationSummary(packageList, packageCount, allTranslations, allValidationReports) {
+  return {
+    generatedAt: new Date().toISOString(),
+    packages: packageList,
+    summary: {
+      totalPackages: packageCount,
+      totalLocales: Object.keys(allTranslations).length,
+      totalIssues: allValidationReports.reduce(
+        (sum, report) => sum + Object.values(report.counts).reduce((a, b) => a + b, 0),
+        0
+      ),
+      untranslatedStrings: allValidationReports.reduce(
+        (sum, report) => sum + report.counts.untranslated,
+        0
+      ),
+      fuzzyTranslations: allValidationReports.reduce(
+        (sum, report) => sum + report.counts.fuzzyTranslations,
+        0
+      ),
+    },
+    reports: allValidationReports,
+  };
+}
+
+/**
+ * Write translations to a JSON file in the package directory.
+ */
+function writeTranslations(outputDir, packageName, translations) {
+  const packageDir = path.join(outputDir, packageName);
+  writeJsonFile(packageDir, "translations.json", translations);
 }
 
 main().catch(console.error);

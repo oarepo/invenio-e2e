@@ -1,3 +1,6 @@
+# This CI tests if the *.pot file generation works which includes that new msgids will be added to the pot file. 
+# Further it will test translation collection from InvenioRDM packages and validate the collected translations.
+
 name: i18n-ci
 
 on:
@@ -19,7 +22,7 @@ jobs:
         run: |
           curl -fsSL https://get.pnpm.io/install.sh | sh -
           echo "$HOME/.local/share/pnpm" >> $GITHUB_PATH
-      
+
       - name: Install Node deps
         run: pnpm install --prefer-offline
 
@@ -70,5 +73,3 @@ jobs:
             src/translations/messages.pot
             src/translations/translations.json
             src/translations/validation-report.json
-
-

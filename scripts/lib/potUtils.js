@@ -2,64 +2,50 @@ const fs = require("fs");
 const path = require("path");
 const { execSync, spawn } = require("child_process");
 
-/**
- * Run the invenio i18n create-global-pot command.
- */
-function tryInvenioI18nCommand(venvInfo, outputFile) {
-  console.log("Trying invenio i18n create-global-pot...");
+// Find an Invenio package folder where we can run commands
+function findValidInvenioPackageDir() {
+  const packageDirs = [
+    path.resolve(__dirname, "../../../invenio-app-rdm"),
+    path.resolve(__dirname, "../../../invenio-rdm-records"),
+  ];
 
+  for (const dir of packageDirs) {
+    if (
+      fs.existsSync(path.join(dir, "setup.cfg")) ||
+      fs.existsSync(path.join(dir, "pyproject.toml"))
+    ) {
+      return dir;
+    }
+  }
+
+  return null;
+}
+
+// Try to run the invenio i18n command (returns success/failure)
+function tryInvenioI18nCommand(venvInfo, outputFile) {
   try {
     const pythonPath = path.join(venvInfo.path, "bin", "python");
-
     const args = outputFile ? ` --output "${outputFile}"` : "";
-
-    // valid Invenio package directory to run the command from
-    const packageDirs = [
-      path.resolve(__dirname, "../../../invenio-app-rdm"),
-      path.resolve(__dirname, "../../../invenio-rdm-records"),
-    ];
-
-    let workingDir = null;
-    for (const dir of packageDirs) {
-      if (
-        fs.existsSync(path.join(dir, "setup.cfg")) ||
-        fs.existsSync(path.join(dir, "pyproject.toml"))
-      ) {
-        workingDir = dir;
-        break;
-      }
-    }
-
+    const workingDir = findValidInvenioPackageDir();
     if (!workingDir) {
       throw new Error("No valid Invenio package directory found");
     }
 
     const command = `${pythonPath} -m invenio i18n create-global-pot${args}`;
-    console.log(`Running: ${command}`);
     execSync(command, {
       cwd: workingDir,
       encoding: "utf8",
       stdio: "pipe",
     });
 
-    console.log("invenio i18n create-global-pot succeeded!");
-    return { success: true };
+    return { success: true, command };
   } catch (error) {
-    console.log(
-      "invenio i18n create-global-pot not available, falling back to pybabel..."
-    );
-    return { success: false, error: error.message };
+    return { success: false };
   }
 }
 
-/**
- * Extract strings using pybabel as a fallback method.
- */
-async function extractStringsWithPybabel(
-  sitePackagesPath,
-  outputFile,
-  venvInfo
-) {
+// Extract strings with pybabel
+async function extractStringsWithPybabel(sitePackagesPath, outputFile, venvInfo) {
   return new Promise((resolve, reject) => {
     const packages = fs
       .readdirSync(sitePackagesPath)
@@ -69,8 +55,6 @@ async function extractStringsWithPybabel(
     if (packages.length === 0) {
       return reject(new Error("No Invenio packages found to extract from."));
     }
-
-    console.log(`Extracting strings from ${packages.length} packages`);
 
     const args = [
       "extract",
@@ -97,9 +81,7 @@ async function extractStringsWithPybabel(
     ];
 
     const pythonPath = path.join(venvInfo.path, "bin", "python");
-
     const commandArgs = ["-m", "babel.messages.frontend", ...args];
-
     const pybabel = spawn(pythonPath, commandArgs, {
       stdio: ["pipe", "pipe", "pipe"],
     });
@@ -111,7 +93,6 @@ async function extractStringsWithPybabel(
 
     pybabel.on("close", (code) => {
       if (code === 0) {
-        console.log("POT file generated successfully");
         resolve();
       } else {
         reject(new Error(`pybabel failed with code ${code}: ${stderr}`));
@@ -119,14 +100,9 @@ async function extractStringsWithPybabel(
     });
 
     pybabel.on("error", () => {
-      reject(
-        new Error("pybabel not found. Please install Babel: uv add babel")
-      );
+      reject(new Error("pybabel not found. Please install Babel: uv add babel"));
     });
   });
 }
 
-module.exports = {
-  tryInvenioI18nCommand,
-  extractStringsWithPybabel,
-};
+module.exports = { tryInvenioI18nCommand, extractStringsWithPybabel };

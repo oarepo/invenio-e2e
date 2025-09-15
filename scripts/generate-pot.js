@@ -1,75 +1,98 @@
 #!/usr/bin/env node
 
 /**
- * POT File Generation
+ * Generate POT file from Invenio packages
  *
- * Algorithm: detect venv → run `invenio i18n create-global-pot` → if missing, run `pybabel extract` → write messages.pot
+ * This script creates a .pot file with all the translatable strings from Invenio.
+ * It tries two ways:
+ * 1. Use the invenio i18n command (works if invenio-i18n is installed)
+ * 2. Use pybabel directly (backup plan if invenio command fails)
  *
- * Usage:
- * - `npm run generate-pot` - Generate POT using invenio i18n create-global-pot
- * - `VENV_PATH=/path/to/venv npm run generate-pot` - Use custom virtual environment
- * - `npm run generate-pot --output path/to/output.pot` - Custom output location
+ * You need a Python venv with either invenio-i18n or babel installed.
+ *
+ * How to use:
+ * - npm run generate-pot (basic usage)
+ * - VENV_PATH=/my/venv npm run generate-pot (custom venv)
+ * - npm run generate-pot --output my.pot (custom output file)
  */
 
 const fs = require("fs");
 const path = require("path");
 const { findVirtualEnv, getSitePackagesPath } = require("./lib/venvUtils");
-const {
-  tryInvenioI18nCommand,
-  extractStringsWithPybabel,
-} = require("./lib/potUtils");
+const { tryInvenioI18nCommand, extractStringsWithPybabel } = require("./lib/potUtils");
+const { TranslationLogger } = require("./lib/logger");
 
-const OUTPUT_DIR =
-  process.env.I18N_OUTPUT_DIR || path.join("src", "translations");
+const OUTPUT_DIR = process.env.I18N_OUTPUT_DIR || path.join("src", "translations");
 
-/**
- * MAIN ALGORITHM: POT Generation
- *
- * 1: Find virtual environment
- * 2: Try invenio i18n create-global-pot command
- * 3: Fallback to direct pybabel extraction
- * 4: Write POT file to translations/
- */
 async function main() {
-  const args = process.argv.slice(2);
-  const outputIndex = args.indexOf("--output");
-  const customOutput = outputIndex !== -1 ? args[outputIndex + 1] : null;
+  const logger = new TranslationLogger();
 
-  console.log("POT Generation: invenio i18n create-global-pot");
-  console.log("===================================================");
+  // Comment: ALGORITHM - POT Generation
+  // Setup: Parse args and prepare environment
+  // Method A: Use invenio i18n command (preferred)
+  // Method B: Use pybabel extraction (fallback)
 
-  const venvInfo = findVirtualEnv();
-  if (!venvInfo) {
-    console.error("Virtual environment not found!");
-    console.error(
-      "Please set VENV_PATH or create a .venv in an Invenio package directory."
-    );
-    process.exit(1);
-  }
-  console.log(`Using virtual environment: ${venvInfo.path}`);
+  const config = parseArgumentsAndSetup(logger);
 
-  const outputFile = customOutput || path.join(OUTPUT_DIR, "messages.pot");
-  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-
-  const invenioResult = tryInvenioI18nCommand(venvInfo, outputFile);
-  if (invenioResult.success) {
-    console.log(`POT file generated: ${outputFile}`);
-    console.log("Used core invenio-i18n create-global-pot command");
+  if (await tryInvenioMethod(config, logger)) {
     return;
   }
 
-  console.log("Falling back to direct pybabel extraction...");
+  await tryPybabelMethod(config, logger);
+}
 
+// Parse command line args and make sure output folder exists
+function parseArgumentsAndSetup(logger) {
+  logger.logPotGenerationStart();
+
+  const args = process.argv.slice(2);
+  const outputIndex = args.indexOf("--output");
+  const customOutput = outputIndex !== -1 ? args[outputIndex + 1] : null;
+  const outputFile = customOutput || path.join(OUTPUT_DIR, "messages.pot");
+
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+
+  return { outputFile };
+}
+
+// Try the invenio command first (this is the best way if it works)
+async function tryInvenioMethod(config, logger) {
+  const venvInfo = findVirtualEnv();
+  if (!venvInfo) {
+    logger.logVenvNotFound();
+    process.exit(1);
+  }
+  logger.logUsingVenv(venvInfo.path);
+
+  const result = tryInvenioI18nCommand(venvInfo, config.outputFile);
+  if (result.success) {
+    logger.logPotFileGenerated(config.outputFile, "core invenio-i18n create-global-pot command");
+    return true;
+  }
+
+  return false;
+}
+
+// If invenio command failed, try pybabel directly
+async function tryPybabelMethod(config, logger) {
+  logger.logFallbackToPybabel();
+
+  const venvInfo = findVirtualEnv();
   const sitePackagesPath = getSitePackagesPath(venvInfo.path);
   if (!sitePackagesPath) {
-    console.error(`Site-packages directory not found in: ${venvInfo.path}`);
+    logger.logSitePackagesNotFound(venvInfo.path);
     process.exit(1);
   }
 
-  console.log(`Site-packages path: ${sitePackagesPath}`);
-  await extractStringsWithPybabel(sitePackagesPath, outputFile, venvInfo);
+  logger.logSitePackagesPath(sitePackagesPath);
 
-  console.log(`POT file generated: ${outputFile}`);
+  try {
+    await extractStringsWithPybabel(sitePackagesPath, config.outputFile, venvInfo);
+    logger.logPotFileGenerated(config.outputFile);
+  } catch (error) {
+    logger.logPybabelFailed(error.message);
+    process.exit(1);
+  }
 }
 
 main().catch(console.error);

@@ -2,83 +2,83 @@ name: Translation Validation
 
 on:
   push:
-    branches: [ main, master, i18n_service_clean ]
+    branches: [main, master, i18n_service_clean]
   pull_request:
-    branches: [ main, master, i18n_service_clean ]
+    branches: [main, master, i18n_service_clean]
   workflow_dispatch:
     inputs:
       packages:
-        description: 'Package to validate'
+        description: "Package to validate"
         required: false
-        default: 'invenio-app-rdm'
+        default: "invenio-app-rdm"
 
 jobs:
   translation-validation:
     runs-on: ubuntu-22.04
-    
+
     strategy:
       matrix:
-        python-version: ['3.13']
-    
+        python-version: ["3.13"]
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 2
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-    
-    - name: Install pnpm
-      run: |
-        curl -fsSL https://get.pnpm.io/install.sh | sh -
-        echo "$HOME/.local/share/pnpm" >> $GITHUB_PATH
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
-    - name: Install Node.js dependencies
-      run: pnpm install --prefer-offline
-    
-    - name: Clone Invenio packages
-      run: |
-        git clone https://github.com/inveniosoftware/invenio-app-rdm.git
-        git clone https://github.com/inveniosoftware/invenio-rdm-records.git
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install UV
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    - name: Install Python dependencies with UV
-      run: |
-        source $HOME/.cargo/env
-        uv venv --python ${{ matrix.python-version }}
-        uv pip install babel invenio-i18n
-        # Install packages 
-        uv pip install -e ./invenio-app-rdm
-        uv pip install -e ./invenio-rdm-records
-    
-    - name: Generate POT file
-      env:
-        VENV_PATH: ${{ github.workspace }}/.venv
-        I18N_OUTPUT_DIR: src/translations
-      run: pnpm run generate-pot
+      - name: Install pnpm
+        run: |
+          curl -fsSL https://get.pnpm.io/install.sh | sh -
+          echo "$HOME/.local/share/pnpm" >> $GITHUB_PATH
 
-    - name: Collect translations with validation
-      env:
-        INVENIO_PACKAGES_DIR: ${{ github.workspace }}
-        I18N_OUTPUT_DIR: src/translations
-      run: pnpm run collect-translations:validate
-    
-    - name: Upload validation reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: translation-reports-${{ matrix.python-version }}
-        path: |
-          src/translations/validation-report.json
-          src/translations/messages.pot
-        retention-days: 30
+      - name: Install Node.js dependencies
+        run: pnpm install --prefer-offline
+
+      - name: Clone Invenio packages
+        run: |
+          git clone https://github.com/inveniosoftware/invenio-app-rdm.git
+          git clone https://github.com/inveniosoftware/invenio-rdm-records.git
+
+      - name: Install UV
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install Python dependencies with UV
+        run: |
+          source $HOME/.cargo/env
+          uv venv --python ${{ matrix.python-version }}
+          uv pip install babel invenio-i18n
+          # Install packages 
+          uv pip install -e ./invenio-app-rdm
+          uv pip install -e ./invenio-rdm-records
+
+      - name: Generate POT file
+        env:
+          VENV_PATH: ${{ github.workspace }}/.venv
+          I18N_OUTPUT_DIR: src/translations
+        run: pnpm run generate-pot
+
+      - name: Collect translations with validation
+        env:
+          INVENIO_PACKAGES_DIR: ${{ github.workspace }}
+          I18N_OUTPUT_DIR: src/translations
+        run: pnpm run collect-translations:validate
+
+      - name: Upload validation reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: translation-reports-${{ matrix.python-version }}
+          path: |
+            src/translations/validation-report.json
+            src/translations/messages.pot
+          retention-days: 30
