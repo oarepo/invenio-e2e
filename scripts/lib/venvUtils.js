@@ -34,17 +34,24 @@ function findVirtualEnv() {
   return null;
 }
 
-// Get site-packages path from venv
+// Get site-packages path from venv - works with any Python version.
 function getSitePackagesPath(venvPath) {
   const libDir = path.join(venvPath, "lib");
   if (!fs.existsSync(libDir)) {
     return "";
   }
 
-  const sitePackagesPath = path.join(libDir, "python3.13", "site-packages");
-  if (fs.existsSync(sitePackagesPath)) {
-    return sitePackagesPath;
-  }
+  try {
+    const libContents = fs.readdirSync(libDir);
+    const pythonDirs = libContents.filter((name) => name.startsWith("python"));
+
+    for (const pythonDir of pythonDirs) {
+      const sitePackagesPath = path.join(libDir, pythonDir, "site-packages");
+      if (fs.existsSync(sitePackagesPath)) {
+        return sitePackagesPath;
+      }
+    }
+  } catch (error) {}
 
   return "";
 }

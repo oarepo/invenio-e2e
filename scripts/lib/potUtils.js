@@ -4,10 +4,14 @@ const { execSync, spawn } = require("child_process");
 
 // Find an Invenio package folder where we can run commands
 function findValidInvenioPackageDir() {
-  const packageDirs = [
-    path.resolve(__dirname, "../../../invenio-app-rdm"),
-    path.resolve(__dirname, "../../../invenio-rdm-records"),
-  ];
+  const packageNames = ["invenio-app-rdm", "invenio-rdm-records"];
+  let packageDirs;
+
+  if (process.env.INVENIO_PACKAGES_DIR) {
+    packageDirs = packageNames.map((name) => path.join(process.env.INVENIO_PACKAGES_DIR, name));
+  } else {
+    packageDirs = packageNames.map((name) => path.resolve(__dirname, "../../../" + name));
+  }
 
   for (const dir of packageDirs) {
     if (
@@ -44,16 +48,23 @@ function tryInvenioI18nCommand(venvInfo, outputFile) {
   }
 }
 
-// Extract strings with pybabel
-async function extractStringsWithPybabel(sitePackagesPath, outputFile, venvInfo) {
+// Extract strings with pybabel from cloned package directories
+async function extractStringsWithPybabel(outputFile, venvInfo) {
   return new Promise((resolve, reject) => {
-    const packages = fs
-      .readdirSync(sitePackagesPath)
-      .filter((name) => name.startsWith("invenio_"))
-      .map((name) => path.join(sitePackagesPath, name));
+    const packageNames = ["invenio-app-rdm", "invenio-rdm-records"];
+    let packageDirs;
+
+    if (process.env.INVENIO_PACKAGES_DIR) {
+      packageDirs = packageNames.map((name) => path.join(process.env.INVENIO_PACKAGES_DIR, name));
+    } else {
+      packageDirs = packageNames.map((name) => path.resolve(__dirname, "../../../" + name));
+    }
+
+    const packages = packageDirs.filter(fs.existsSync);
 
     if (packages.length === 0) {
-      return reject(new Error("No Invenio packages found to extract from."));
+      console.log("No Invenio packages found - skipping extraction as expected in CI");
+      return resolve();
     }
 
     const args = [

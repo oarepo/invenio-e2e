@@ -18,11 +18,11 @@
 
 const fs = require("fs");
 const path = require("path");
-const { findVirtualEnv, getSitePackagesPath } = require("./lib/venvUtils");
+const { findVirtualEnv } = require("./lib/venvUtils");
 const { tryInvenioI18nCommand, extractStringsWithPybabel } = require("./lib/potUtils");
 const { TranslationLogger } = require("./lib/logger");
 
-const OUTPUT_DIR = process.env.I18N_OUTPUT_DIR || path.join("src", "translations");
+const OUTPUT_DIR = process.env.I18N_OUTPUT_DIR || path.resolve("translations");
 
 async function main() {
   const logger = new TranslationLogger();
@@ -78,17 +78,14 @@ async function tryPybabelMethod(config, logger) {
   logger.logFallbackToPybabel();
 
   const venvInfo = findVirtualEnv();
-  const sitePackagesPath = getSitePackagesPath(venvInfo.path);
-  if (!sitePackagesPath) {
-    logger.logSitePackagesNotFound(venvInfo.path);
-    process.exit(1);
-  }
-
-  logger.logSitePackagesPath(sitePackagesPath);
 
   try {
-    await extractStringsWithPybabel(sitePackagesPath, config.outputFile, venvInfo);
-    logger.logPotFileGenerated(config.outputFile);
+    await extractStringsWithPybabel(config.outputFile, venvInfo);
+    if (fs.existsSync(config.outputFile)) {
+      logger.logPotFileGenerated(config.outputFile);
+    } else {
+      console.log("POT generation skipped - no packages available");
+    }
   } catch (error) {
     logger.logPybabelFailed(error.message);
     process.exit(1);

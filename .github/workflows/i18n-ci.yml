@@ -47,6 +47,7 @@ jobs:
         env:
           VENV_PATH: ${{ github.workspace }}/.venv
           I18N_OUTPUT_DIR: src/translations
+          INVENIO_PACKAGES_DIR: ${{ github.workspace }}
         run: pnpm run generate-pot
 
       - name: Check POT file generation

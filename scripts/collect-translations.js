@@ -20,7 +20,7 @@ const path = require("path");
 const { resolvePackagePath, scanPackage } = require("./lib/translationUtils");
 const { TranslationLogger } = require("./lib/logger");
 
-const OUTPUT_DIR = process.env.I18N_OUTPUT_DIR || path.join("src", "translations");
+const OUTPUT_DIR = process.env.I18N_OUTPUT_DIR || path.resolve("translations");
 
 // Comment: Algorithm - Find packages, scan PO files, convert to JSON, optionally validate
 async function main() {
@@ -101,9 +101,62 @@ function writeJsonFile(outputDir, fileName, data) {
 }
 
 /**
- * Create validation summary with calculated statistics.
+ * Create validation summary with calculated statistics and breakdowns.
  */
 function createValidationSummary(packageList, packageCount, allTranslations, allValidationReports) {
+  // Calculate per-package and per-language breakdowns
+  const packageBreakdown = {};
+  const languageBreakdown = {};
+
+  allValidationReports.forEach((report) => {
+    // Per-package breakdown
+    if (!packageBreakdown[report.package]) {
+      packageBreakdown[report.package] = {
+        locales: 0,
+        totalIssues: 0,
+        untranslatedStrings: 0,
+        fuzzyTranslations: 0,
+        problematicLanguages: [],
+      };
+    }
+
+    const pkg = packageBreakdown[report.package];
+    pkg.locales++;
+    pkg.totalIssues += Object.values(report.counts).reduce((a, b) => a + b, 0);
+    pkg.untranslatedStrings += report.counts.untranslated;
+    pkg.fuzzyTranslations += report.counts.fuzzyTranslations;
+
+    // Track languages with issues
+    const hasIssues = Object.values(report.counts).reduce((a, b) => a + b, 0) > 0;
+    if (hasIssues) {
+      pkg.problematicLanguages.push({
+        locale: report.locale,
+        issues: report.counts,
+      });
+    }
+
+    // Per-language breakdown
+    if (!languageBreakdown[report.locale]) {
+      languageBreakdown[report.locale] = {
+        packages: 0,
+        totalIssues: 0,
+        untranslatedStrings: 0,
+        fuzzyTranslations: 0,
+        isComplete: true,
+      };
+    }
+
+    const lang = languageBreakdown[report.locale];
+    lang.packages++;
+    lang.totalIssues += Object.values(report.counts).reduce((a, b) => a + b, 0);
+    lang.untranslatedStrings += report.counts.untranslated;
+    lang.fuzzyTranslations += report.counts.fuzzyTranslations;
+
+    if (Object.values(report.counts).reduce((a, b) => a + b, 0) > 0) {
+      lang.isComplete = false;
+    }
+  });
+
   return {
     generatedAt: new Date().toISOString(),
     packages: packageList,
@@ -123,6 +176,8 @@ function createValidationSummary(packageList, packageCount, allTranslations, all
         0
       ),
     },
+    packageBreakdown,
+    languageBreakdown,
     reports: allValidationReports,
   };
 }

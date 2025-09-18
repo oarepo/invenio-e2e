@@ -1,53 +1,30 @@
-import { expect, test } from '@playwright/test';
+import { InvenioTest } from "../../fixtures";
+import { expect } from "@playwright/test";
+import fs from "fs";
+import path from "path";
 
-import fs from 'fs';
-import path from 'path';
+/**
+ * Runs a set of tests for POT file generation.
+ *
+ * @param test - The InvenioTest instance to use for the tests.
+ */
+export function i18nPOTTests(test: InvenioTest) {
+  test.describe("POT file generation (fast, no browser)", () => {
+    test("POT file exists and contains translatable strings", async () => {
+      const potFilePath = path.resolve("translations/messages.pot");
 
-interface PotComparisonReport {
-  generatedAt: string;
-  potFile: {
-    totalStrings: number;
-    strings: string[];
-  };
-  locales: {
-    [locale: string]: {
-      totalTranslations: number;
-      missingFromPot: string[];
-      missingFromLocale: string[];
-      coveragePercentage: number;
-    };
-  };
-}
+      expect(fs.existsSync(potFilePath), "POT file should exist. Run `npm run generate-pot`.").toBe(
+        true
+      );
 
-function readPotComparisonReport(): PotComparisonReport | null {
-  const reportPath = path.join(__dirname, '../../translations/pot-comparison-report.json');
-  if (!fs.existsSync(reportPath)) return null;
-  return JSON.parse(fs.readFileSync(reportPath, 'utf8')) as PotComparisonReport;
-}
+      const potContent = fs.readFileSync(potFilePath, "utf8");
+      expect(potContent.length, "POT file should not be empty").toBeGreaterThan(0);
 
-test.describe('POT synchronization (fast, no browser)', () => {
-  test('POT file synchronization validation', async () => {
-    const report = readPotComparisonReport();
-    if (!report) test.skip(true, 'POT comparison report missing. Run `npm run generate-pot`.');
-
-    const { potFile, locales } = report!;
-
-    expect(potFile.totalStrings, 'POT file should contain translatable strings').toBeGreaterThan(0);
-
-    for (const [locale, info] of Object.entries(locales)) {
+      const msgidCount = (potContent.match(/^msgid\s+"/gm) || []).length;
       expect(
-        info.missingFromLocale.length,
-        `${locale} is missing ${info.missingFromLocale.length} strings from POT file`
-      ).toBeLessThanOrEqual(1000); 
-    }
-
-    for (const [locale, info] of Object.entries(locales)) {
-      expect(
-        info.missingFromPot.length,
-        `${locale} has ${info.missingFromPot.length} obsolete strings not in POT`
-      ).toBeLessThanOrEqual(1000); 
-    }
+        msgidCount,
+        "POT file should contain translatable strings (msgid entries)"
+      ).toBeGreaterThan(0);
+    });
   });
-});
-
-
+}

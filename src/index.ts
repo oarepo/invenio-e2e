@@ -12,3 +12,5 @@ export { BasePage } from './pages/basePage';
 
 // tests
 export { homepageTests } from './tests/e2e';
+export { i18nValidationTests } from './tests/i18n/validation.spec';
+export { i18nPOTTests } from './tests/i18n/pot.spec';
