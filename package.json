@@ -6,11 +6,15 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc; cp package.json dist; cp -r scripts dist/",
-    "docs": "documentation build src/**/*.ts -f md -o api_docs.md --shallow --github --sort-order kind"
+    "docs": "documentation build src/**/*.ts -f md -o api_docs.md --shallow --github --sort-order kind",
+    "collect-translations": "node scripts/collect-translations.js",
+    "collect-translations:validate": "node scripts/collect-translations.js --validate",
+    "generate-pot": "node scripts/generate-pot.js",
+    "i18n:validate": "npm run generate-pot && npm run collect-translations:validate"
   },
   "bin": {
     "invenio-e2e-collect-translations": "scripts/collect-translations.js",
-    "invenio-e2e-i18n-setup": "scripts/i18n-setup.js"
+    "invenio-e2e-generate-pot": "scripts/generate-pot.js"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,76 @@
+# This CI tests if the *.pot file generation works which includes that new msgids will be added to the pot file. 
+# Further it will test translation collection from InvenioRDM packages and validate the collected translations.
+
+name: i18n-ci
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  i18n:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: |
+          curl -fsSL https://get.pnpm.io/install.sh | sh -
+          echo "$HOME/.local/share/pnpm" >> $GITHUB_PATH
+
+      - name: Install Node deps
+        run: pnpm install --prefer-offline
+
+      - name: Clone Invenio packages
+        run: |
+          git clone https://github.com/inveniosoftware/invenio-app-rdm.git
+          git clone https://github.com/inveniosoftware/invenio-rdm-records.git
+
+      - name: Install UV
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install Python dependencies with UV
+        run: |
+          source $HOME/.cargo/env
+          uv venv --python 3.13
+          uv pip install babel invenio-i18n
+          # Install packages 
+          uv pip install -e ./invenio-app-rdm
+          uv pip install -e ./invenio-rdm-records
+
+      - name: Generate POT file
+        env:
+          VENV_PATH: ${{ github.workspace }}/.venv
+          I18N_OUTPUT_DIR: src/translations
+          INVENIO_PACKAGES_DIR: ${{ github.workspace }}
+        run: pnpm run generate-pot
+
+      - name: Check POT file generation
+        run: |
+          git add -f src/translations/messages.pot
+          git diff --exit-code -- src/translations/messages.pot || {
+            echo "POT file has changed - source strings may have been modified"
+            exit 1
+          }
+          echo "POT file is up to date"
+
+      - name: Collect translations + validate
+        env:
+          INVENIO_PACKAGES_DIR: ${{ github.workspace }}
+          I18N_OUTPUT_DIR: src/translations
+        run: pnpm run collect-translations:validate
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: i18n-reports
+          path: |
+            src/translations/messages.pot
+            src/translations/translations.json
+            src/translations/validation-report.json
