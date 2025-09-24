@@ -1,8 +1,9 @@
-import { AllPages, BasePage, HomePage, LoginPage, SearchPage } from '../pages';
+import { AllPages, BasePage, HomePage, LoginPage, SearchPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
 import {
     I18nExpected, I18nService, LocalLoginService, Services, Translations
 } from '../services';
+import { defaultCommunityData, CommunityData } from './communityData';
 
 import type { Config } from '../config';
 import type { Locators } from '../locators';
@@ -27,6 +28,8 @@ const _test = base.extend<{
     loginService: LocalLoginService<Locators>;
     defaultUserLoggedIn: true;
 
+    communityData: CommunityData;
+
     services: Services<Locators>;
 
     expect: Expect<I18nExpected>;
@@ -34,6 +37,12 @@ const _test = base.extend<{
     homePage: HomePage;
     searchPage: SearchPage;
     loginPage: LoginPage;
+    communitiesPage: CommunitiesPage;
+    communityDetailPage: CommunityDetailPage;
+    communitySearchPage: CommunitySearchPage;
+    myDashboardPage: MyDashboardPage;
+    newCommunityPage: NewCommunityPage;
+
 }>({
     // locators are used to find elements on the page and they are separated
     // from the page classes so that they can be easily overwritten in tests
@@ -136,6 +145,10 @@ const _test = base.extend<{
         await use(true);
     },
 
+    communityData: async ({ }, use) => {
+        await use(defaultCommunityData);
+    },
+
     services: async ({ i18nService, loginService }, use) => {
         // services are used to interact with the application, for example,
         // loginService is used to log in the user, i18nService is used to
@@ -154,6 +167,11 @@ const _test = base.extend<{
     ...registerPage('homePage', HomePage),
     ...registerPage('searchPage', SearchPage),
     ...registerPage("loginPage", LoginPage),
+    ...registerPage("communitiesPage", CommunitiesPage),
+    ...registerPage("communityDetailPage", CommunityDetailPage),
+    ...registerPage("communitySearchPage", CommunitySearchPage),
+    ...registerPage("myDashboardPage", MyDashboardPage),
+    ...registerPage("newCommunityPage", NewCommunityPage),
 
 })
 

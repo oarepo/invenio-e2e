@@ -49,16 +49,53 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
         return nextPage;
     }
 
-    // FLOWS ------------------------------------------------------------------------------
+  /**
+   * Navigates to the Communities page by clicking the header link.
+   */
+  async goToCommunitiesPage(): Promise<void> {
+    const communitiesLink = this.page.locator(
+      this.locators.header.communitiesLink
+    );
+    await communitiesLink.click();
+    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForSelector(this.locators.communitiesPage.pageTitle, {
+      state: "visible",
+    });
+  }
 
-    /**
-     * Performs a search operation by filling the search field and submitting the search.
-     * 
-     * @param query  The search query to fill in the search field.
-     * @returns The search page after performing the search.
-     */
-    async performSearch(query: string): Promise<SearchPage> {
-        await this.fillSearchField(query);
-        return await this.submitSearch();
-    }
+  // FLOWS -------------------------------------------------------------------------------
+
+  /**
+   * Clicks on the Quick Create drop-down.
+   */
+  async clickQuickCreateButton(): Promise<void> {
+    const quickCreateBtn = this.page.locator(
+      this.locators.homePage.quickCreateButton
+    );
+    await quickCreateBtn.click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  /**
+   * Performs a search operation by filling the search field and submitting the search.
+   *
+   * @param query  The search query to fill in the search field.
+   * @returns The search page after performing the search.
+   */
+  async performSearch(query: string): Promise<SearchPage> {
+    await this.fillSearchField(query);
+    return await this.submitSearch();
+  }
+
+  /**
+   * Opens Quick Create and selects "New community".
+   */
+  async selectNewCommunity(): Promise<void> {
+    await this.clickQuickCreateButton();
+    const newCommunityItem = this.page.locator(
+      this.locators.homePage.newCommunityMenuItem
+    );
+    await newCommunityItem.click();
+    await this.page.waitForLoadState("networkidle");
+  }
 }
