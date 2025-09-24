@@ -1,6 +1,8 @@
 import { AllPages, BasePage, HomePage, LoginPage, SearchPage } from '../pages';
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
-import { I18nExpected, I18nService, LocalLoginService, Services, Translations } from '../services';
+import {
+    I18nExpected, I18nService, LocalLoginService, Services, Translations
+} from '../services';
 
 import type { Config } from '../config';
 import type { Locators } from '../locators';
@@ -23,7 +25,7 @@ const _test = base.extend<{
 
     i18nService: I18nService<Locators>;
     loginService: LocalLoginService<Locators>;
-    defaultUserLoggedIn: () => Promise<void>;
+    defaultUserLoggedIn: true;
 
     services: Services<Locators>;
 
@@ -32,7 +34,6 @@ const _test = base.extend<{
     homePage: HomePage;
     searchPage: SearchPage;
     loginPage: LoginPage;
-
 }>({
     // locators are used to find elements on the page and they are separated
     // from the page classes so that they can be easily overwritten in tests
@@ -132,7 +133,7 @@ const _test = base.extend<{
         // this fixture logs in the default user
         await homePage.openPage();
         await loginService.login(homePage);
-        await use(async () => {});
+        await use(true);
     },
 
     services: async ({ i18nService, loginService }, use) => {
@@ -153,6 +154,7 @@ const _test = base.extend<{
     ...registerPage('homePage', HomePage),
     ...registerPage('searchPage', SearchPage),
     ...registerPage("loginPage", LoginPage),
+
 })
 
 type _invenio_base_test = typeof _test;
@@ -192,9 +194,9 @@ export const test = new Proxy(_test as InvenioTest, {
                 return (title: string, annotation?: any, callback?: () => void) => {
                     const skippedTests = target.__skipped_tests || [];
                     if (skippedTests.includes(title)) {
-                        return target.describe.skip(title, annotation, callback || (() => {}));
+                        return target.describe.skip(title, annotation, callback || (() => { }));
                     } else {
-                        return target.describe(title, annotation, callback || (() => {}));
+                        return target.describe(title, annotation, callback || (() => { }));
                     }
                 }
             case 'skipTests':
@@ -217,6 +219,7 @@ export const test = new Proxy(_test as InvenioTest, {
                 return (target as any)[prop];
         }
     },
+
     /**
      * Handles the case test("test title", ({fixtures}) => { test body })
      * If the test has a title that is in the skipped tests list, the test
@@ -230,7 +233,6 @@ export const test = new Proxy(_test as InvenioTest, {
             // @ts-ignore
             return (target as any).skip(...args);
         }
-        return (target as any).apply(thisArg, args);
+        return target.apply(thisArg, args as any);
     }
 });
-
