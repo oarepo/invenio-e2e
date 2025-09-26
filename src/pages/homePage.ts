@@ -1,6 +1,7 @@
-import { Locators } from '../locators';
-import { SearchPage } from './searchPage';
-import { BasePage } from './basePage';
+import { Locators } from "../locators";
+import { SearchPage } from "./searchPage";
+import { BasePage } from "./basePage";
+import { DepositPage } from "./depositPage";
 
 /**
  * Class representing a home page with search functionality.
@@ -8,46 +9,47 @@ import { BasePage } from './basePage';
 
 export class HomePage<T extends Locators = Locators> extends BasePage<T> {
 
-    /*
-     * Navigate to the Home page.
-     * @returns The home page instance to allow method chaining.
-     */
-    async openPage(): Promise<void> {
-        await this.page.goto('/');
-        await this.page.waitForLoadState("networkidle");
-        await this.validatePageLoaded();
-    }
+  // NAVIGATION -------------------------------------------------------------------------
 
-    // VALIDATION
-    /**
-     * Validates that the home page has loaded by checking for the search field.
-     */
-    async validatePageLoaded(): Promise<void> {
-        await super.validatePageLoaded();
-        await this.page.waitForSelector(this.locators.homePage.searchField);
-    }
+  /*
+   * Navigate to the Home page.
+   * @returns The home page instance to allow method chaining.
+   */
+  async openPage(): Promise<void> {
+    await this.page.goto("/");
+    await this.page.waitForLoadState("networkidle");
+    await this.validatePageLoaded();
+  }
 
-    // FIELDS ------------------------------------------------------------------------------
+  // VALIDATION --------------------------------------------------------------------------
+  /**
+   * Validates that the home page has loaded by checking for the search field.
+   */
+  async validatePageLoaded(): Promise<void> {
+    await super.validatePageLoaded();
+    await this.page.waitForSelector(this.locators.homePage.searchField);
+  }
 
-    // Method to fill in the search field
-    async fillSearchField(query: string): Promise<void> {
-        const searchInput = this.page.locator(this.locators.homePage.searchField);
-        await searchInput.fill(query);
-        await this.expect(searchInput).toHaveValue(query);
-    }
+  // FIELDS ------------------------------------------------------------------------------
 
+  // Method to fill in the search field
+  async fillSearchField(query: string): Promise<void> {
+    const searchInput = this.page.locator(this.locators.homePage.searchField);
+    await searchInput.fill(query);
+    await this.expect(searchInput).toHaveValue(query);
+  }
 
-    // BUTTONS -----------------------------------------------------------------------------
+  // BUTTONS -----------------------------------------------------------------------------
 
-    // Method to submit the search
-    async submitSearch(): Promise<SearchPage> {
-        const submitButton = this.page.locator(this.locators.homePage.searchButton);
-        await submitButton.click();
-        await this.page.waitForLoadState("networkidle");
-        const nextPage = this.availablePages.searchPage;
-        await nextPage.validatePageLoaded();
-        return nextPage;
-    }
+  // Method to submit the search
+  async submitSearch(): Promise<SearchPage> {
+    const submitButton = this.page.locator(this.locators.homePage.searchButton);
+    await submitButton.click();
+    await this.page.waitForLoadState("networkidle");
+    const nextPage = this.availablePages.searchPage;
+    await nextPage.validatePageLoaded();
+    return nextPage;
+  }
 
   /**
    * Navigates to the Communities page by clicking the header link.
@@ -63,8 +65,6 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
     });
   }
 
-  // FLOWS -------------------------------------------------------------------------------
-
   /**
    * Clicks on the Quick Create drop-down.
    */
@@ -75,6 +75,8 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
     await quickCreateBtn.click();
     await this.page.waitForLoadState("networkidle");
   }
+
+  // FLOWS -------------------------------------------------------------------------------
 
   /**
    * Performs a search operation by filling the search field and submitting the search.
@@ -97,5 +99,29 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
     );
     await newCommunityItem.click();
     await this.page.waitForLoadState("networkidle");
+  }
+  
+  /**
+   * Opens Quick Create and selects "New upload".
+   * @returns The deposit page after selecting new upload.
+   */
+  async selectNewUpload(): Promise<DepositPage> {
+    await this.clickQuickCreateButton();
+    const newUploadItem = this.page.locator(
+      this.locators.homePage.newUploadMenuItem
+    );
+    await newUploadItem.waitFor({ state: "visible", timeout: 5000 });
+    await newUploadItem.click();
+    await this.page.waitForLoadState("networkidle");
+
+    const depositPage = new DepositPage({
+      page: this.page,
+      locators: this.locators,
+      availablePages: this.availablePages,
+      services: this.services,
+      expect: this.expect,
+    });
+    await depositPage.validatePageLoaded();
+    return depositPage;
   }
 }

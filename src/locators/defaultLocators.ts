@@ -1,6 +1,6 @@
 /**
  * This module defines locators for various elements in the Invenio E2E tests.
- * It provides a structured way to access elements on the page using CSS selectors.
+ * It provides a structured way to access elements on the page using selectors.
  */
 export const locators = {
   // ------------------------ HEADER ------------------------
@@ -217,7 +217,7 @@ export const locators = {
       'div.ui.placeholder.center.aligned.segment h1.ui.icon.header:has-text("All done!")',
     newVersionDraftLabel: 'text="New version draft"',
   },
-
+  
   // ---------------------------- LOGIN ----------------------------
   loginPage: {
     usernameField: "input#email",

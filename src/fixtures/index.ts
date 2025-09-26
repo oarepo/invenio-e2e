@@ -1,8 +1,9 @@
-import { AllPages, BasePage, HomePage, LoginPage, SearchPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
+import { AllPages, BasePage, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
 import {
-    I18nExpected, I18nService, LocalLoginService, Services, Translations
+    I18nExpected, I18nService, LocalLoginService, Services, Translations, FormService,
 } from '../services';
+import { defaultDepositionData, DepositionData } from './depositionData';
 import { defaultCommunityData, CommunityData } from './communityData';
 
 import type { Config } from '../config';
@@ -12,6 +13,7 @@ import { locators } from '../locators';
 import { registerPage } from './utils';
 
 export { registerPage } from './utils';
+import { FileUploadHelper } from '../helpers/fileUploadHelper';
 
 
 const _test = base.extend<{
@@ -29,6 +31,8 @@ const _test = base.extend<{
     defaultUserLoggedIn: true;
 
     communityData: CommunityData;
+    depositionData: DepositionData;
+    formService: FormService<Locators>;
 
     services: Services<Locators>;
 
@@ -42,6 +46,10 @@ const _test = base.extend<{
     communitySearchPage: CommunitySearchPage;
     myDashboardPage: MyDashboardPage;
     newCommunityPage: NewCommunityPage;
+    depositPage: DepositPage;
+    previewPage: PreviewPage;
+
+    uploadHelper: FileUploadHelper;
 
 }>({
     // locators are used to find elements on the page and they are separated
@@ -149,11 +157,20 @@ const _test = base.extend<{
         await use(defaultCommunityData);
     },
 
-    services: async ({ i18nService, loginService }, use) => {
+    depositionData: async ({ }, use) => {
+        await use(defaultDepositionData)
+    },
+
+    formService: async ({ config }, use) => {
+        const formService = new FormService(config);
+        await use(formService);
+    },
+
+    services: async ({ i18nService, loginService, formService }, use) => {
         // services are used to interact with the application, for example,
         // loginService is used to log in the user, i18nService is used to
         // interact with the internationalization service.
-        await use({ i18n: i18nService, login: loginService });
+        await use({ i18n: i18nService, login: loginService, form: formService });
     },
 
     expect: async ({ i18nService }, use) => {
@@ -161,11 +178,18 @@ const _test = base.extend<{
         await use(i18nService.extendExpect(playwrightExpect));
     },
 
+    uploadHelper: async ({ page }, use) => {
+        const helper = new FileUploadHelper(page);
+        await use(helper);
+    },
+
     // pages provide a set of methods to interact with a UI page, abstracting low-level
     // Playwright API calls. They are registered in the availablePages registry
     // so that they can be easily accessed from other pages and tests.
     ...registerPage('homePage', HomePage),
     ...registerPage('searchPage', SearchPage),
+    ...registerPage('depositPage', DepositPage),
+    ...registerPage('previewPage', PreviewPage),
     ...registerPage("loginPage", LoginPage),
     ...registerPage("communitiesPage", CommunitiesPage),
     ...registerPage("communityDetailPage", CommunityDetailPage),
