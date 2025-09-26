@@ -135,7 +135,11 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
                     return translation;
                 }
             } catch (error) {
-                console.warn(`i18next translation failed for key "${key}":`, (error as Error).message);
+                if (error instanceof Error) {
+                    console.warn(`i18next translation failed for key "${key}":`, error.message);
+                } else {
+                    console.warn(`i18next translation failed for key "${key}":`, error);
+                }
             }
         }
         
@@ -171,7 +175,11 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
                 }
             }
         } catch (error) {
-            console.warn('UI language switching failed, falling back to URL method:', (error as Error).message);
+            if (error instanceof Error) {
+                console.warn('UI language switching failed, falling back to URL method:', error.message);
+            } else {
+                console.warn('UI language switching failed, falling back to URL method:', error);
+            }
         }
         const url = new URL(this.page.url());
         url.searchParams.set('ln', locale);

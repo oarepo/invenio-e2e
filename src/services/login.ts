@@ -1,8 +1,7 @@
-import { expect, Page } from '@playwright/test';
+import { Page } from '@playwright/test';
 import { Locators } from '../locators';
 import { Config } from '../config';
 import { AllPages, BasePage } from '../pages';
-import { LoginPage } from '../pages/loginPage';
 
 export interface LoginServiceInterface<L extends Locators> {
     isUserLoggedIn: () => Promise<boolean>;

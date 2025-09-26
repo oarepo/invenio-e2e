@@ -1,12 +1,9 @@
-import { defineConfig, devices } from '@playwright/test';
-
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
+ * This file is just for testing this library, it is not intended to be used for real repositories.
+ * For those, please use invenio-cli init with the appropriate template.
  */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+import { defineConfig, devices } from "@playwright/test";
+import { appConfig } from "../src/config/env"; //  use centralized config
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -14,10 +11,6 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   // Include both legacy ./tests and new ./src/tests directories
   testDir: '.',
-  testMatch: [
-    'tests/**/*.spec.ts',
-    'src/tests/**/*.ts'
-  ],
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -27,21 +20,41 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  // Multiple reporters (console + HTML + Qase)
+  reporter: [
+    ["list"],
+    ["html", { outputFolder: "playwright-report", open: "never" }],
+    ...(appConfig.qase
+      ? [
+          [
+            "playwright-qase-reporter",
+            {
+              apiToken: appConfig.qase.token,
+              projectCode: appConfig.qase.project,
+              runName: `E2E Run - ${new Date().toISOString()}`,
+              environment: appConfig.qase.environment,
+              rootSuiteTitle: "Playwright E2E",
+              runComplete: appConfig.qase.runComplete,
+            } as const,
+          ] as const,
+        ]
+      : []),
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     ignoreHTTPSErrors: true,
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.BASE_URL || 'https://127.0.0.1:5000',
-
+    baseURL: appConfig.baseURL, // use from env.ts
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-
     /* Create a screenshot of a failure */
     screenshot: 'on-first-failure',
-
     /* Record video of a failure */
     video: 'retain-on-failure',
+    headless: process.env.CI ? true : false, // CI vs local
+    launchOptions: {
+      slowMo: process.env.CI ? 0 : 50,
+    },
   },
 
   /* Configure projects for major browsers */

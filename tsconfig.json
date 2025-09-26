@@ -10,10 +10,12 @@
     "strict": true,
     "types": ["@playwright/test", "node"],
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true
+
   },
   "include": [
     "src/**/*", 
     "tests/**/*"
-  ]
+  ],
 }
