@@ -1,19 +1,24 @@
-import { AllPages, BasePage, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
+
+import { AllPages, BasePage, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import {
     I18nExpected, I18nService, LocalLoginService, Services, Translations, FormService,
 } from '../services';
+
 import { defaultDepositionData, DepositionData } from './depositionData';
 import { defaultCommunityData, CommunityData } from './communityData';
+import { defaultRecordsApiData, RecordsApiData } from './api';
 
 import type { Config } from '../config';
 import type { Locators } from '../locators';
 import { config } from '../config';
 import { locators } from '../locators';
 import { registerPage } from './utils';
+import { FileUploadHelper } from '../helpers/fileUploadHelper';
 
 export { registerPage } from './utils';
-import { FileUploadHelper } from '../helpers/fileUploadHelper';
+export type { DepositionData, FormData } from './depositionData';
+export type { CommunityData, CommunityDataRecord } from './communityData';
 
 
 const _test = base.extend<{
@@ -29,12 +34,12 @@ const _test = base.extend<{
     i18nService: I18nService<Locators>;
     loginService: LocalLoginService<Locators>;
     defaultUserLoggedIn: true;
+    formService: FormService<Locators>;
+    services: Services<Locators>;
 
     communityData: CommunityData;
     depositionData: DepositionData;
-    formService: FormService<Locators>;
-
-    services: Services<Locators>;
+    recordsApiData: RecordsApiData;
 
     expect: Expect<I18nExpected>;
 
@@ -50,7 +55,6 @@ const _test = base.extend<{
     previewPage: PreviewPage;
 
     uploadHelper: FileUploadHelper;
-
 }>({
     // locators are used to find elements on the page and they are separated
     // from the page classes so that they can be easily overwritten in tests
@@ -158,7 +162,11 @@ const _test = base.extend<{
     },
 
     depositionData: async ({ }, use) => {
-        await use(defaultDepositionData)
+        await use(defaultDepositionData);
+    },
+
+    recordsApiData: async ({ }, use) => {
+        await use(defaultRecordsApiData);
     },
 
     formService: async ({ config }, use) => {

@@ -5,13 +5,11 @@ import { expect } from '@playwright/test';
  * Runs a set of API tests for the Records API.
  * 
  * @param test - The InvenioTest instance to use for the tests.
- * @param context - The authenticated BrowserContext to use for API requests.
  */
-export function apiRecordTests(test: InvenioTest) {
-
+export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/api/records') {
     test.describe('API Record Tests', () => {
         test('Should return list of records with correct structure', async ({ request }) => {
-            const response = await request.get('/api/records');
+            const response = await request.get(recordsApiPath);
             expect(response.status()).toBe(200);
             expect(await response.json()).toEqual(expect.objectContaining({
                 hits: expect.objectContaining({
@@ -26,40 +24,12 @@ export function apiRecordTests(test: InvenioTest) {
             }));
         });
 
-        test('Should create and publish a new metadata-only record', async ({ request }) => {
+        test('Should create and publish a new metadata-only record', async ({ request, recordsApiData }) => {
+            const defaultRecord = recordsApiData["defaultRecord"];
+
             // Create a new record
-            const response = await request.post('/api/records', {
-                data: {
-                    "access": {
-                        "record": "public",
-                        "files": "public"
-                    },
-                    "files": {
-                        "enabled": false
-                    },
-                    "metadata": {
-                        "creators": [
-                            {
-                                "person_or_org": {
-                                    "family_name": "Brown",
-                                    "given_name": "Troy",
-                                    "type": "personal"
-                                }
-                            },
-                            {
-                                "person_or_org": {
-                                    "name": "Troy Inc.",
-                                    "type": "organizational"
-                                }
-                            }
-                        ],
-                        "publication_date": "2020-06-01",
-                        "resource_type": {
-                            "id": "image-photo"
-                        },
-                        "title": "A Romans story"
-                    }
-                },
+            const response = await request.post(recordsApiPath, {
+                data: defaultRecord,
             });
 
             expect(response.status()).toBe(201);
@@ -72,34 +42,27 @@ export function apiRecordTests(test: InvenioTest) {
                 created: expect.any(String),
                 updated: expect.any(String),
                 access: expect.objectContaining({
-                    record: "public",
-                    files: "public"
+                    ...defaultRecord.access
                 }),
                 files: expect.objectContaining({
-                    enabled: false
+                    ...defaultRecord.files
                 }),
                 metadata: expect.objectContaining({
-                    creators: [
-                        {
-                            "person_or_org": {
-                                "family_name": "Brown",
-                                "given_name": "Troy",
-                                "name": "Brown, Troy",
-                                "type": "personal"
-                            }
-                        },
-                        {
-                            "person_or_org": {
-                                "name": "Troy Inc.",
-                                "type": "organizational"
-                            }
+                    ...defaultRecord.metadata,
+                    creators: defaultRecord.metadata.creators.map(creator => {
+                        if (creator.person_or_org.type.toLowerCase() === "personal") {
+                            return {
+                                person_or_org: {
+                                    ...creator.person_or_org,
+                                    name: `${creator.person_or_org.family_name}, ${creator.person_or_org.given_name}`
+                                },
+                            };
                         }
-                    ],
-                    publication_date: "2020-06-01",
-                    resource_type: expect.objectContaining({
-                        id: "image-photo"
+                        return creator;
                     }),
-                    title: "A Romans story"
+                    resource_type: expect.objectContaining({
+                        ...defaultRecord.metadata.resource_type
+                    }),
                 })
             };
 

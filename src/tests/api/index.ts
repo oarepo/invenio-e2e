@@ -1,1 +1,3 @@
-export { apiRecordTests } from './records';
+export { setupApiTesting } from './apiSetup';
+
+export { recordsApiTests } from './records';

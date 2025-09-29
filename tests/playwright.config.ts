@@ -4,11 +4,7 @@
  */
 
 import { defineConfig, devices } from '@playwright/test';
-import { readFileSync } from 'fs';
 import { appConfig } from "../src/config/env"; //  use centralized config
-
-const authUserFilePath = 'playwright/.auth/user.json';
-const authUserFile = JSON.parse(readFileSync(authUserFilePath, 'utf-8'));
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -24,6 +20,8 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
+  /* Set global timeout for each test */
+  timeout: 10_000,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   // Multiple reporters (console + HTML + Qase)
   reporter: [
@@ -88,12 +86,6 @@ export default defineConfig({
       testMatch: /api\/.*\.spec.ts/,
       use: {
         ...devices['Desktop Chrome'],
-        // Use prepared auth state.
-        storageState: authUserFilePath,
-        extraHTTPHeaders: {
-          'X-CSRFToken': authUserFile.cookies.find(cookie => cookie.name === 'csrftoken')?.value || '',
-          'Referer': process.env.BASE_URL || 'https://127.0.0.1:5000',
-        },
       },
       dependencies: ['API Testing Setup'],
     },
