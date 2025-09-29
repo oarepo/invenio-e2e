@@ -12,10 +12,9 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true
-
   },
   "include": [
     "src/**/*", 
     "tests/**/*"
-  ],
+  ]
 }

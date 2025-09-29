@@ -12,5 +12,7 @@ export type { AllPages } from "./pages";
 // tests
 export { loginTests, homepageTests, depositionTests } from './tests/e2e';
 
+export { setupApiTesting, recordsApiTests } from "./tests/api";
+
 export { i18nValidationTests } from "./tests/i18n/validation.spec";
 export { i18nPOTTests } from "./tests/i18n/pot.spec";
