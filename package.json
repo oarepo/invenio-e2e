@@ -7,6 +7,9 @@
   "scripts": {
     "build": "tsc; cat package.json | sed 's@dist/index.ts@dist/index.js@' > dist/package.json; cp -r scripts dist/",
     "docs": "documentation build src/**/*.ts -f md -o api_docs.md --shallow --github --sort-order kind",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier": "prettier --check \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
     "collect-translations": "node scripts/collect-translations.js",
     "collect-translations:validate": "node scripts/collect-translations.js --validate",
     "generate-pot": "node scripts/generate-pot.js",
@@ -25,7 +28,10 @@
     "@types/node": "^24.3.1",
     "documentation": "^14.0.3",
     "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsdoc": "^60.5.0",
     "playwright-qase-reporter": "^2.1.5",
+    "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.44.1"
