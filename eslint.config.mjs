@@ -8,6 +8,9 @@ import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default defineConfig(
   {
+    ignores: ["dist/**", "node_modules/**", "playwright-report/**", "test-results/**", ".git/**"],
+  },
+  {
     files: ["{src,tests}/**/*.{js,ts}"],
     plugins: {
 			js,

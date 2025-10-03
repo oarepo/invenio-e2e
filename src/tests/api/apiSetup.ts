@@ -6,6 +6,7 @@ import path from 'path';
 export function setupApiTesting(authFilePath?: string) {
   authFilePath = authFilePath ?? path.join(__dirname, '../../../playwright/.auth/user.json');
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setup('Authentication for API Testing', async ({ loginPage, homePage, page }) => {
     await homePage.openPage();
     const loggedInHomePage = await homePage.login();

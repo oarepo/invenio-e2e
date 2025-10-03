@@ -152,6 +152,7 @@ const _test = base.extend<{
         await use(loginService);
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     defaultUserLoggedIn: async ({ loginService, homePage, loginPage }, use) => {
         // this fixture logs in the default user
         await homePage.openPage();
