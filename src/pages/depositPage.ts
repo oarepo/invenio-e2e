@@ -1,10 +1,9 @@
 import { Locators } from "../locators";
 import { BasePage } from "./basePage";
 import { PreviewPage } from "./previewPage";
-import { expect, Page, Locator } from "@playwright/test";
+import { expect, Locator } from "@playwright/test";
 import { ExpectedTexts } from "../locators/expectedTexts";
 import { getCurrentDateFormatted } from "../fixtures/utils";
-import { FileUploadHelper } from "../helpers/fileUploadHelper";
 import { ExpectedError as ErrorWithLocation } from "../services/form";
 import path from "path";
 
@@ -17,9 +16,8 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   /*
    * Navigate to the Deposit page.
-   * @param url Optional URL to navigate to (if not provided, defaults to "/")
    */
-  async openPage(url?: string): Promise<void> {
+  async openPage(): Promise<void> {
     await this.page.goto("/");
     await this.page.waitForLoadState("networkidle");
     await this.validatePageLoaded();
@@ -171,7 +169,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   // Click the 'Preview' button and return a new PreviewPage instance
   async clickPreview(): Promise<PreviewPage> {
     await this.page.locator(this.locators.uploadPage.previewButton).click();
-    this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("networkidle");
     const previewPage = this.availablePages.previewPage;
     // Ensure the preview page is fully loaded before returning
     await previewPage.validatePageLoaded();
@@ -185,7 +183,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     );
     await saveDraftButton.click();
     // this makes the API call that can take some time on server so that network idle is not enough
-    this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("networkidle");
     await expect(saveDraftButton).not.toHaveClass(/loading/);
     // Scroll to top to see the error message if there is any
     await this.page.evaluate(() => window.scrollTo(0, 0));
@@ -194,7 +192,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   // Click the 'Publish' button
   async clickPublish(): Promise<void> {
     await this.page.locator(this.locators.uploadPage.publishButton).click();
-    this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("networkidle");
   }
 
   // Click confirmation 'Publish' button ('Are you sure you want to publish this record?' dialog)
@@ -203,19 +201,19 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
       .locator(this.locators.uploadPage.publishButton)
       .nth(1)
       .click();
-    this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("networkidle");
   }
 
   // Click the 'Edit' button
   async clickEditButton(): Promise<void> {
     await this.page.locator(this.locators.uploadPage.editButton).click();
-    this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("networkidle");
   }
 
   // Click the 'Delete' button
   async clickDeleteButton(): Promise<void> {
     await this.page.locator(this.locators.uploadPage.deleteButton).click();
-    this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("networkidle");
   }
 
   // Click delete confirmation button
@@ -223,7 +221,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     await this.page
       .locator(this.locators.uploadPage.confirmDeleteButton)
       .click();
-    this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("networkidle");
   }
 
   // VERIFICATION ------------------------------------------------------------------------
@@ -274,7 +272,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     expectedErrors: ErrorWithLocation[],
     onlyThese: boolean = true
   ): Promise<void> {
-    this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("networkidle");
     /* field looks like: 
         <div>
           <something name="field_name"></>
@@ -288,7 +286,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     const foundErrors: string[][] = [];
     const count = await errorFieldsLocator.count();
     for (let i = 0; i < count; i++) {
-      var { fieldName, errorMessage } = await this._getErrorFieldAndMessage(
+      const { fieldName, errorMessage } = await this._getErrorFieldAndMessage(
         errorFieldsLocator.nth(i)
       );
       if (fieldName && errorMessage) {
@@ -387,7 +385,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
           .first()
           .getAttribute("for"),
       };
-    } catch (e) {
+    } catch {
       // ignore
     }
     try {
@@ -398,7 +396,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
           .first()
           .getAttribute("name"),
       };
-    } catch (e) {
+    } catch {
       // ignore
     }
     return { errorMessage };
@@ -421,7 +419,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   async waitForUploadComplete(fileName: string): Promise<void> {
     await this.page.waitForSelector(
-      this.locators.uploadPage.uploadCompleteBar(fileName),
+      this.locators.uploadPage.uploadCompleteBar(),
       { state: "visible", timeout: 20000 }
     );
     console.log(`Upload complete for file: ${fileName}`);

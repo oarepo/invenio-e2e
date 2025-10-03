@@ -7,7 +7,7 @@ export { LocalLoginService, LoginServiceInterface } from './login';
 export { FormService, FormServiceInterface, ExpectedError } from './form';
 
 export interface Services<L extends Locators> {
-    i18n: I18nServiceInterface<L>;
+    i18n: I18nServiceInterface;
     login: LoginServiceInterface<L>;
-    form: FormServiceInterface<L>;
+    form: FormServiceInterface;
 }

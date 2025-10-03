@@ -47,7 +47,7 @@ function readValidationReport(): ValidationSummary | null {
  */
 export function i18nValidationTests(test: InvenioTest) {
   test.describe("Translation validation (fast, no browser)", () => {
-    test("Completeness and quality thresholds", async () => {
+    test("Completeness and quality thresholds", () => {
       const summary = readValidationReport();
       if (!summary)
         test.skip(true, "Validation report missing. Run `npm run collect-translations:validate`.");

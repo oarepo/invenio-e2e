@@ -68,8 +68,11 @@ export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
     options: { extraFixtures: string[] } = { extraFixtures: [] }
 ): { [key: string]: FixtureRegistrationFunction<L, T> } {
 
-    const page_creator = async (fixtures: any, use: UseFunction<L, T>) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pageCreator = async (fixtures: any, use: UseFunction<L, T>) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const pageInstance = new PageType(fixtures);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         fixtures.availablePages[name] = pageInstance;
         await use(pageInstance as InstanceType<T>);
     };
@@ -94,15 +97,17 @@ export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
             "expect",
             ...options.extraFixtures, // extra fixtures are passed as parameters
         ].join(", ");
-        const func = eval(`async ({ ${parameters} } , use) => { return await page_creator({ ${parameters} }, use); }`);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const func = eval(`async ({ ${parameters} } , use) => { return await pageCreator({ ${parameters} }, use); }`);
         return {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             [name]: func
         }
     }
 
     return {
         [name]: async ({ page, locators, availablePages, services, expect }: PageFixtureParams<L>, use: UseFunction<L, T>) => {
-            await page_creator({ page, locators, availablePages, services, expect }, use)
+            await pageCreator({ page, locators, availablePages, services, expect }, use)
         }
     }
 }

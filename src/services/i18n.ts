@@ -1,4 +1,4 @@
-import { Expect, Locator, Page, expect } from '@playwright/test';
+import { Expect, Locator, Page } from '@playwright/test';
 
 import type { Locators } from '../locators';
 import i18next from 'i18next';
@@ -6,7 +6,7 @@ import i18next from 'i18next';
 /**
  * Type that adds translation checking methods to Playwright's expect function
  */
-export type I18nExpected = Record<string, any> & {
+export type I18nExpected = Record<string, unknown> & {
     toHaveI18nText(
         locator: Locator, 
         translationKey: string, 
@@ -30,13 +30,13 @@ export interface Translations {
 /**
  * Interface for changing languages and checking translations in tests
  */
-export interface I18nServiceInterface<L extends Locators> {
+export interface I18nServiceInterface {
     switchLocale(locale: string): Promise<void>;
     currentLocale: string;
     untranslatedStrings: string[];
     translatableSelectors: string[];
     translations: Translations;
-    extendExpect<T extends Record<string, any> = {}>(expect: Expect<T>): Expect<T & I18nExpected>;
+    extendExpect<T extends Record<string, unknown> = Record<string, never>>(expect: Expect<T>): Expect<T & I18nExpected>;
     hasTranslation(key: string, locale?: string, packageName?: string): boolean;
     getLocalizedText(key: string, locale?: string, packageName?: string): string;
 }
@@ -44,7 +44,7 @@ export interface I18nServiceInterface<L extends Locators> {
 /**
  * Service for handling internationalization (i18n) in E2E tests
  */
-export class I18nService<L extends Locators> implements I18nServiceInterface<L> {
+export class I18nService<L extends Locators> implements I18nServiceInterface {
     private page: Page;
     private locators: L;
     private currentLocaleValue: string;
@@ -68,7 +68,7 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
         this.untranslatedStrings = untranslatedStrings;
         this.translatableSelectors = translatableSelectors;
         
-        this.initializeI18next();
+        void this.initializeI18next();
     }
 
     /**
@@ -187,6 +187,7 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
         await this.page.waitForLoadState('networkidle');
     }
 
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type, @typescript-eslint/no-this-alias */
     extendExpect<T extends Record<string, any> = {}>(expect: Expect<T>): Expect<T & I18nExpected> {
         const i18nService = this;
         return expect.extend({
@@ -218,4 +219,5 @@ export class I18nService<L extends Locators> implements I18nServiceInterface<L> 
             },
         }) as Expect<T & I18nExpected>;
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type, @typescript-eslint/no-this-alias */
 }

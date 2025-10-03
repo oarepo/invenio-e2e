@@ -32,10 +32,8 @@ export class FileUploadHelper {
 
   /**
    * Upload a random file from the UploadFiles folder.
-   * 
-   * @param filename name of the file to upload, relative to data/UploadFiles
    */
-  async uploadRandomFileAndConfirm(filename: string): Promise<void> {
+  async uploadRandomFileAndConfirm(): Promise<void> {
     const files = fs.readdirSync(this.uploadFolderPath); // Read files in the folder
 
     if (files.length === 0) {

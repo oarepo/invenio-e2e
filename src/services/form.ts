@@ -1,4 +1,3 @@
-import { Locators } from "../locators";
 import { Config } from "../config";
 import { BasePage, DepositPage } from "../pages";
 import { FormData } from "../fixtures/depositionData";
@@ -8,7 +7,7 @@ export interface ExpectedError {
     field?: string; // Optional field name associated with the error
 }
 
-export interface FormServiceInterface<L extends Locators = Locators> {
+export interface FormServiceInterface {
     /**
      * Fill the deposition form using FormData structure.
      * @param page      the deposition page instance
@@ -17,12 +16,14 @@ export interface FormServiceInterface<L extends Locators = Locators> {
     fillForm: (
         page: BasePage,
         formData: FormData
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) => Promise<{ page: BasePage; filledData: any[][] }>;
 
     /**
      * Fill form fields with the provided data.
      * It will call `fill<FieldName>` method for each provided field on the DepositPage instance.
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fill: (page: BasePage, data: Array<[string, any]>) => Promise<{ page: BasePage; filledData: any[] }>;
 
     /**
@@ -46,11 +47,11 @@ export interface FormServiceInterface<L extends Locators = Locators> {
      * Upload files to the form.
      * Upload a specific file from UploadFiles folder.
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     uploadFiles: (page: BasePage, fileNames: string[]) => Promise<{ page: BasePage; filledData: any[] }>;
 }
 
-export class FormService<L extends Locators>
-    implements FormServiceInterface<L> {
+export class FormService implements FormServiceInterface {
 
     private fillMethodPrefixes = ["fill", "select", "add"];
 
@@ -59,10 +60,13 @@ export class FormService<L extends Locators>
      */
     constructor(protected config: Config) { }
 
+    // Dynamic form handling requires any types for flexibility
     async fillForm(
         page: BasePage,
         formData: FormData
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ): Promise<{ page: BasePage; filledData: any[][] }> {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const filledData: any[][] = [];
 
         // Fill form data
@@ -90,6 +94,8 @@ export class FormService<L extends Locators>
         return { page, filledData };
     }
 
+    // Dynamic form field handling - requires any types for method resolution
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
     async fill(page: BasePage, data: Array<[string, any]>): Promise<{ page: BasePage; filledData: any[] }> {
         const _p: any = page; // cast to any to allow dynamic method calls
 
@@ -124,12 +130,15 @@ export class FormService<L extends Locators>
         return { page, filledData };
     }
 
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
     async save(page: BasePage): Promise<BasePage> {
         const _p = page as any;
         const newPage = await _p.clickSave() || _p;
         return newPage;
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
     async expectErrors(page: BasePage, expectedErrors: ExpectedError[], onlyTheseErrors: boolean = true): Promise<BasePage> {
         const _p = page as any;
         if (_p.verifyErrorMessages === undefined) {
@@ -141,7 +150,9 @@ export class FormService<L extends Locators>
         await _p.verifyErrorMessages(expectedErrors, onlyTheseErrors);
         return page;
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     async uploadFiles(page: BasePage, fileNames: string[]): Promise<{ page: BasePage; filledData: any[] }> {
         const filledData: any[] = [];
 
@@ -152,10 +163,12 @@ export class FormService<L extends Locators>
 
         return { page, filledData };
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
     /**
      * Helper method to find the appropriate method name for a field.
      */
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
     private getMethod(page: any, field: string, methodPrefixes: string[]): string {
         const triedMethods = [];
         for (const prefix of methodPrefixes) {
@@ -169,4 +182,5 @@ export class FormService<L extends Locators>
             `No method found for filling field ${field}. Tried: ${triedMethods.join(", ")}`
         );
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
 }

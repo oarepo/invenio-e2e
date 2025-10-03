@@ -27,21 +27,23 @@ export default defineConfig({
   reporter: [
     ["list"],
     ["html", { outputFolder: "playwright-report", open: "never" }],
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
     ...(appConfig.qase
       ? [
           [
             "playwright-qase-reporter",
             {
-              apiToken: appConfig.qase.token,
-              projectCode: appConfig.qase.project,
+              apiToken: (appConfig.qase as any).token,
+              projectCode: (appConfig.qase as any).project,
               runName: `E2E Run - ${new Date().toISOString()}`,
-              environment: appConfig.qase.environment,
+              environment: (appConfig.qase as any).environment,
               rootSuiteTitle: "Playwright E2E",
-              runComplete: appConfig.qase.runComplete,
+              runComplete: (appConfig.qase as any).runComplete,
             } as const,
           ] as const,
         ]
       : []),
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {

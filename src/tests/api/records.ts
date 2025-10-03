@@ -34,6 +34,7 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
 
             expect(response.status()).toBe(201);
 
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const createdRecord = await response.json();
 
             expect(createdRecord, "should not have any errors").not.toHaveProperty("errors");
@@ -75,6 +76,7 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
             }));
 
             // Publish the record
+            /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
             const publishResponse = await request.post(createdRecord.links.publish);
 
             expect(publishResponse.status()).toBe(202);
@@ -103,6 +105,7 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
                 created: publishedRecord.created, // created timestamp should be the same as when published
                 updated: publishedRecord.updated, // updated timestamp should be the same as when published
             }));
+            /* eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
         });
     });
 };
