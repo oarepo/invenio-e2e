@@ -1,6 +1,7 @@
+/* eslint-disable no-empty-pattern */
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
 
-import { AllPages, BasePage, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
+import { AllPages, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import {
     I18nExpected, I18nService, LocalLoginService, Services, Translations, FormService,
 } from '../services';
@@ -34,7 +35,7 @@ const _test = base.extend<{
     i18nService: I18nService<Locators>;
     loginService: LocalLoginService<Locators>;
     defaultUserLoggedIn: true;
-    formService: FormService<Locators>;
+    formService: FormService;
     services: Services<Locators>;
 
     communityData: CommunityData;
@@ -70,12 +71,13 @@ const _test = base.extend<{
     initialLocale: undefined,
 
     // translations loaded from pre-compiled file
-    translations: async ({ }, use) => {
-        let translations = {};
+    translations: async ({}, use) => {
+        let translations: Translations = {};
         try {
-            const translationsFile = require('@collected-translations/translations.json');
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const translationsFile = require('@collected-translations/translations.json') as Translations;
             translations = translationsFile;
-        } catch (error) {
+        } catch {
             throw new Error(
                 'Pre-compiled translations not found. Please generate translations first:\n\n' +
                 'run: npm run collect-translations\n' +
@@ -157,15 +159,15 @@ const _test = base.extend<{
         await use(true);
     },
 
-    communityData: async ({ }, use) => {
+    communityData: async ({}, use) => {
         await use(defaultCommunityData);
     },
 
-    depositionData: async ({ }, use) => {
+    depositionData: async ({}, use) => {
         await use(defaultDepositionData);
     },
 
-    recordsApiData: async ({ }, use) => {
+    recordsApiData: async ({}, use) => {
         await use(defaultRecordsApiData);
     },
 
@@ -241,12 +243,14 @@ export const test = new Proxy(_test as InvenioTest, {
         switch (prop) {
             case 'describe':
                 // return a wrapper around the describe method that can skip tests
-                return (title: string, annotation?: any, callback?: () => void) => {
+                return (title: string, annotation?: unknown, callback?: () => void) => {
                     const skippedTests = target.__skipped_tests || [];
                     if (skippedTests.includes(title)) {
-                        return target.describe.skip(title, annotation, callback || (() => { }));
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+                        return target.describe.skip(title, annotation as any, callback || (() => { }));
                     } else {
-                        return target.describe(title, annotation, callback || (() => { }));
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+                        return target.describe(title, annotation as any, callback || (() => { }));
                     }
                 }
             case 'skipTests':
@@ -266,6 +270,7 @@ export const test = new Proxy(_test as InvenioTest, {
                     }
                 }
             default:
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
                 return (target as any)[prop];
         }
     },
@@ -275,14 +280,15 @@ export const test = new Proxy(_test as InvenioTest, {
      * If the test has a title that is in the skipped tests list, the test
      * will be marked as .skip
      */
-    apply: (target, thisArg, args: any[]) => {
+    apply: (target, thisArg, args: unknown[]) => {
         const skippedTests = target.__skipped_tests || [];
         // if the first argument is a string, it is a test title
         if (typeof args[0] === 'string' && skippedTests.includes(args[0])) {
             // skip the test if it is in the skipped tests list
-            // @ts-ignore
-            return (target as any).skip(...args);
+            // @ts-expect-error - Skip method not properly typed on test function
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+            return (target as unknown).skip(...args);
         }
-        return target.apply(thisArg, args as any);
+        return target.apply(thisArg, args as Parameters<typeof target>);
     }
 });

@@ -35,7 +35,7 @@ async function parsePoFile(poFilePath, packageName) {
     }
 
     return output;
-  } catch (error) {
+  } catch {
     return {};
   }
 }
@@ -120,7 +120,7 @@ function createValidationReportOfPoFile(poFilePath, packageName, locale) {
         obsoleteTranslations: issues.obsoleteTranslations.length,
       },
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 }

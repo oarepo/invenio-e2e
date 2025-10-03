@@ -63,7 +63,7 @@ export class BasePage<L extends Locators = Locators,
      * @returns the home page
      */
     async navigateToHomePage(): Promise<HomePage> {
-        const logoLink = await this.page.locator(this.locators.header.logoLink);
+        const logoLink = this.page.locator(this.locators.header.logoLink);
         await logoLink.click();
 
         const homePage = this.availablePages.homePage;
@@ -72,8 +72,9 @@ export class BasePage<L extends Locators = Locators,
     }
 
     // FLOWS
-    async login(credentials?: any): Promise<this> {
+    async login(credentials?: { username?: string; password?: string }): Promise<this> {
         const loginService = this.services.login;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await loginService.login(this as any, credentials);
         this.expect(
             await loginService.isUserLoggedIn(),

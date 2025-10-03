@@ -7,7 +7,7 @@ export interface LoginServiceInterface<L extends Locators> {
     isUserLoggedIn: () => Promise<boolean>;
     login<S extends BasePage<L>>(
         currentPage: S,
-        credentials?: any,
+        credentials?: { username?: string; password?: string },
     ): Promise<S>;
 }
 

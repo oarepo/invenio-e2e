@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { InvenioTest } from '../../fixtures';
 import { expect } from '@playwright/test';
 
@@ -19,7 +20,7 @@ export function loginTests(test: InvenioTest) {
         });
 
         test('Logged in fixture works', async ({ defaultUserLoggedIn, loginService }) => {
-            expect(loginService.isUserLoggedIn()).toBeTruthy();
+            expect(await loginService.isUserLoggedIn()).toBeTruthy();
         });
     });
 };

@@ -146,10 +146,12 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     console.log(`Description verified: ${actualValue}`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async verifyData(filledData: any[][]): Promise<void> {
     for (const data of filledData) {
       console.log("verifyData got:", JSON.stringify(data)); // DEBUG
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const [field, value] = data;
       if (!field) {
         throw new Error(
@@ -157,10 +159,11 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
         );
       }
 
-      const methodName = `verify${
-        field.charAt(0).toUpperCase() + field.slice(1)
-      }`;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      const methodName = `verify${field.charAt(0).toUpperCase() + field.slice(1)}`;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       if (typeof (this as any)[methodName] === "function") {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
         await (this as any)[methodName](value);
       } else {
         throw new Error(`No verification method found for field ${field}`);

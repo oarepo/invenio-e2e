@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
 
@@ -19,7 +20,7 @@ export function depositionTests(test: InvenioTest) {
       // Fill the deposition form by following the provided steps and check for errors
       const { filledData } = await formService.fillForm(depositPage, depositionData["metadataOnlyRecord"]);
 
-      await expect(await depositPage.clickPreview()).toBe(previewPage);
+      expect(await depositPage.clickPreview()).toBe(previewPage);
       await previewPage.verifyData(filledData);
     });
 

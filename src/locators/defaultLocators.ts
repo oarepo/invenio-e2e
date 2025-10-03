@@ -76,7 +76,7 @@ export const locators = {
     warningMessage: "#warning-feedback-div[i.exclamation",
     fieldWithError: "div.field.error",
     errorMessageInsideField: "div.ui.pointing.prompt.label",
-    uploadCompleteBar: (fileName: string) =>
+    uploadCompleteBar: () =>
       `.file-upload-progress[data-percent="100"]`,
   },
 

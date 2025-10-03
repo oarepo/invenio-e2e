@@ -26,7 +26,7 @@ export const appConfig = {
   // User login for tested app
   userEmail: process.env.INVENIO_USER_EMAIL || "",
   userPassword: process.env.INVENIO_USER_PASSWORD || "",
-  qase: undefined as any, // optional qase config
+  qase: undefined as unknown, // optional qase config
 };
 
 console.log("[ENV] Loaded from .env:", {

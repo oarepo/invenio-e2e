@@ -53,11 +53,11 @@ type UseLocators<L> = (r: L & Locators) => Promise<void>;
  *          merges them with the new ones, to be used in the test 
  *          fixture definition.
  */
-export function updateLocators<T extends Record<string, any>>(locators: T): (
+export function updateLocators<T extends Record<string, unknown>>(locators: T): (
     (params: { locators: Locators }, use: UseLocators<T & Locators>) => Promise<void>) {
     return async ({ locators: origLocators }, use) => {
         // NOTE: https://github.com/voodoocreation/ts-deepmerge/issues/30: When working with generic declared types/interfaces
         // TODO: Create a type-safe interfaces like ILocatorsObject
-        await use(merge(origLocators, locators as Object) as T & Locators);
+        await use(merge(origLocators, locators as object) as T & Locators);
     };
 }

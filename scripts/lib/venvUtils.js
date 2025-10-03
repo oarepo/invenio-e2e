@@ -51,7 +51,9 @@ function getSitePackagesPath(venvPath) {
         return sitePackagesPath;
       }
     }
-  } catch (error) {}
+  } catch {
+    // Ignore errors when checking virtual environment
+  }
 
   return "";
 }

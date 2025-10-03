@@ -6,6 +6,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 const authUserFilePath = process.env.AUTH_USER_FILE || path.join(__dirname, '../../playwright/.auth/user.json');
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 const authUserFile = JSON.parse(readFileSync(authUserFilePath, 'utf-8'));
 
 test.use({
@@ -15,6 +16,7 @@ test.use({
     'Referer': appConfig.baseURL || 'https://127.0.0.1:5000',
   },
 });
+/* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
 // Run all API tests by calling the function with the test instance
 
