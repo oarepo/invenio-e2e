@@ -1,8 +1,8 @@
 // @ts-check
 
-import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
-// import jsdoc from 'eslint-plugin-jsdoc';
+import js from '@eslint/js';
+import jsdoc from 'eslint-plugin-jsdoc';
 import tseslint from 'typescript-eslint';
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
@@ -11,21 +11,17 @@ export default defineConfig(
     ignores: ["dist/**", "node_modules/**", "playwright-report/**", "test-results/**", ".git/**"],
   },
   {
-    files: ["{src,tests}/**/*.{js,ts}"],
-    plugins: {
-			js,
-		},
-		extends: ["js/recommended"],
-    rules: {
-      "camelcase": ["error", { properties: "never", ignoreDestructuring: true }],
-    }
-  },
-  {
-    files: ["scripts/**/*.js"],
+    files: ["{src,tests,scripts}/**/*.{js,ts}"],
     plugins: {
       js,
+      jsdoc,
     },
-    extends: ["js/recommended"],
+    extends: [
+      js.configs.recommended,
+      jsdoc.configs['flat/contents-typescript-error'],
+      jsdoc.configs['flat/logical-typescript-error'],
+      jsdoc.configs['flat/stylistic-typescript'],
+    ],
     languageOptions: {
       globals: {
         require: "readonly",
@@ -39,21 +35,19 @@ export default defineConfig(
         Buffer: "readonly",
       },
     },
+    // Additional rules to override those in the extended configs
     rules: {
-      "camelcase": ["error", { properties: "never", ignoreDestructuring: true }],
+      "camelcase": ["error", { properties: "never", ignoreDestructuring: true }], // Invenio rule
     }
   },
   {
     files: ["{src,tests}/**/*.ts"],
     plugins: {
       tseslint,
-      // jsdoc,
+      jsdoc,
     },
     extends: [
       tseslint.configs.recommendedTypeChecked,
-      // jsdoc.configs['flat/contents-typescript-error'],
-      // jsdoc.configs['flat/logical-typescript-error'],
-      // jsdoc.configs['flat/stylistic-typescript'],
     ],
   },
   {
