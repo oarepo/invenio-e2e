@@ -4,8 +4,7 @@ import { expect } from '@playwright/test';
 
 /**
  * Runs a set of tests for the login page.
- * 
- * @param test - The InvenioTest instance to use for the tests.
+ * @param test The InvenioTest instance to use for the tests.
  */
 export function loginTests(test: InvenioTest) {
     // If Login Tests are skipped, return early

@@ -10,7 +10,7 @@ export class NewCommunityPage<T extends Locators = Locators> extends BasePage<T>
   // NAVIGATION --------------------------------------------------------------------------
 
   /**
-   * Navigate to the home page.
+   * Navigates to the home page.
    */
   async navigateToHome() {
     await this.page.goto("/");
@@ -108,7 +108,7 @@ export class NewCommunityPage<T extends Locators = Locators> extends BasePage<T>
 
   /**
    * Verifies that the created community name matches the expected name.
-   * @param expectedName The expected community name.
+   * @param expectedName The expected community name to verify.
    */
   async verifyCommunityName(expectedName: string) {
     const locator = this.getCommunityName();

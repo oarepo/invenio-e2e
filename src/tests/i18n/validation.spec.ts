@@ -42,8 +42,7 @@ function readValidationReport(): ValidationSummary | null {
 
 /**
  * Runs a set of tests for translation validation.
- *
- * @param test - The InvenioTest instance to use for the tests.
+ * @param test The InvenioTest instance to use for the tests.
  */
 export function i18nValidationTests(test: InvenioTest) {
   test.describe("Translation validation (fast, no browser)", () => {

@@ -7,7 +7,7 @@ import { BasePage } from './basePage';
 
 export class LoginPage<T extends Locators = Locators> extends BasePage<T> {
 
-    /*
+    /**
      * Navigate to the Login page.
      * @returns The login page instance to allow method chaining.
      */
@@ -22,6 +22,7 @@ export class LoginPage<T extends Locators = Locators> extends BasePage<T> {
     }
 
     // VALIDATION
+
     /**
      * Validates that the login page has loaded by checking for the username and password fields.
      */
@@ -64,10 +65,9 @@ export class LoginPage<T extends Locators = Locators> extends BasePage<T> {
     /**
      * Performs a log in operation by filling the username and password fields 
      * and submitting the login.
-     * 
-     * @param username: The username to fill in the username field.
-     * @param password: The password to fill in the password field.
-     * @param expectedPage: The page expected after login.
+     * @param username The username to fill in the username field.
+     * @param password The password to fill in the password field.
+     * @param afterLoginPage The page instance expected after login.
      * @returns The expected page after performing the login.
      */
     async loginUser<S extends BasePage<T>>(username: string, password: string, afterLoginPage: S): Promise<S> {

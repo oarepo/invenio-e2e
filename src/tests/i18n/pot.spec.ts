@@ -5,8 +5,7 @@ import path from "path";
 
 /**
  * Runs a set of tests for POT file generation.
- *
- * @param test - The InvenioTest instance to use for the tests.
+ * @param test The InvenioTest instance to use for the tests.
  */
 export function i18nPOTTests(test: InvenioTest) {
   test.describe("POT file generation (fast, no browser)", () => {

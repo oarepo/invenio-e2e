@@ -10,8 +10,8 @@ export interface ExpectedError {
 export interface FormServiceInterface {
     /**
      * Fill the deposition form using FormData structure.
-     * @param page      the deposition page instance
-     * @param formData  the form data containing data, files, and expected errors
+     * @param page the deposition page instance
+     * @param formData the form data containing data, files, and expected errors
      */
     fillForm: (
         page: BasePage,
@@ -21,7 +21,7 @@ export interface FormServiceInterface {
 
     /**
      * Fill form fields with the provided data.
-     * It will call `fill<FieldName>` method for each provided field on the DepositPage instance.
+     * It will call `fill&lt;FieldName>` method for each provided field on the DepositPage instance.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fill: (page: BasePage, data: Array<[string, any]>) => Promise<{ page: BasePage; filledData: any[] }>;

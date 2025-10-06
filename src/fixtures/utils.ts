@@ -30,37 +30,37 @@ export type FixtureRegistrationFunction<L extends Locators, T extends typeof Bas
 ) => Promise<void>;
 
 /**
- * registerPage is a utility function to register a page in the test fixture.
+ * RegisterPage is a utility function to register a page in the test fixture.
  * Usage:
- * 
+ *
  * ```typescript
- * 
- *    import { registerPage } from '@inveniosoftware/invenio-e2e';
- *    export const test = invenio_test.extend({
- *       blah: 1, // this is just an example of an extra fixture
- *       ...registerPage('myPage', MyPage, { extraFixtures: ['blah'] }),
- *    });
- * 
+ *
+ * import { registerPage } from '@inveniosoftware/invenio-e2e';
+ * export const test = invenio_test.extend({
+ * blah: 1, // this is just an example of an extra fixture
+ * ...registerPage('myPage', MyPage, { extraFixtures: ['blah'] }),
+ * });
+ *
  * ```
- * 
+ *
  * It is equivalent to:
- * 
+ *
  * ```typescript
- *   export const test = invenio_test.extend({
- *      blah: 1,
- *      myPage: async ({ page, locators, availablePages, blah }, use) => {
- *         const inst = new MyPage({ page, locators, availablePages, blah });
- *         availablePages.myPage = inst;
- *         await use(inst);
- *      }
- *   });
+ * export const test = invenio_test.extend({
+ * blah: 1,
+ * myPage: async ({ page, locators, availablePages, blah }, use) => {
+ * const inst = new MyPage({ page, locators, availablePages, blah });
+ * availablePages.myPage = inst;
+ * await use(inst);
+ * }
+ * });
  * ```
- * 
- * @param name        The name of the fixture that will contain the page instance.
- * @param PageType    Page class to be registered.
- * @param options     Optional options for the registration, such as extraFixtures. 
- * @returns           An object with the fixture registration function for the page
- *                    to be used deconstructed in the test fixture.
+ * @param name The name of the fixture that will contain the page instance.
+ * @param PageType Page class to be registered.
+ * @param options Optional options for the registration.
+ * @param options.extraFixtures Additional fixtures to be passed to the page constructor.
+ * @returns An object with the fixture registration function for the page
+ * to be used deconstructed in the test fixture.
  */
 export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
     name: string,

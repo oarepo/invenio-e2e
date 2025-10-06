@@ -3,8 +3,7 @@ import { expect } from '@playwright/test';
 
 /**
  * Runs a set of API tests for the Records API.
- * 
- * @param test - The InvenioTest instance to use for the tests.
+ * @param test The InvenioTest instance to use for the tests.
  */
 export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/api/records') {
     test.describe('API Record Tests', () => {

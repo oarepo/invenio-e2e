@@ -48,7 +48,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Clicks the "Metadata-only record" checkbox according to the given value.
-   * @param value boolean - true to check, false to uncheck
+   * @param checked Boolean value - true to check, false to uncheck.
    */
   async fillMetadataOnly(checked: boolean): Promise<void> {
     const checkbox = this.page.locator(
@@ -227,8 +227,8 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   // VERIFICATION ------------------------------------------------------------------------
 
   /**
-   * Private helper to verify toast messages on the page
-   * @param expectedText The expected text in the toast message
+   * Private helper to verify toast messages on the page.
+   * @param expectedText The text content that should appear in the toast notification.
    */
   private async verifyToastMessage(expectedText: string): Promise<void> {
     const toast = this.page.locator(
@@ -260,13 +260,12 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Helper to verify that these error messages are shown on the page.
-   *
    * @param expectedErrors The expected error messages (strings or regex patterns). Pass
-   *                 empty array and onlyThese=true to verify that no error messages
-   *                 are shown.
+   * empty array and onlyThese=true to verify that no error messages
+   * are shown.
    * @param onlyThese If true, verifies that only these messages are present.
-   *             If false, verifies that at least these messages are present.
-   *             Default is true.
+   * If false, verifies that at least these messages are present.
+   * Default is true.
    */
   async verifyErrorMessages(
     expectedErrors: ErrorWithLocation[],
@@ -332,12 +331,12 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   }
 
   /**
-   *
+   * Matches and removes errors from the errorMessages array.
    * If we match an error, we will remove it from the "errorMessages" array
    * so that at the end we can see if there are any unmatched errors.
-   * @param messages
-   * @param errorMessages
-   * @returns
+   * @param messages The list of message locators to check.
+   * @param errorMessages The array of expected error messages.
+   * @returns The updated array of unmatched error messages.
    */
   private _matchErrorMessages(
     messages: ErrorWithLocation[],
@@ -424,9 +423,10 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     );
     console.log(`Upload complete for file: ${fileName}`);
   }
+
   /**
-    async fillAndSubmit(data: Record<string, any>): Promise<DepositPage> {
- 
-    }
-     */
+   * async fillAndSubmit(data: Record&lt;string, any>): Promise&lt;DepositPage> {
+   *
+   * }
+   */
 }

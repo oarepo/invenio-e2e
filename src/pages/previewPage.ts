@@ -47,8 +47,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Verifies that an uploaded file with the given filename is visible in the preview page.
-   *
-   * @param filename - The expected filename of the uploaded file.
+   * @param filename The expected filename of the uploaded file.
    */
   async verifyUploadedFile(filename: string): Promise<void> {
     await this.waitForUploadedFilesTable();
@@ -63,8 +62,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Verifies that the creator matches the expected value.
-   *
-   * @param expectedValue - Expected creator name
+   * @param expected Expected creator name or object with name property.
    */
   async verifyCreator(expected: string | { name: string }): Promise<void> {
     const creatorLocator = this.page.locator(this.locators.previewPage.creator);
@@ -86,8 +84,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
   /**
    * Verifies that the record title on the page matches the expected title.
    * Fails the test if the title does not match.
-   *
-   * @param expectedTitle - The title string that should appear on the page.
+   * @param expectedTitle The title string that should appear on the page.
    */
   async verifyTitle(expectedTitle: string): Promise<void> {
     const titleLocator = this.page.locator(
@@ -110,8 +107,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Verifies that the resource type matches the expected value.
-   *
-   * @param expectedValue - Expected resource type text.
+   * @param expectedValue Expected resource type text.
    */
   async verifyResourceType(expectedValue: string): Promise<void> {
     const locator = this.page.locator(this.locators.previewPage.resourceType);
@@ -128,8 +124,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Verifies that the description matches the expected value.
-   *
-   * @param expectedValue - Expected description text.
+   * @param expectedValue Expected description text.
    */
   async verifyDescription(expectedValue: string): Promise<void> {
     const locator = this.page.locator(

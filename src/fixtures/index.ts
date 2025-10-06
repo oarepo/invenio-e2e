@@ -221,12 +221,12 @@ type _invenio_base_test = typeof _test;
  */
 export interface InvenioTest extends _invenio_base_test {
     __skipped_tests?: string[];
+
     /**
      * Call the callback function with the skipped tests list. If a test inside the callback
      * has a title that is in the skipped tests list, it will be skipped.
-     * 
-     * @param skippedTests  a list of test titles to skip
-     * @param callback      a callback function that contains the tests to run
+     * @param skippedTests a list of test titles to skip
+     * @param callback a callback function that contains the tests to run
      */
     skipTests: (skippedTests: string[], callback: () => void) => void;
 }
@@ -277,9 +277,9 @@ export const test = new Proxy(_test as InvenioTest, {
     },
 
     /**
-     * Handles the case test("test title", ({fixtures}) => { test body })
+     * Handles the case test("test title", ({fixtures}) => { test body }).
      * If the test has a title that is in the skipped tests list, the test
-     * will be marked as .skip
+     * will be marked as .skip.
      */
     apply: (target, thisArg, args: unknown[]) => {
         const skippedTests = target.__skipped_tests || [];

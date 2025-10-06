@@ -20,10 +20,12 @@ export class BasePage<L extends Locators = Locators,
 
     /**
      * Creates a new instance of the abstract base page.
-     * 
-     * @param page  Playwright Page object representing the current page.
-     * @param locators  An object containing locators for elements on the page.
-     * @param availablePages  An object containing available pages for navigation.
+     * @param conf Configuration object.
+     * @param conf.page Playwright Page object representing the current page.
+     * @param conf.locators An object containing locators for elements on the page.
+     * @param conf.availablePages An object containing available pages for navigation.
+     * @param conf.services An object containing available services.
+     * @param conf.expect Playwright expect function with extensions.
      */
     constructor({ page, locators, availablePages, services, expect }: {
         page: Page,
@@ -40,6 +42,7 @@ export class BasePage<L extends Locators = Locators,
     }
 
     // VALIDATION
+
     /**
      * Validates that the loaded page has a logo link in the header.
      */
@@ -57,10 +60,10 @@ export class BasePage<L extends Locators = Locators,
     }
 
     // NAVIGATION
+
     /**
      * Navigates to the home page as we should always have a home page link in the header.
-     * 
-     * @returns the home page
+     * @returns The home page instance.
      */
     async navigateToHomePage(): Promise<HomePage> {
         const logoLink = this.page.locator(this.locators.header.logoLink);

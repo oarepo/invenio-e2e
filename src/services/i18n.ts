@@ -72,7 +72,7 @@ export class I18nService<L extends Locators> implements I18nServiceInterface {
     }
 
     /**
-     * Initialize i18next instances for each locale to handle language nuances
+     * Initializes i18next instances for each locale to handle language nuances.
      */
     private async initializeI18next(): Promise<void> {
         for (const locale of Object.keys(this.translations)) {
@@ -110,17 +110,16 @@ export class I18nService<L extends Locators> implements I18nServiceInterface {
     }
 
     /**
-     * Get localized text using i18next for better language handling.
-     * 
+     * Retrieves localized text using i18next for enhanced language handling.
+     *
      * This method uses i18next to properly handle language nuances, including:
      * - Czech plural forms and cases
      * - Proper interpolation and formatting
-     * - Context-sensitive translations
-     * 
-     * @param key - Translation key to look up
-     * @param locale - Locale defaults to current locale
-     * @param packageName - Optional package namespace for scoped lookups
-     * @returns Translated text or a fallback indicator
+     * - Context-sensitive translations.
+     * @param key Translation key to look up.
+     * @param locale Locale defaults to current locale.
+     * @param packageName Optional package namespace for scoped lookups.
+     * @returns Translated text or a fallback indicator.
      */
     getLocalizedText(key: string, locale?: string, packageName?: string): string {
         const targetLocale = locale || this.currentLocaleValue;
