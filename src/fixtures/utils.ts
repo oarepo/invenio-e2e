@@ -34,11 +34,10 @@ export type FixtureRegistrationFunction<L extends Locators, T extends typeof Bas
  * Usage:
  *
  * ```typescript
- *
  * import { registerPage } from '@inveniosoftware/invenio-e2e';
  * export const test = invenio_test.extend({
- * blah: 1, // this is just an example of an extra fixture
- * ...registerPage('myPage', MyPage, { extraFixtures: ['blah'] }),
+ *   blah: 1, // this is just an example of an extra fixture
+ *   ...registerPage('myPage', MyPage, { extraFixtures: ['blah'] }),
  * });
  *
  * ```
@@ -47,12 +46,12 @@ export type FixtureRegistrationFunction<L extends Locators, T extends typeof Bas
  *
  * ```typescript
  * export const test = invenio_test.extend({
- * blah: 1,
- * myPage: async ({ page, locators, availablePages, blah }, use) => {
- * const inst = new MyPage({ page, locators, availablePages, blah });
- * availablePages.myPage = inst;
- * await use(inst);
- * }
+ *   blah: 1,
+ *   myPage: async ({ page, locators, availablePages, blah }, use) => {
+ *     const inst = new MyPage({ page, locators, availablePages, blah });
+ *     availablePages.myPage = inst;
+ *     await use(inst);
+ *   }
  * });
  * ```
  * @param name The name of the fixture that will contain the page instance.
