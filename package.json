@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
+    "prettier:fix": "prettier --write \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
     "collect-translations": "node scripts/collect-translations.js",
     "collect-translations:validate": "node scripts/collect-translations.js --validate",
     "generate-pot": "node scripts/generate-pot.js",
