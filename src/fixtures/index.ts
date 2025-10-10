@@ -1,5 +1,6 @@
 /* eslint-disable no-empty-pattern */
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
+import type { TestDetails } from '@playwright/test';
 
 import { AllPages, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import {
@@ -74,7 +75,7 @@ const _test = base.extend<{
     translations: async ({}, use) => {
         let translations: Translations = {};
         try {
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            // eslint-disable-next-line @typescript-eslint/no-require-imports -- we cannot use import here because "@collected-translations" alias is registered when Playwright is run inside an external/tested repository
             const translationsFile = require('@collected-translations/translations.json') as Translations;
             translations = translationsFile;
         } catch {
@@ -234,24 +235,24 @@ export interface InvenioTest extends _invenio_base_test {
 /**
  * InvenioTest is a normal Playwright test object with additional functionality
  * to skip tests based on a list of skipped tests.
+ * @augments _test
+ * @see {@link https://playwright.dev/docs/api/class-test} for more information about the Playwright test object.
  */
-export const test = new Proxy(_test as InvenioTest, {
+export const test: InvenioTest = new Proxy(_test as InvenioTest, {
 
     /**
      * Proxy getter to handle .describe and .skipTests methods.
      */
-    get: (target, prop) => {
+    get: (target, prop: keyof InvenioTest) => {
         switch (prop) {
             case 'describe':
                 // return a wrapper around the describe method that can skip tests
-                return (title: string, annotation?: unknown, callback?: () => void) => {
+                return (title: string, details?: TestDetails, callback?: () => void) => {
                     const skippedTests = target.__skipped_tests || [];
                     if (skippedTests.includes(title)) {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-                        return target.describe.skip(title, annotation as any, callback || (() => { }));
+                        return target.describe.skip(title, details as TestDetails, callback || (() => { }));
                     } else {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-                        return target.describe(title, annotation as any, callback || (() => { }));
+                        return target.describe(title, details as TestDetails, callback || (() => { }));
                     }
                 }
             case 'skipTests':
@@ -271,8 +272,7 @@ export const test = new Proxy(_test as InvenioTest, {
                     }
                 }
             default:
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-                return (target as any)[prop];
+                return target[prop];
         }
     },
 
@@ -281,7 +281,7 @@ export const test = new Proxy(_test as InvenioTest, {
      * If the test has a title that is in the skipped tests list, the test
      * will be marked as .skip.
      */
-    apply: (target, thisArg, args: unknown[]) => {
+    apply: (target, thisArg, args: Parameters<InvenioTest>) => {
         const skippedTests = target.__skipped_tests || [];
         // if the first argument is a string, it is a test title
         if (typeof args[0] === 'string' && skippedTests.includes(args[0])) {
@@ -290,6 +290,6 @@ export const test = new Proxy(_test as InvenioTest, {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
             return (target as unknown).skip(...args);
         }
-        return target.apply(thisArg, args as Parameters<typeof target>);
+        return target.apply(thisArg, args);
     }
 });

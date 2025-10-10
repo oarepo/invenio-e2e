@@ -3,7 +3,7 @@ import { test } from '../src/fixtures';
 function getAvailableTranslations(): Record<string, unknown> | null {
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-require-imports
-        return require('../src/translations/translations.json');
+        return require('@collected-translations/translations.json');
     } catch {
         return null;
     }

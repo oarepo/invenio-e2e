@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/text-escaping */
 import { locators } from './defaultLocators';
 import { merge } from 'ts-deepmerge';
 
@@ -19,7 +20,7 @@ type UseLocators<L> = (r: L & Locators) => Promise<void>;
  * myLocators = { ... }
  *
  * export const test = invenio_test.extend({
- * locators: updateLocators(myLocators),
+ *   locators: updateLocators(myLocators),
  * })
  * ```
  *
@@ -39,10 +40,10 @@ type UseLocators<L> = (r: L & Locators) => Promise<void>;
  * ```typescript
  *
  * import { BasePage } from '@inveniosoftware/invenio-e2e';
- * class MyPage extends BasePage&lt;MyLocators> {
- * blah() {
- * console.log(this.locators.myPage.something);
- * }
+ * class MyPage extends BasePage<MyLocators> {
+ *   blah() {
+ *     console.log(this.locators.myPage.something);
+ *   }
  * }
  * ```
  * @param locators the new locators to be merged with the existing ones.

@@ -40,3 +40,5 @@ export interface AllPages<L extends Locators = Locators> {
     depositPage: DepositPage<L>;
     previewPage: PreviewPage<L>;
 }
+
+export type AllPagesKeys = Extract<keyof AllPages, string>;

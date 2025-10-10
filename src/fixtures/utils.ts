@@ -1,6 +1,6 @@
 import { Page, Expect } from '@playwright/test';
 import type { Locators } from '../locators';
-import { AllPages, BasePage } from '../pages';
+import { AllPages, AllPagesKeys, BasePage } from '../pages';
 import { Services, I18nExpected } from '../services';
 
 /**
@@ -62,17 +62,15 @@ export type FixtureRegistrationFunction<L extends Locators, T extends typeof Bas
  * to be used deconstructed in the test fixture.
  */
 export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
-    name: string,
+    name: AllPagesKeys,
     PageType: T,
     options: { extraFixtures: string[] } = { extraFixtures: [] }
 ): { [key: string]: FixtureRegistrationFunction<L, T> } {
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pageCreator = async (fixtures: any, use: UseFunction<L, T>) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const pageCreator = async (fixtures: PageFixtureParams<L>, use: UseFunction<L, T>) => {
         const pageInstance = new PageType(fixtures);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        fixtures.availablePages[name] = pageInstance;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        (fixtures.availablePages as any)[name] = pageInstance;
         await use(pageInstance as InstanceType<T>);
     };
 
