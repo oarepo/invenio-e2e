@@ -11,7 +11,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
 
   // NAVIGATION -------------------------------------------------------------------------
 
-  /*
+  /**
    * Navigate to the Home page.
    * @returns The home page instance to allow method chaining.
    */
@@ -22,6 +22,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
   }
 
   // VALIDATION --------------------------------------------------------------------------
+
   /**
    * Validates that the home page has loaded by checking for the search field.
    */
@@ -80,8 +81,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Performs a search operation by filling the search field and submitting the search.
-   *
-   * @param query  The search query to fill in the search field.
+   * @param query The search query to fill in the search field.
    * @returns The search page after performing the search.
    */
   async performSearch(query: string): Promise<SearchPage> {

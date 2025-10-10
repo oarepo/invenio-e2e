@@ -1,6 +1,6 @@
 import { Page, Expect } from '@playwright/test';
 import type { Locators } from '../locators';
-import { AllPages, BasePage } from '../pages';
+import { AllPages, AllPagesKeys, BasePage } from '../pages';
 import { Services, I18nExpected } from '../services';
 
 /**
@@ -30,47 +30,47 @@ export type FixtureRegistrationFunction<L extends Locators, T extends typeof Bas
 ) => Promise<void>;
 
 /**
- * registerPage is a utility function to register a page in the test fixture.
+ * RegisterPage is a utility function to register a page in the test fixture.
  * Usage:
- * 
+ *
  * ```typescript
- * 
- *    import { registerPage } from '@inveniosoftware/invenio-e2e';
- *    export const test = invenio_test.extend({
- *       blah: 1, // this is just an example of an extra fixture
- *       ...registerPage('myPage', MyPage, { extraFixtures: ['blah'] }),
- *    });
- * 
+ * import { registerPage } from '@inveniosoftware/invenio-e2e';
+ * export const test = invenio_test.extend({
+ *   blah: 1, // this is just an example of an extra fixture
+ *   ...registerPage('myPage', MyPage, { extraFixtures: ['blah'] }),
+ * });
+ *
  * ```
- * 
+ *
  * It is equivalent to:
- * 
+ *
  * ```typescript
- *   export const test = invenio_test.extend({
- *      blah: 1,
- *      myPage: async ({ page, locators, availablePages, blah }, use) => {
- *         const inst = new MyPage({ page, locators, availablePages, blah });
- *         availablePages.myPage = inst;
- *         await use(inst);
- *      }
- *   });
+ * export const test = invenio_test.extend({
+ *   blah: 1,
+ *   myPage: async ({ page, locators, availablePages, blah }, use) => {
+ *     const inst = new MyPage({ page, locators, availablePages, blah });
+ *     availablePages.myPage = inst;
+ *     await use(inst);
+ *   }
+ * });
  * ```
- * 
- * @param name        The name of the fixture that will contain the page instance.
- * @param PageType    Page class to be registered.
- * @param options     Optional options for the registration, such as extraFixtures. 
- * @returns           An object with the fixture registration function for the page
- *                    to be used deconstructed in the test fixture.
+ * @param name The name of the fixture that will contain the page instance.
+ * @param PageType Page class to be registered.
+ * @param options Optional options for the registration.
+ * @param options.extraFixtures Additional fixtures to be passed to the page constructor.
+ * @returns An object with the fixture registration function for the page
+ * to be used deconstructed in the test fixture.
  */
 export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
-    name: string,
+    name: AllPagesKeys,
     PageType: T,
     options: { extraFixtures: string[] } = { extraFixtures: [] }
 ): { [key: string]: FixtureRegistrationFunction<L, T> } {
 
-    const page_creator = async (fixtures: any, use: UseFunction<L, T>) => {
+    const pageCreator = async (fixtures: PageFixtureParams<L>, use: UseFunction<L, T>) => {
         const pageInstance = new PageType(fixtures);
-        fixtures.availablePages[name] = pageInstance;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        (fixtures.availablePages as any)[name] = pageInstance;
         await use(pageInstance as InstanceType<T>);
     };
 
@@ -94,15 +94,17 @@ export function registerPage<L extends Locators, T extends typeof BasePage<L>>(
             "expect",
             ...options.extraFixtures, // extra fixtures are passed as parameters
         ].join(", ");
-        const func = eval(`async ({ ${parameters} } , use) => { return await page_creator({ ${parameters} }, use); }`);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const func = eval(`async ({ ${parameters} } , use) => { return await pageCreator({ ${parameters} }, use); }`);
         return {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             [name]: func
         }
     }
 
     return {
         [name]: async ({ page, locators, availablePages, services, expect }: PageFixtureParams<L>, use: UseFunction<L, T>) => {
-            await page_creator({ page, locators, availablePages, services, expect }, use)
+            await pageCreator({ page, locators, availablePages, services, expect }, use)
         }
     }
 }

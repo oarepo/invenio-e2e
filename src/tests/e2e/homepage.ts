@@ -3,8 +3,7 @@ import { expect } from '@playwright/test';
 
 /**
  * Runs a set of tests for the homepage.
- * 
- * @param test - The InvenioTest instance to use for the tests.
+ * @param test The InvenioTest instance to use for the tests.
  */
 export function homepageTests(test: InvenioTest) {
 

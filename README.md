@@ -2,6 +2,11 @@
 
 **Note:** This is a suggestion only; it might be changed or abandoned at any time.
 
+## Dependencies
+
+- [Node.js](https://nodejs.org/en/) (v20.11.0 or higher)
+- [pnpm](https://pnpm.io/) (v9.0.0 or higher)
+
 ## How to Try It Out
 
 ### Directory Structure

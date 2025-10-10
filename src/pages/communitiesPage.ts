@@ -68,7 +68,7 @@ export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> 
 
   /**
    * Verifies that the community name at the given index matches the expected name.
-   * @param expectedName The expected community name.
+   * @param expectedName The expected community name to verify.
    * @param index Index of the community in the list (default 0).
    */
   async verifyCommunityName(

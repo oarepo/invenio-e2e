@@ -43,7 +43,7 @@ function tryInvenioI18nCommand(venvInfo, outputFile) {
     });
 
     return { success: true, command };
-  } catch (error) {
+  } catch {
     return { success: false };
   }
 }
@@ -97,7 +97,6 @@ async function extractStringsWithPybabel(outputFile, venvInfo) {
       stdio: ["pipe", "pipe", "pipe"],
     });
 
-    let stdout = "";
     let stderr = "";
 
     pybabel.stderr.on("data", (data) => (stderr += data.toString()));

@@ -47,8 +47,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Verifies that an uploaded file with the given filename is visible in the preview page.
-   *
-   * @param filename - The expected filename of the uploaded file.
+   * @param filename The expected filename of the uploaded file.
    */
   async verifyUploadedFile(filename: string): Promise<void> {
     await this.waitForUploadedFilesTable();
@@ -63,8 +62,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Verifies that the creator matches the expected value.
-   *
-   * @param expectedValue - Expected creator name
+   * @param expected Expected creator name or object with name property.
    */
   async verifyCreator(expected: string | { name: string }): Promise<void> {
     const creatorLocator = this.page.locator(this.locators.previewPage.creator);
@@ -86,8 +84,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
   /**
    * Verifies that the record title on the page matches the expected title.
    * Fails the test if the title does not match.
-   *
-   * @param expectedTitle - The title string that should appear on the page.
+   * @param expectedTitle The title string that should appear on the page.
    */
   async verifyTitle(expectedTitle: string): Promise<void> {
     const titleLocator = this.page.locator(
@@ -110,8 +107,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Verifies that the resource type matches the expected value.
-   *
-   * @param expectedValue - Expected resource type text.
+   * @param expectedValue Expected resource type text.
    */
   async verifyResourceType(expectedValue: string): Promise<void> {
     const locator = this.page.locator(this.locators.previewPage.resourceType);
@@ -128,8 +124,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Verifies that the description matches the expected value.
-   *
-   * @param expectedValue - Expected description text.
+   * @param expectedValue Expected description text.
    */
   async verifyDescription(expectedValue: string): Promise<void> {
     const locator = this.page.locator(
@@ -146,10 +141,12 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     console.log(`Description verified: ${actualValue}`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async verifyData(filledData: any[][]): Promise<void> {
     for (const data of filledData) {
       console.log("verifyData got:", JSON.stringify(data)); // DEBUG
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const [field, value] = data;
       if (!field) {
         throw new Error(
@@ -157,10 +154,11 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
         );
       }
 
-      const methodName = `verify${
-        field.charAt(0).toUpperCase() + field.slice(1)
-      }`;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      const methodName = `verify${field.charAt(0).toUpperCase() + field.slice(1)}`;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       if (typeof (this as any)[methodName] === "function") {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
         await (this as any)[methodName](value);
       } else {
         throw new Error(`No verification method found for field ${field}`);
