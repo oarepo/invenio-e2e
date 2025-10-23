@@ -8,14 +8,15 @@ import { ExpectedError as ErrorWithLocation } from "../services/form";
 import path from "path";
 
 /**
- * Class representing a Deposit page in the application.
- * Contains methods to interact with fields, buttons, and perform verifications.
+ * Represents the Deposit page in the application.
+ * Provides methods to interact with fields, buttons, and verify system messages.
  */
+
 export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   // NAVIGATION ------------------------------------------------------------------------
 
-  /*
-   * Navigate to the Deposit page.
+  /**
+   * Opens the Deposit page and validates that it has loaded.
    */
   async openPage(): Promise<void> {
     await this.page.goto("/");
@@ -26,7 +27,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   // VALIDATION -------------------------------------------------------------------------
 
   /**
-   * Validates that the deposit page has loaded.
+   * Validates that the Deposit page has loaded successfully.
    */
   async validatePageLoaded(): Promise<void> {
     await super.validatePageLoaded();
@@ -34,30 +35,30 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   // FIELDS ------------------------------------------------------------------------------
 
-  // Fill in the 'Title' field
+  /**
+   * Fills the Title field.
+   * @param title Title text to enter.
+   */
   async fillTitle(title: string): Promise<void> {
     await this.page.locator(this.locators.uploadPage.titleField).fill(title);
   }
 
-  // Fill in the 'Description' field
+  /**
+   * Fills the Description field.
+   * @param description Description text to enter.
+   */
   async fillDescription(description: string): Promise<void> {
-    await this.page
-      .locator(this.locators.uploadPage.descriptionField)
-      .fill(description);
+    await this.page.locator(this.locators.uploadPage.descriptionField).fill(description);
   }
 
   /**
-   * Clicks the "Metadata-only record" checkbox according to the given value.
-   * @param checked Boolean value - true to check, false to uncheck.
+   * Toggles the "Metadata-only record" checkbox.
+   * @param checked True to check, false to uncheck.
    */
   async fillMetadataOnly(checked: boolean): Promise<void> {
-    const checkbox = this.page.locator(
-      this.locators.uploadPage.metadataOnlyCheckbox
-    );
+    const checkbox = this.page.locator(this.locators.uploadPage.metadataOnlyCheckbox);
 
-    const isChecked = await checkbox
-      .locator('input[type="checkbox"]')
-      .isChecked();
+    const isChecked = await checkbox.locator('input[type="checkbox"]').isChecked();
 
     if (isChecked !== checked) {
       await checkbox.click();
@@ -82,16 +83,12 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   async uploadFileAndConfirm(filename: string) {
     await this.uploadFile(filename);
 
-    const uploadBtn = this.page.locator(
-      this.locators.uploadPage.uploadFilesButton
-    );
+    const uploadBtn = this.page.locator(this.locators.uploadPage.uploadFilesButton);
     await expect(uploadBtn).toBeEnabled({ timeout: 10000 });
 
     await uploadBtn.click();
 
-    const uploaded = this.page.locator(
-      this.locators.uploadPage.uploadedFile(filename)
-    );
+    const uploaded = this.page.locator(this.locators.uploadPage.uploadedFile(filename));
 
     await expect(uploaded).toBeVisible({ timeout: 15000 });
     await this.page.evaluate(() => window.scrollTo(0, 0));
@@ -99,11 +96,12 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     console.log(`[DepositPage] Uploaded and confirmed file: ${filename}`);
   }
 
-  // Selects a 'Resource type' from the dropdown
+  /**
+   * Selects a Resource Type from the dropdown.
+   * @param optionLabel Label of the resource type to select.
+   */
   async selectResourceType(optionLabel: string): Promise<void> {
-    const dropdown = this.page.locator(
-      this.locators.uploadPage.resourceTypeDropdown
-    );
+    const dropdown = this.page.locator(this.locators.uploadPage.resourceTypeDropdown);
     await dropdown.click();
 
     // Locate the exact option by text
@@ -118,22 +116,27 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     await option.first().click();
   }
 
-  // Fill the publication date field. If no date is provided, current date is used.
+  /**
+   * Fills the publication date field. Uses the current date if none is provided.
+   * @param date Optional date to enter.
+   */
   async fillPublicationDate(date?: string): Promise<void> {
     const dateToUse = date ?? getCurrentDateFormatted();
-    await this.page
-      .locator(this.locators.uploadPage.publicationDateField)
-      .fill(dateToUse);
+    await this.page.locator(this.locators.uploadPage.publicationDateField).fill(dateToUse);
   }
 
-  // Fill the creator/family name field ('Add creator' pop-up dialog)
+  /**
+   * Fills the creator’s family name in the Add Creator dialog.
+   * @param name Family name to enter.
+   */
   async fillCreatorFamilyName(name: string): Promise<void> {
-    await this.page
-      .locator(this.locators.uploadPage.familyNameField)
-      .fill(name);
+    await this.page.locator(this.locators.uploadPage.familyNameField).fill(name);
   }
 
-  // Fill the creator/given name field ('Add creator' pop-up dialog)
+  /**
+   * Fills the creator’s given name in the Add Creator dialog.
+   * @param name Given name to enter.
+   */
   async fillCreatorGivenName(name: string): Promise<void> {
     await this.page.locator(this.locators.uploadPage.givenNameField).fill(name);
   }
@@ -148,25 +151,31 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   // BUTTONS -----------------------------------------------------------------------------
 
-  // Click the 'Browse files' link
+  /**
+   * Clicks the Browse Files link.
+   */
   async clickBrowseFiles(): Promise<void> {
     await this.page.locator(this.locators.uploadPage.browseFilesButton).click();
   }
 
-  // Click the 'Add Creator' button
+  /**
+   * Clicks the Add Creator button.
+   */
   async clickAddCreatorButton(): Promise<void> {
     await this.page.locator(this.locators.uploadPage.addCreatorButton).click();
   }
 
-  // Click the 'Save' button after adding a creator
+  /**
+   * Clicks the Save button in the Add Creator dialog.
+   */
   async clickAddCreatorSaveButton(): Promise<void> {
-    await this.page
-      .locator(this.locators.uploadPage.saveAddCreatorButton)
-      .nth(1)
-      .click();
+    await this.page.locator(this.locators.uploadPage.saveAddCreatorButton).nth(1).click();
   }
 
-  // Click the 'Preview' button and return a new PreviewPage instance
+  /**
+   * Clicks the Preview button and returns a new PreviewPage instance.
+   * @returns Instance of the PreviewPage.
+   */
   async clickPreview(): Promise<PreviewPage> {
     await this.page.locator(this.locators.uploadPage.previewButton).click();
     await this.page.waitForLoadState("networkidle");
@@ -176,11 +185,11 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     return previewPage;
   }
 
-  // Click the 'Save Draft' button
+  /**
+   * Clicks the Save Draft button.
+   */
   async clickSave(): Promise<void> {
-    const saveDraftButton = this.page.locator(
-      this.locators.uploadPage.saveDraftButton
-    );
+    const saveDraftButton = this.page.locator(this.locators.uploadPage.saveDraftButton);
     await saveDraftButton.click();
     // this makes the API call that can take some time on server so that network idle is not enough
     await this.page.waitForLoadState("networkidle");
@@ -189,83 +198,91 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     await this.page.evaluate(() => window.scrollTo(0, 0));
   }
 
-  // Click the 'Publish' button
+  /**
+   * Clicks the Publish button.
+   */
   async clickPublish(): Promise<void> {
     await this.page.locator(this.locators.uploadPage.publishButton).click();
     await this.page.waitForLoadState("networkidle");
   }
 
-  // Click confirmation 'Publish' button ('Are you sure you want to publish this record?' dialog)
+  /**
+   * Confirms record publication in the confirmation dialog.
+   */
   async confirmPublication(): Promise<void> {
-    await this.page
-      .locator(this.locators.uploadPage.publishButton)
-      .nth(1)
-      .click();
+    await this.page.locator(this.locators.uploadPage.publishButton).nth(1).click();
     await this.page.waitForLoadState("networkidle");
   }
 
-  // Click the 'Edit' button
+  /**
+   * Clicks the Edit button.
+   */
   async clickEditButton(): Promise<void> {
     await this.page.locator(this.locators.uploadPage.editButton).click();
     await this.page.waitForLoadState("networkidle");
   }
 
-  // Click the 'Delete' button
+  /**
+   * Clicks the Delete button.
+   */
   async clickDeleteButton(): Promise<void> {
     await this.page.locator(this.locators.uploadPage.deleteButton).click();
     await this.page.waitForLoadState("networkidle");
   }
 
-  // Click delete confirmation button
+  /**
+   * Confirms record deletion.
+   */
   async confirmDeletion(): Promise<void> {
-    await this.page
-      .locator(this.locators.uploadPage.confirmDeleteButton)
-      .click();
+    await this.page.locator(this.locators.uploadPage.confirmDeleteButton).click();
     await this.page.waitForLoadState("networkidle");
   }
 
   // VERIFICATION ------------------------------------------------------------------------
 
   /**
-   * Private helper to verify toast messages on the page.
-   * @param expectedText The text content that should appear in the toast notification.
+   * Verifies that a toast message with the expected text is visible.
+   * @param expectedText Expected text to appear in the toast message.
    */
   private async verifyToastMessage(expectedText: string): Promise<void> {
-    const toast = this.page.locator(
-      this.locators.uploadPage.toastMessage(expectedText)
-    );
+    const toast = this.page.locator(this.locators.uploadPage.toastMessage(expectedText));
     await expect(toast).toBeVisible();
     await expect(toast).toHaveText(new RegExp(expectedText, "i"));
   }
 
-  // Verify that the "Save Draft" toast message is displayed
+  /**
+   * Verifies that the Save Draft message appears.
+   */
   async verifySaveDraftMessage(): Promise<void> {
     await this.verifyToastMessage(ExpectedTexts.draftSaved);
   }
 
-  // Verify that the "Record Published" toast message is displayed
+  /**
+   * Verifies that the Record Published message appears.
+   */
   async verifySuccessfulPublishMessage(): Promise<void> {
     await this.verifyToastMessage(ExpectedTexts.recordPublished);
   }
 
-  // Verify that the "Record Deleted" toast message is displayed
+  /**
+   * Verifies that the Record Deleted message appears.
+   */
   async verifyRecordWasDeleted(): Promise<void> {
     await this.verifyToastMessage(ExpectedTexts.recordDeleted);
   }
 
-  // Verify that a specific title is visible on the page
+  /**
+   * Verifies that a specific title is visible on the page.
+   * @param title Title text to verify.
+   */
   async verifyTitleIsVisible(title: string): Promise<void> {
     await expect(this.page.getByRole("heading", { name: title })).toBeVisible();
   }
 
   /**
-   * Helper to verify that these error messages are shown on the page.
-   * @param expectedErrors The expected error messages (strings or regex patterns). Pass
-   * empty array and onlyThese=true to verify that no error messages
-   * are shown.
-   * @param onlyThese If true, verifies that only these messages are present.
-   * If false, verifies that at least these messages are present.
-   * Default is true.
+   * Verifies that the displayed error messages match the expected ones.
+   * @param expectedErrors Array of expected errors, each containing a message and optional field.
+   * @param onlyThese If true (default), verifies that only the expected messages are present.
    */
   async verifyErrorMessages(
     expectedErrors: ErrorWithLocation[],
@@ -278,9 +295,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
           <div class="ui pointing above prompt label">error message</>
         </div>
     */
-    const errorFieldsLocator = this.page.locator(
-      this.locators.uploadPage.fieldWithError
-    );
+    const errorFieldsLocator = this.page.locator(this.locators.uploadPage.fieldWithError);
     // let's extract the field name and the error message
     const foundErrors: string[][] = [];
     const count = await errorFieldsLocator.count();
@@ -308,15 +323,15 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     // now let's match expected erorrs with the actual ones. If we match an error,
     // we will remove it from the "errorMessages" array so that at the end we can see
     // if there are any unmatched errors
-    const { unmatchedErrors, unmatchedErrorMessages } =
-      this._matchErrorMessages(expectedErrors, foundErrors);
+    const { unmatchedErrors, unmatchedErrorMessages } = this._matchErrorMessages(
+      expectedErrors,
+      foundErrors
+    );
 
     if (unmatchedErrors.length > 0) {
       throw new Error(
         `Expected error messages not found: ${unmatchedErrors
-          .map((e) =>
-            e.field ? `[${e.field}] ${e.message}` : e.message.toString()
-          )
+          .map((e) => (e.field ? `[${e.field}] ${e.message}` : e.message.toString()))
           .join(", ")}`
       );
     }
@@ -331,17 +346,12 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   }
 
   /**
-   * Matches and removes errors from the errorMessages array.
-   * If we match an error, we will remove it from the "errorMessages" array
-   * so that at the end we can see if there are any unmatched errors.
-   * @param messages The list of message locators to check.
-   * @param errorMessages The array of expected error messages.
-   * @returns The updated array of unmatched error messages.
+   * Matches expected errors with actual errors found on the page.
+   * @param messages Array of expected error messages.
+   * @param errorMessages Array of actual [fieldName, errorMessage] pairs.
+   * @returns Object containing unmatched expected and actual error messages.
    */
-  private _matchErrorMessages(
-    messages: ErrorWithLocation[],
-    errorMessages: string[][]
-  ) {
+  private _matchErrorMessages(messages: ErrorWithLocation[], errorMessages: string[][]) {
     // make copy of the error messages
     errorMessages = errorMessages.slice();
     const unmatchedErrors: ErrorWithLocation[] = [];
@@ -355,8 +365,8 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
           typeof message === "string"
             ? message.trim() === errorMessage.trim()
             : message instanceof RegExp
-            ? message.test(errorMessage.trim())
-            : false;
+              ? message.test(errorMessage.trim())
+              : false;
         if (fieldMatches && messageMatches) {
           // matched, remove from the list
           errorMessages.splice(i, 1);
@@ -371,6 +381,11 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     return { unmatchedErrors, unmatchedErrorMessages: errorMessages };
   }
 
+  /**
+   * Extracts the field name and error message from a given field locator.
+   * @param field Locator of a field with an error.
+   * @returns Object containing the field name (if available) and the error message.
+   */
   private async _getErrorFieldAndMessage(field: Locator) {
     const errorMessage = await field
       .locator(this.locators.uploadPage.errorMessageInsideField)
@@ -379,10 +394,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     try {
       return {
         errorMessage,
-        fieldName: await field
-          .locator("label[for]")
-          .first()
-          .getAttribute("for"),
+        fieldName: await field.locator("label[for]").first().getAttribute("for"),
       };
     } catch {
       // ignore
@@ -403,6 +415,12 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   // FLOWS -------------------------------------------------------------------------------
 
+  /**
+   * Adds a new creator with given details.
+   * @param data Object containing the creator details.
+   * @param data.givenName Optional given name of the creator.
+   * @param data.familyName Optional family name of the creator.
+   */
   async addCreator(data: { givenName?: string; familyName?: string }) {
     await this.clickAddCreatorButton();
     if (data.familyName) {
@@ -416,11 +434,16 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   // WAITS --------------------------------------------------------------------------------
 
+  /**
+   * Waits until the upload of a given file is completed.
+   * @param fileName Name of the file to wait for.
+   * @throws Will throw an error if the upload does not complete within 20 seconds.
+   */
   async waitForUploadComplete(fileName: string): Promise<void> {
-    await this.page.waitForSelector(
-      this.locators.uploadPage.uploadCompleteBar(),
-      { state: "visible", timeout: 20000 }
-    );
+    await this.page.waitForSelector(this.locators.uploadPage.uploadCompleteBar(), {
+      state: "visible",
+      timeout: 20000,
+    });
     console.log(`Upload complete for file: ${fileName}`);
   }
 

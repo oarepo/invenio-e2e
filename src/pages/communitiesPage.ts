@@ -3,14 +3,17 @@ import { BasePage } from "./basePage";
 import { expect } from "@playwright/test";
 
 /**
- * Class representing the Communities page.
- * Contains methods to interact with the communities list and details.
+ * CommunitiesPage represents the Communities section of the application.
+ * Provides methods to navigate, search, and verify communities.
  */
+
 export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> {
+
   // NAVIGATION ------------------------------------------------------------------------
 
   /**
-   * Navigate to the first community in the list of "My communities".
+   * Navigates to the first community in the "My communities" list.
+   * Waits until the community card and the records tab are visible.
    */
   async navigateToFirstCommunity(): Promise<void> {
     console.log("Navigating to the first Community detail...");
@@ -30,8 +33,8 @@ export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> 
   // FIELDS ------------------------------------------------------------------------------
 
   /**
-   * Fills the search field on the Communities page.
-   * @param query The search query to enter.
+   * Fills the search input field on the Communities page.
+   * @param query The text to enter into the search field.
    */
   async fillSearchField(query: string): Promise<void> {
     const searchInput = this.page.locator(
@@ -43,7 +46,8 @@ export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> 
   // BUTTONS ------------------------------------------------------------------------------
 
   /**
-   * Submits the community search.
+   * Clicks the search button to submit the community search.
+   * Waits for network idle state after clicking.
    */
   async submitSearch(): Promise<void> {
     const submitButton = this.page.locator(
@@ -56,7 +60,8 @@ export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> 
   // FLOWS -------------------------------------------------------------------------------
 
   /**
-   * Performs a search on the Communities page.
+   * Performs a full search on the Communities page by filling the search field
+   * and clicking the submit button.
    * @param query The search query to search for.
    */
   async performSearch(query: string): Promise<void> {

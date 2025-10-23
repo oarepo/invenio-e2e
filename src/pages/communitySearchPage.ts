@@ -1,6 +1,11 @@
 import { Locators } from "../locators";
 import { BasePage } from "./basePage";
 
+/**
+ * Represents the Community Search page.
+ * Provides methods to interact with sorting and verify selected options.
+ */
+
 export class CommunitySearchPage<T extends Locators = Locators> extends BasePage<T> {
 
   // NAVIGATION -------------------------------------------------------------------------
@@ -21,7 +26,7 @@ export class CommunitySearchPage<T extends Locators = Locators> extends BasePage
   // VERIFICATION ------------------------------------------------------------------------
 
   /**
-   * Checks if the given 'Sort by' option is selected.
+   * Verifies whether the given sort option is selected.
    * @param option The name of the option to verify.
    * @returns True if the option is selected, otherwise false.
    */

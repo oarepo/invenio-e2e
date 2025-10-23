@@ -9,6 +9,10 @@ import { NewCommunityPage } from './newCommunityPage';
 import { DepositPage } from './depositPage';
 import { PreviewPage } from './previewPage';
 
+/**
+ * Re-export the core and specific pages of the application.
+ * Allows convenient import of pages from a single location.
+ */
 export { BasePage } from './basePage';
 export { HomePage } from './homePage';
 export { SearchPage } from './searchPage';
@@ -27,6 +31,7 @@ import { Locators } from '../locators';
 
 /**
  * Interface representing all available pages in the application.
+ * Provides type safety and clear structure for page objects.
  */
 export interface AllPages<L extends Locators = Locators> {
     homePage: HomePage<L>;
