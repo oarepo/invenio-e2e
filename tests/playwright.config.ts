@@ -4,7 +4,7 @@
  */
 
 import { defineConfig, devices } from '@playwright/test';
-import { appConfig } from "../src/config/env"; //  use centralized config
+import { appConfig } from "../src/config"; //  use centralized config
 
 /**
  * See https://playwright.dev/docs/test-configuration.

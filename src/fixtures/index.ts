@@ -11,9 +11,9 @@ import { defaultDepositionData, DepositionData } from './depositionData';
 import { defaultCommunityData, CommunityData } from './communityData';
 import { defaultRecordsApiData, RecordsApiData } from './api';
 
-import type { Config } from '../config';
+import type { TestConfig } from '../config';
 import type { Locators } from '../locators';
-import { config } from '../config';
+import { testConfig } from '../config';
 import { locators } from '../locators';
 import { registerPage } from './utils';
 import { FileUploadHelper } from '../helpers/fileUploadHelper';
@@ -24,7 +24,7 @@ export type { CommunityData, CommunityDataRecord } from './communityData';
 
 
 const _test = base.extend<{
-    config: Config;
+    config: TestConfig;
     locators: Locators;
     availablePages: AllPages<Locators>;
 
@@ -132,7 +132,7 @@ const _test = base.extend<{
         ".btn:not(:empty)",
     ],
 
-    config,
+    config: testConfig,
 
     // browser context with initial locale
     context: async ({ context: originalContext, initialLocale }, use) => {

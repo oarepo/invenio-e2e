@@ -1,4 +1,4 @@
-import { Config } from "../config";
+import { TestConfig } from "../config";
 import { BasePage, DepositPage } from "../pages";
 import { FormData } from "../fixtures/depositionData";
 
@@ -58,7 +58,7 @@ export class FormService implements FormServiceInterface {
     /**
      * Implementation of the deposition service that invokes deposition & checking steps.
      */
-    constructor(protected config: Config) { }
+    constructor(protected config: TestConfig) { }
 
     // Dynamic form handling requires any types for flexibility
     async fillForm(

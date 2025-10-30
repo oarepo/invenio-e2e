@@ -44,7 +44,6 @@ export default defineConfig(
     files: ["{src,tests}/**/*.ts"],
     plugins: {
       tseslint,
-      jsdoc,
     },
     extends: [
       tseslint.configs.recommendedTypeChecked,

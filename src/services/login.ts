@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { Locators } from '../locators';
-import { Config } from '../config';
+import { TestConfig } from '../config';
 import { AllPages, BasePage } from '../pages';
 
 export interface LoginServiceInterface<L extends Locators> {
@@ -13,7 +13,7 @@ export interface LoginServiceInterface<L extends Locators> {
 
 export class LocalLoginService<L extends Locators> implements LoginServiceInterface<L> {
     constructor(
-        protected config: Config,
+        protected config: TestConfig,
         protected page: Page,
         protected locators: L,
         protected availablePages: AllPages<L>,

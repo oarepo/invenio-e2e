@@ -2,100 +2,973 @@
 
 ### Table of Contents
 
-*   [BasePage][1]
-    *   [Parameters][2]
-    *   [validatePageLoaded][3]
-    *   [expectLogoVisible][4]
-    *   [navigateToHomePage][5]
-*   [HomePage][6]
+*   [][1]
+*   [FileUploadHelper][2]
+    *   [Parameters][3]
+    *   [uploadRandomFileAndConfirm][4]
+*   [BasePage][5]
+    *   [Parameters][6]
     *   [validatePageLoaded][7]
-    *   [performSearch][8]
-        *   [Parameters][9]
-*   [SearchPage][10]
-    *   [validatePageLoaded][11]
-*   [locators][12]
-*   [registerPage][13]
-    *   [Parameters][14]
-*   [updateLocators][15]
-    *   [Parameters][16]
-*   [PageFixtureParams][17]
-    *   [Properties][18]
-*   [UseFunction][19]
-*   [FixtureRegistrationFunction][20]
-*   [Locators][21]
+    *   [expectLogoVisible][8]
+    *   [navigateToHomePage][9]
+*   [CommunitiesPage][10]
+    *   [navigateToFirstCommunity][11]
+    *   [fillSearchField][12]
+        *   [Parameters][13]
+    *   [submitSearch][14]
+    *   [performSearch][15]
+        *   [Parameters][16]
+    *   [verifyCommunityName][17]
+        *   [Parameters][18]
+*   [CommunityDetailPage][19]
+    *   [navigateToSettingsSection][20]
+    *   [navigateToRecordsSection][21]
+    *   [navigateToMembersSection][22]
+    *   [navigateToCurationPolicySection][23]
+    *   [navigateToAboutSection][24]
+    *   [editCommunityName][25]
+    *   [fillDeleteConfirmationInput][26]
+    *   [selectRoleByIndex][27]
+        *   [Parameters][28]
+    *   [fillCurationPolicy][29]
+        *   [Parameters][30]
+    *   [fillAboutPage][31]
+        *   [Parameters][32]
+    *   [getCommunityHeaderName][33]
+    *   [clickSaveButton][34]
+    *   [clickDeleteCommunityButton][35]
+    *   [clickPermanentlyDeleteButton][36]
+    *   [clickInviteButton][37]
+    *   [clickInviteButtonConfirmation][38]
+    *   [verifyCommunityName][39]
+        *   [Parameters][40]
+    *   [verifyUpdatedCommunityName][41]
+        *   [Parameters][42]
+    *   [verifyCommunityNotPresent][43]
+        *   [Parameters][44]
+*   [DepositPage][45]
+    *   [validatePageLoaded][46]
+    *   [fillMetadataOnly][47]
+        *   [Parameters][48]
+    *   [uploadFile][49]
+        *   [Parameters][50]
+    *   [uploadFileAndConfirm][51]
+        *   [Parameters][52]
+    *   [verifyErrorMessages][53]
+        *   [Parameters][54]
+*   [HomePage][55]
+    *   [openPage][56]
+    *   [validatePageLoaded][57]
+    *   [goToCommunitiesPage][58]
+    *   [clickQuickCreateButton][59]
+    *   [performSearch][60]
+        *   [Parameters][61]
+    *   [selectNewCommunity][62]
+    *   [selectNewUpload][63]
+*   [LoginPage][64]
+    *   [openPage][65]
+        *   [Parameters][66]
+    *   [validatePageLoaded][67]
+    *   [loginUser][68]
+        *   [Parameters][69]
+*   [MyDashboardPage][70]
+    *   [navigateToCommunities][71]
+    *   [navigateToMyDashboard][72]
+    *   [firstRecordDetail][73]
+    *   [navigateToFirstCommunity][74]
+    *   [navigateToRequests][75]
+    *   [clickEditButton][76]
+    *   [clickAcceptButton][77]
+        *   [Parameters][78]
+    *   [clickDeclineButton][79]
+        *   [Parameters][80]
+    *   [isDeclineButtonPresent][81]
+        *   [Parameters][82]
+    *   [clickAcceptButtonConfirm][83]
+    *   [clickDeclineButtonConfirm][84]
+    *   [clickVersionsToggle][85]
+    *   [verifyRecordIsAbsent][86]
+        *   [Parameters][87]
+    *   [isAllDoneMessagePresent][88]
+    *   [isNewVersionDraftLabelPresent][89]
+    *   [isRecordTitleMatching][90]
+        *   [Parameters][91]
+*   [NewCommunityPage][92]
+    *   [navigateToHome][93]
+    *   [navigateToMyDashboard][94]
+    *   [firstRecordDetail][95]
+    *   [fillCommunityName][96]
+        *   [Parameters][97]
+    *   [fillCommunityIdentifier][98]
+        *   [Parameters][99]
+    *   [clickNewCommunityButton][100]
+    *   [selectPublicCommunity][101]
+    *   [selectRestrictedCommunity][102]
+    *   [clickCreateCommunity][103]
+    *   [getCommunityName][104]
+    *   [verifyCommunityName][105]
+        *   [Parameters][106]
+*   [PreviewPage][107]
+    *   [validatePageLoaded][108]
+    *   [verifySaveDraftPreview][109]
+    *   [verifySaveDraftPreviewVersions][110]
+    *   [verifyUploadedFile][111]
+        *   [Parameters][112]
+    *   [verifyCreator][113]
+        *   [Parameters][114]
+    *   [verifyTitle][115]
+        *   [Parameters][116]
+    *   [verifyResourceType][117]
+        *   [Parameters][118]
+    *   [verifyDescription][119]
+        *   [Parameters][120]
+    *   [countUploadedFiles][121]
+    *   [waitForUploadedFilesTable][122]
+*   [SearchPage][123]
+    *   [validatePageLoaded][124]
+*   [I18nService][125]
+    *   [Parameters][126]
+    *   [getLocalizedText][127]
+        *   [Parameters][128]
+*   [appConfig][129]
+*   [test][130]
+    *   [get][131]
+        *   [Parameters][132]
+    *   [apply][133]
+        *   [Parameters][134]
+*   [locators][135]
+*   [registerPage][136]
+    *   [Parameters][137]
+*   [updateLocators][138]
+    *   [Parameters][139]
+*   [selectSortOption][140]
+    *   [Parameters][141]
+*   [isSortOptionSelected][142]
+    *   [Parameters][143]
+*   [constructor][144]
+    *   [Parameters][145]
+*   [AllPages][146]
+*   [Translations][147]
+*   [I18nServiceInterface][148]
+*   [skipTests][149]
+    *   [Parameters][150]
+*   [fillForm][151]
+    *   [Parameters][152]
+*   [fill][153]
+*   [save][154]
+*   [expectErrors][155]
+*   [uploadFiles][156]
+*   [PageFixtureParams][157]
+    *   [Properties][158]
+*   [UseFunction][159]
+*   [FixtureRegistrationFunction][160]
+*   [Locators][161]
+*   [I18nExpected][162]
+
+##
+
+[src/pages/depositPage.ts:419-425][163]
+
+async fillAndSubmit(data: Record\<string, any>): Promise\<DepositPage> {
+
+}
+
+## FileUploadHelper
+
+[src/helpers/fileUploadHelper.ts:14-59][164]
+
+This helper class provides utility functions to manage file uploads during Playwright tests.
+
+Main responsibilities:
+
+*   Dynamically determine the path to the folder containing files for upload (`data/UploadFiles`).
+*   Ensure that this upload folder exists, creating it if necessary.
+*   Provide a method to randomly select a file from the upload folder and upload it via the web page.
+
+### Parameters
+
+*   `` &#x20;
+
+### uploadRandomFileAndConfirm
+
+[src/helpers/fileUploadHelper.ts:36-58][165]
+
+Upload a random file from the UploadFiles folder.
+
+Returns **[Promise][166]\<void>**&#x20;
 
 ## BasePage
 
-[src/pages/basePage.ts:8-60][22]
+[src/pages/basePage.ts:10-88][167]
 
 Class representing a base page with common functionality for all pages.
 
 ### Parameters
 
-*   `$0` **{page: Page, locators: T, availablePages: {: [object][23]}}**&#x20;
+*   `$0` **{page: Page, locators: L, availablePages: P, services: S, expect: Expect\<ExpectExtension>}**&#x20;
 
     *   `$0.page` &#x20;
     *   `$0.locators` &#x20;
     *   `$0.availablePages` &#x20;
-*   `page`  Playwright Page object representing the current page.
-*   `locators`  An object containing locators for elements on the page.
-*   `availablePages`  An object containing available pages for navigation.
+    *   `$0.services` &#x20;
+    *   `$0.expect` &#x20;
+*   `conf`  Configuration object.
 
 ### validatePageLoaded
 
-[src/pages/basePage.ts:34-36][24]
+[src/pages/basePage.ts:49-51][168]
 
 Validates that the loaded page has a logo link in the header.
 
-Returns **[Promise][25]\<void>**&#x20;
+Returns **[Promise][166]\<void>**&#x20;
 
 ### expectLogoVisible
 
-[src/pages/basePage.ts:41-45][26]
+[src/pages/basePage.ts:56-60][169]
 
 Validates that the logo is visible on the page.
 
-Returns **[Promise][25]\<void>**&#x20;
+Returns **[Promise][166]\<void>**&#x20;
 
 ### navigateToHomePage
 
-[src/pages/basePage.ts:53-59][27]
+[src/pages/basePage.ts:68-75][170]
 
 Navigates to the home page as we should always have a home page link in the header.
 
-Returns **[Promise][25]<[HomePage][6]>** the home page
+Returns **[Promise][166]<[HomePage][55]>** The home page instance.
+
+## CommunitiesPage
+
+[src/pages/communitiesPage.ts:9-84][171]
+
+**Extends BasePage**
+
+Class representing the Communities page.
+Contains methods to interact with the communities list and details.
+
+### navigateToFirstCommunity
+
+[src/pages/communitiesPage.ts:15-28][172]
+
+Navigate to the first community in the list of "My communities".
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### fillSearchField
+
+[src/pages/communitiesPage.ts:36-41][173]
+
+Fills the search field on the Communities page.
+
+#### Parameters
+
+*   `query` **[string][174]** The search query to enter.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### submitSearch
+
+[src/pages/communitiesPage.ts:48-54][175]
+
+Submits the community search.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### performSearch
+
+[src/pages/communitiesPage.ts:62-65][176]
+
+Performs a search on the Communities page.
+
+#### Parameters
+
+*   `query` **[string][174]** The search query to search for.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### verifyCommunityName
+
+[src/pages/communitiesPage.ts:74-83][177]
+
+Verifies that the community name at the given index matches the expected name.
+
+#### Parameters
+
+*   `expectedName` **[string][174]** The expected community name to verify.
+*   `index` **[number][178]** Index of the community in the list (default 0). (optional, default `0`)
+
+Returns **[Promise][166]\<void>**&#x20;
+
+## CommunityDetailPage
+
+[src/pages/communityDetailPage.ts:9-206][179]
+
+**Extends BasePage**
+
+Class representing the Community Detail page.
+
+### navigateToSettingsSection
+
+[src/pages/communityDetailPage.ts:15-17][180]
+
+Navigates to the Settings section of the community.
+
+### navigateToRecordsSection
+
+[src/pages/communityDetailPage.ts:22-24][181]
+
+Navigates to the Records section of the community.
+
+### navigateToMembersSection
+
+[src/pages/communityDetailPage.ts:29-31][182]
+
+Navigates to the Members section of the community.
+
+### navigateToCurationPolicySection
+
+[src/pages/communityDetailPage.ts:36-38][183]
+
+Navigates to the Curation Policy section of the community.
+
+### navigateToAboutSection
+
+[src/pages/communityDetailPage.ts:43-45][184]
+
+Navigates to the About section of the community.
+
+### editCommunityName
+
+[src/pages/communityDetailPage.ts:53-63][185]
+
+Edit the community name by appending '\_EDITED'.
+Returns the updated name.
+
+Returns **[Promise][166]<[string][174]>**&#x20;
+
+### fillDeleteConfirmationInput
+
+[src/pages/communityDetailPage.ts:68-78][186]
+
+Fill the delete confirmation input with the community's identifier.
+
+### selectRoleByIndex
+
+[src/pages/communityDetailPage.ts:84-88][187]
+
+Select a member role checkbox by index.
+
+#### Parameters
+
+*   `index` **[number][178]** Index of the role checkbox to select.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### fillCurationPolicy
+
+[src/pages/communityDetailPage.ts:94-100][188]
+
+Fill the Curation Policy editor with the provided text.
+
+#### Parameters
+
+*   `text` **[string][174]** Text to fill into the editor.
+
+### fillAboutPage
+
+[src/pages/communityDetailPage.ts:106-112][189]
+
+Fill the About page editor with the provided text.
+
+#### Parameters
+
+*   `text` **[string][174]** Text to fill into the editor.
+
+### getCommunityHeaderName
+
+[src/pages/communityDetailPage.ts:118-123][190]
+
+Get the current community header name text.
+
+Returns **[Promise][166]<[string][174]>** The community name as a string.
+
+### clickSaveButton
+
+[src/pages/communityDetailPage.ts:130-134][191]
+
+Click the Save button in community detail settings.
+
+### clickDeleteCommunityButton
+
+[src/pages/communityDetailPage.ts:139-143][192]
+
+Clicks the Delete Community button to initiate community deletion.
+
+### clickPermanentlyDeleteButton
+
+[src/pages/communityDetailPage.ts:148-154][193]
+
+Click the Permanently Delete button to confirm deletion.
+
+### clickInviteButton
+
+[src/pages/communityDetailPage.ts:159-161][194]
+
+Click the Invite button to open the invite dialog.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### clickInviteButtonConfirmation
+
+[src/pages/communityDetailPage.ts:166-170][195]
+
+Confirm the invitation by clicking the Invite button in the dialog.
+
+### verifyCommunityName
+
+[src/pages/communityDetailPage.ts:178-183][196]
+
+Verifies that the community name matches the expected value.
+
+#### Parameters
+
+*   `expectedName` **[string][174]** Expected community name to verify.
+
+### verifyUpdatedCommunityName
+
+[src/pages/communityDetailPage.ts:189-194][197]
+
+Verify that the community name contains the expected value (useful after edits).
+
+#### Parameters
+
+*   `expectedName` **[string][174]** Expected text within the community name.
+
+### verifyCommunityNotPresent
+
+[src/pages/communityDetailPage.ts:200-205][198]
+
+Verify that the community is not present in the list.
+
+#### Parameters
+
+*   `name` **[string][174]** Name of the community expected to be absent.
+
+## DepositPage
+
+[src/pages/depositPage.ts:14-432][199]
+
+**Extends BasePage**
+
+Class representing a Deposit page in the application.
+Contains methods to interact with fields, buttons, and perform verifications.
+
+### validatePageLoaded
+
+[src/pages/depositPage.ts:31-33][200]
+
+Validates that the deposit page has loaded.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### fillMetadataOnly
+
+[src/pages/depositPage.ts:53-66][201]
+
+Clicks the "Metadata-only record" checkbox according to the given value.
+
+#### Parameters
+
+*   `checked` **[boolean][202]** Boolean value - true to check, false to uncheck.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### uploadFile
+
+[src/pages/depositPage.ts:72-76][203]
+
+Upload a specific file from the UploadFiles folder.
+
+#### Parameters
+
+*   `filename` **[string][174]** Name of the file to upload
+
+### uploadFileAndConfirm
+
+[src/pages/depositPage.ts:82-100][204]
+
+Upload a file and confirm by clicking the "Upload" button in Uppy.
+
+#### Parameters
+
+*   `filename` **[string][174]** Name of the file to upload
+
+### verifyErrorMessages
+
+[src/pages/depositPage.ts:270-331][205]
+
+Helper to verify that these error messages are shown on the page.
+
+#### Parameters
+
+*   `expectedErrors` **[Array][206]\<ErrorWithLocation>** The expected error messages (strings or regex patterns). Pass
+    empty array and onlyThese=true to verify that no error messages
+    are shown.
+*   `onlyThese` **[boolean][202]** If true, verifies that only these messages are present.
+    If false, verifies that at least these messages are present.
+    Default is true. (optional, default `true`)
+
+Returns **[Promise][166]\<void>**&#x20;
 
 ## HomePage
 
-[src/pages/homePage.ts:10-65][28]
+[src/pages/homePage.ts:10-127][207]
 
 **Extends BasePage**
 
 Class representing a home page with search functionality.
 
+### openPage
+
+[src/pages/homePage.ts:18-22][208]
+
+Navigate to the Home page.
+
+Returns **[Promise][166]\<void>** The home page instance to allow method chaining.
+
 ### validatePageLoaded
 
-[src/pages/homePage.ts:26-29][29]
+[src/pages/homePage.ts:29-32][209]
 
 Validates that the home page has loaded by checking for the search field.
 
-Returns **[Promise][25]\<void>**&#x20;
+Returns **[Promise][166]\<void>**&#x20;
+
+### goToCommunitiesPage
+
+[src/pages/homePage.ts:58-67][210]
+
+Navigates to the Communities page by clicking the header link.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### clickQuickCreateButton
+
+[src/pages/homePage.ts:72-78][211]
+
+Clicks on the Quick Create drop-down.
+
+Returns **[Promise][166]\<void>**&#x20;
 
 ### performSearch
 
-[src/pages/homePage.ts:61-64][30]
+[src/pages/homePage.ts:87-90][212]
 
 Performs a search operation by filling the search field and submitting the search.
 
 #### Parameters
 
-*   `query` **[string][31]** The search query to fill in the search field.
+*   `query` **[string][174]** The search query to fill in the search field.
 
-Returns **[Promise][25]<[SearchPage][10]>** The search page after performing the search.
+Returns **[Promise][166]<[SearchPage][123]>** The search page after performing the search.
+
+### selectNewCommunity
+
+[src/pages/homePage.ts:95-102][213]
+
+Opens Quick Create and selects "New community".
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### selectNewUpload
+
+[src/pages/homePage.ts:108-126][214]
+
+Opens Quick Create and selects "New upload".
+
+Returns **[Promise][166]<[DepositPage][45]>** The deposit page after selecting new upload.
+
+## LoginPage
+
+[src/pages/loginPage.ts:8-78][215]
+
+**Extends BasePage**
+
+Class representing invenio login page.
+
+### openPage
+
+[src/pages/loginPage.ts:14-22][216]
+
+Navigate to the Login page.
+
+#### Parameters
+
+*   `options` **{nextURL: [string][174]}?**&#x20;
+
+Returns **[Promise][166]\<void>** The login page instance to allow method chaining.
+
+### validatePageLoaded
+
+[src/pages/loginPage.ts:29-33][217]
+
+Validates that the login page has loaded by checking for the username and password fields.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### loginUser
+
+[src/pages/loginPage.ts:73-77][218]
+
+Performs a log in operation by filling the username and password fields
+and submitting the login.
+
+#### Parameters
+
+*   `username` **[string][174]** The username to fill in the username field.
+*   `password` **[string][174]** The password to fill in the password field.
+*   `afterLoginPage` **S** The page instance expected after login.
+
+Returns **[Promise][166]\<S>** The expected page after performing the login.
+
+## MyDashboardPage
+
+[src/pages/myDashboardPage.ts:8-177][219]
+
+**Extends BasePage**
+
+Class representing the user Dashboard page.
+
+### navigateToCommunities
+
+[src/pages/myDashboardPage.ts:15-22][220]
+
+Navigate to the "Communities" section from the dashboard.
+
+### navigateToMyDashboard
+
+[src/pages/myDashboardPage.ts:27-29][221]
+
+Navigate directly to the "My Dashboard" page.
+
+### firstRecordDetail
+
+[src/pages/myDashboardPage.ts:34-38][222]
+
+Opens the detail of the first record in the dashboard.
+
+### navigateToFirstCommunity
+
+[src/pages/myDashboardPage.ts:43-50][223]
+
+Opens the first community card in the dashboard.
+
+### navigateToRequests
+
+[src/pages/myDashboardPage.ts:55-57][224]
+
+Navigate to the "Requests" section of the dashboard.
+
+### clickEditButton
+
+[src/pages/myDashboardPage.ts:64-68][225]
+
+Clicks the edit button for the first record in the dashboard.
+
+### clickAcceptButton
+
+[src/pages/myDashboardPage.ts:74-78][226]
+
+Clicks the "Accept" button for a request at a given index.
+
+#### Parameters
+
+*   `index`  Index of the request (default 0). (optional, default `0`)
+
+### clickDeclineButton
+
+[src/pages/myDashboardPage.ts:84-88][227]
+
+Clicks the "Decline" button for a request at a given index.
+
+#### Parameters
+
+*   `index`  Index of the request (default 0). (optional, default `0`)
+
+### isDeclineButtonPresent
+
+[src/pages/myDashboardPage.ts:95-101][228]
+
+Checks if the "Decline" button is present for a request at a given index.
+
+#### Parameters
+
+*   `index`  Index of the request (default 0). (optional, default `0`)
+
+Returns **[Promise][166]<[boolean][202]>** True if present, false otherwise.
+
+### clickAcceptButtonConfirm
+
+[src/pages/myDashboardPage.ts:106-110][229]
+
+Confirms the accept action by clicking the confirmation button.
+
+### clickDeclineButtonConfirm
+
+[src/pages/myDashboardPage.ts:115-119][230]
+
+Confirms the decline action by clicking the confirmation button.
+
+### clickVersionsToggle
+
+[src/pages/myDashboardPage.ts:124-128][231]
+
+Toggles the versions dropdown for a record.
+
+### verifyRecordIsAbsent
+
+[src/pages/myDashboardPage.ts:137-139][232]
+
+Verifies that a record with the given title is absent from the dashboard.
+
+#### Parameters
+
+*   `recordTitle` **[string][174]** The title of the record to check.
+
+Returns **[Promise][166]<[boolean][202]>** True if absent, false otherwise.
+
+### isAllDoneMessagePresent
+
+[src/pages/myDashboardPage.ts:144-148][233]
+
+Checks if the "All Done" message is present on the dashboard.
+
+Returns **[Promise][166]<[boolean][202]>**&#x20;
+
+### isNewVersionDraftLabelPresent
+
+[src/pages/myDashboardPage.ts:154-164][234]
+
+Checks if the "New Version Draft" label is present.
+
+Returns **[Promise][166]<[boolean][202]>** True if present, false otherwise.
+
+### isRecordTitleMatching
+
+[src/pages/myDashboardPage.ts:171-176][235]
+
+Checks if a record title in the dashboard matches the given string.
+
+#### Parameters
+
+*   `title` **[string][174]** The expected record title.
+
+Returns **[Promise][166]<[boolean][202]>** True if matching record is found, false otherwise.
+
+## NewCommunityPage
+
+[src/pages/newCommunityPage.ts:8-123][236]
+
+**Extends BasePage**
+
+Class representing the New Community creation page.
+
+### navigateToHome
+
+[src/pages/newCommunityPage.ts:15-17][237]
+
+Navigates to the home page.
+
+### navigateToMyDashboard
+
+[src/pages/newCommunityPage.ts:22-24][238]
+
+Navigate to the user dashboard page.
+
+### firstRecordDetail
+
+[src/pages/newCommunityPage.ts:29-33][239]
+
+Navigate to the detail of the first record in the dashboard.
+
+### fillCommunityName
+
+[src/pages/newCommunityPage.ts:42-47][240]
+
+Fills in the Community Name field.
+
+#### Parameters
+
+*   `name` **[string][174]** Optional custom name to use. If not provided, generates a random one from test data.
+
+Returns **any** The community name that was filled.
+
+### fillCommunityIdentifier
+
+[src/pages/newCommunityPage.ts:54-60][241]
+
+Fills in the Community Identifier field.
+
+#### Parameters
+
+*   `identifier` **[string][174]?** Optional custom identifier to use. If not provided, generates a random one from test data.
+
+Returns **any** The community identifier that was filled.
+
+### clickNewCommunityButton
+
+[src/pages/newCommunityPage.ts:67-71][242]
+
+Clicks the "New Community" button.
+
+### selectPublicCommunity
+
+[src/pages/newCommunityPage.ts:76-78][243]
+
+Selects the "Public" community visibility option.
+
+### selectRestrictedCommunity
+
+[src/pages/newCommunityPage.ts:83-87][244]
+
+Selects the "Restricted" community visibility option.
+
+### clickCreateCommunity
+
+[src/pages/newCommunityPage.ts:92-96][245]
+
+Clicks the "Create Community" button.
+
+### getCommunityName
+
+[src/pages/newCommunityPage.ts:103-107][246]
+
+Gets the locator for the created community name header.
+
+### verifyCommunityName
+
+[src/pages/newCommunityPage.ts:113-122][247]
+
+Verifies that the created community name matches the expected name.
+
+#### Parameters
+
+*   `expectedName` **[string][174]** The expected community name to verify.
+
+## PreviewPage
+
+[src/pages/previewPage.ts:8-212][248]
+
+**Extends BasePage**
+
+Class representing a preview / record detail page.
+
+### validatePageLoaded
+
+[src/pages/previewPage.ts:14-20][249]
+
+Validates that the preview page has fully loaded.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### verifySaveDraftPreview
+
+[src/pages/previewPage.ts:27-34][250]
+
+Verifies the informational message shown when a draft is being previewed.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### verifySaveDraftPreviewVersions
+
+[src/pages/previewPage.ts:39-46][251]
+
+Verifies the informational message shown when only published versions are displayed.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### verifyUploadedFile
+
+[src/pages/previewPage.ts:52-61][252]
+
+Verifies that an uploaded file with the given filename is visible in the preview page.
+
+#### Parameters
+
+*   `filename` **[string][174]** The expected filename of the uploaded file.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### verifyCreator
+
+[src/pages/previewPage.ts:67-82][253]
+
+Verifies that the creator matches the expected value.
+
+#### Parameters
+
+*   `expected` **([string][174] | {name: [string][174]})** Expected creator name or object with name property.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### verifyTitle
+
+[src/pages/previewPage.ts:89-106][254]
+
+Verifies that the record title on the page matches the expected title.
+Fails the test if the title does not match.
+
+#### Parameters
+
+*   `expectedTitle` **[string][174]** The title string that should appear on the page.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### verifyResourceType
+
+[src/pages/previewPage.ts:112-123][255]
+
+Verifies that the resource type matches the expected value.
+
+#### Parameters
+
+*   `expectedValue` **[string][174]** Expected resource type text.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### verifyDescription
+
+[src/pages/previewPage.ts:129-142][256]
+
+Verifies that the description matches the expected value.
+
+#### Parameters
+
+*   `expectedValue` **[string][174]** Expected description text.
+
+Returns **[Promise][166]\<void>**&#x20;
+
+### countUploadedFiles
+
+[src/pages/previewPage.ts:195-200][257]
+
+Counts the number of uploaded files displayed in the preview page.
+
+Returns **[Promise][166]<[number][178]>** Number of uploaded files.
+
+### waitForUploadedFilesTable
+
+[src/pages/previewPage.ts:206-211][258]
+
+Waits until at least one uploaded file row is visible in the table.
+Ensures that the uploaded files table has rendered.
+
+Returns **[Promise][166]\<void>**&#x20;
 
 ## SearchPage
 
-[src/pages/searchPage.ts:8-27][32]
+[src/pages/searchPage.ts:8-28][259]
 
 **Extends BasePage**
 
@@ -103,82 +976,165 @@ Class representing a search page with a list of search results.
 
 ### validatePageLoaded
 
-[src/pages/searchPage.ts:23-26][33]
+[src/pages/searchPage.ts:24-27][260]
 
 Validates that the search page has loaded by checking for the search result list.
 
-Returns **[Promise][25]\<void>**&#x20;
+Returns **[Promise][166]\<void>**&#x20;
+
+## I18nService
+
+[src/services/i18n.ts:47-222][261]
+
+Service for handling internationalization (i18n) in E2E tests
+
+### Parameters
+
+*   `page` **Page**&#x20;
+*   `locators` **L**&#x20;
+*   `initialLocale` **[string][174]**  (optional, default `'en'`)
+*   `translations` **[Translations][147]**  (optional, default `{}`)
+*   `untranslatedStrings` **[Array][206]<[string][174]>**  (optional, default `[]`)
+*   `translatableSelectors` **[Array][206]<[string][174]>**  (optional, default `[]`)
+
+### getLocalizedText
+
+[src/services/i18n.ts:124-155][262]
+
+Retrieves localized text using i18next for enhanced language handling.
+
+This method uses i18next to properly handle language nuances, including:
+
+*   Czech plural forms and cases
+*   Proper interpolation and formatting
+*   Context-sensitive translations.
+
+#### Parameters
+
+*   `key` **[string][174]** Translation key to look up.
+*   `locale` **[string][174]?** Locale defaults to current locale.
+*   `packageName` **[string][174]?** Optional package namespace for scoped lookups.
+
+Returns **[string][174]** Translated text or a fallback indicator.
+
+## appConfig
+
+[src/config/env.ts:33-47][263]
+
+Application configuration assembled from environment variables.
+
+Defaults to local development values when relevant environment variables
+are not provided.
+
+## test
+
+[src/fixtures/index.ts:241-295][264]
+
+**Extends \_test**
+
+*   **See**: [https://playwright.dev/docs/api/class-test][265] for more information about the Playwright test object.
+
+InvenioTest is a normal Playwright test object with additional functionality
+to skip tests based on a list of skipped tests.
+
+Type: InvenioTest
+
+### get
+
+[src/fixtures/index.ts:246-277][266]
+
+Proxy getter to handle .describe and .skipTests methods.
+
+#### Parameters
+
+*   `target` &#x20;
+*   `prop` **any**&#x20;
+
+### apply
+
+[src/fixtures/index.ts:284-294][267]
+
+Handles the case test("test title", ({fixtures}) => { test body }).
+If the test has a title that is in the skipped tests list, the test
+will be marked as .skip.
+
+#### Parameters
+
+*   `target` &#x20;
+*   `thisArg` &#x20;
+*   `args` **Parameters\<InvenioTest>**&#x20;
 
 ## locators
 
-[src/locators/defaultLocators.ts:5-16][34]
+[src/locators/defaultLocators.ts:5-232][268]
 
 This module defines locators for various elements in the Invenio E2E tests.
-It provides a structured way to access elements on the page using CSS selectors.
+It provides a structured way to access elements on the page using selectors.
 
 ## registerPage
 
-[src/fixtures/utils.ts:62-103][35]
+[src/fixtures/utils.ts:64-110][269]
 
-registerPage is a utility function to register a page in the test fixture.
+RegisterPage is a utility function to register a page in the test fixture.
 Usage:
 
 ```typescript
-
-   import { registerPage } from '@inveniosoftware/invenio-e2e';
-   export const test = invenio_test.extend({
-      blah: 1, // this is just an example of an extra fixture
-      ...registerPage('myPage', MyPage, { extraFixtures: ['blah'] }),
-   });
+import { registerPage } from '@inveniosoftware/invenio-e2e';
+export const test = invenio_test.extend({
+  blah: 1, // this is just an example of an extra fixture
+  ...registerPage('myPage', MyPage, { extraFixtures: ['blah'] }),
+});
 
 ```
 
 It is equivalent to:
 
 ```typescript
-  export const test = invenio_test.extend({
-     blah: 1,
-     myPage: async ({ page, locators, availablePages, blah }, use) => {
-        const inst = new MyPage({ page, locators, availablePages, blah });
-        availablePages.myPage = inst;
-        await use(inst);
-     }
-  });
+export const test = invenio_test.extend({
+  blah: 1,
+  myPage: async ({ page, locators, availablePages, blah }, use) => {
+    const inst = new MyPage({ page, locators, availablePages, blah });
+    availablePages.myPage = inst;
+    await use(inst);
+  }
+});
 ```
 
 ### Parameters
 
-*   `name` **[string][31]** The name of the fixture that will contain the page instance.
+*   `name` **AllPagesKeys** The name of the fixture that will contain the page instance.
 *   `PageType` **T** Page class to be registered.
-*   `options` **{extraFixtures: [Array][36]<[string][31]>}** Optional options for the registration, such as extraFixtures. (optional, default `{extraFixtures:[]}`)
+*   `options` **{extraFixtures: [Array][206]<[string][174]>}** Optional options for the registration. (optional, default `{extraFixtures:[]}`)
 
-Returns **{: [FixtureRegistrationFunction][20]\<L, T>}** An object with the fixture registration function for the page
+    *   `options.extraFixtures`  Additional fixtures to be passed to the page constructor.
+
+Returns **{: [FixtureRegistrationFunction][160]\<L, T>}** An object with the fixture registration function for the page
 to be used deconstructed in the test fixture.
 
 ## updateLocators
 
-[src/locators/index.ts:56-61][37]
+[src/locators/index.ts:54-61][270]
 
 Function to update locators if user wants to override the default locators inside fixtures.
 
 ```typescript
-   import { updateLocators } from '@inveniosoftware/invenio-e2e';
+import { updateLocators } from '@inveniosoftware/invenio-e2e';
 
-   myLocators = { ... }
+myLocators = { ... }
 
-   export const test = invenio_test.extend({
-     locators: updateLocators(myLocators),
-   })
+export const test = invenio_test.extend({
+  locators: updateLocators(myLocators),
+})
 ```
 
 If you extend the locators with new properties and you need to use them in your page classes, define a new type that extends the Locators type:
 
 ```typescript
 
-   import { Locators } from '@inveniosoftware/invenio-e2e';
-   import {myLocators} from './myLocators';
+import { Locators } from '@inveniosoftware/invenio-e2e';
+import {myLocators} from './myLocators';
 
-   export type MyLocators = Locators & typeof myLocators;
+export type MyLocators = Locators & typeof myLocators;
 
 ```
 
@@ -186,140 +1142,764 @@ Then, create your page class with the new type:
 
 ```typescript
 
-   import { BasePage } from '@inveniosoftware/invenio-e2e';
-   class MyPage extends BasePage<MyLocators> {
-       blah() {
-         console.log(this.locators.myPage.something);
-       }
-   }
+import { BasePage } from '@inveniosoftware/invenio-e2e';
+class MyPage extends BasePage<MyLocators> {
+  blah() {
+    console.log(this.locators.myPage.something);
+  }
+}
 ```
 
 ### Parameters
 
 *   `locators` **T** the new locators to be merged with the existing ones.
 
-Returns **function (params: {locators: [Locators][12]}, use: UseLocators\<any>): [Promise][25]\<void>** A function that takes the original locators and
+Returns **function (params: {locators: [Locators][135]}, use: UseLocators\<any>): [Promise][166]\<void>** A function that takes the original locators and
 merges them with the new ones, to be used in the test
 fixture definition.
 
+## selectSortOption
+
+[src/pages/communitySearchPage.ts:12-19][271]
+
+Selects an option from the 'Sort by' dropdown menu.
+
+### Parameters
+
+*   `option` **[string][174]** The option to select ('Newest', 'Oldest', 'Best match').
+
+Returns **[Promise][166]\<void>**&#x20;
+
+## isSortOptionSelected
+
+[src/pages/communitySearchPage.ts:28-32][272]
+
+Checks if the given 'Sort by' option is selected.
+
+### Parameters
+
+*   `option` **[string][174]** The name of the option to verify.
+
+Returns **[Promise][166]<[boolean][202]>** True if the option is selected, otherwise false.
+
+## constructor
+
+[src/services/form.ts:61-61][273]
+
+Implementation of the deposition service that invokes deposition & checking steps.
+
+### Parameters
+
+*   `` &#x20;
+
+## AllPages
+
+[src/pages/index.ts:31-42][274]
+
+Interface representing all available pages in the application.
+
+## Translations
+
+[src/services/i18n.ts:24-28][275]
+
+Structure for pre-compiled translations
+
+## I18nServiceInterface
+
+[src/services/i18n.ts:33-42][276]
+
+Interface for changing languages and checking translations in tests
+
+## skipTests
+
+[src/fixtures/index.ts:232-232][277]
+
+Call the callback function with the skipped tests list. If a test inside the callback
+has a title that is in the skipped tests list, it will be skipped.
+
+Type: function (skippedTests: [Array][206]<[string][174]>, callback: function (): void): void
+
+### Parameters
+
+*   `skippedTests`  a list of test titles to skip
+*   `callback`  a callback function that contains the tests to run
+
+## fillForm
+
+[src/services/form.ts:16-20][278]
+
+Fill the deposition form using FormData structure.
+
+Type: function (page: [BasePage][5], formData: [FormData][279]): [Promise][166]<{page: [BasePage][5], filledData: [Array][206]<[Array][206]\<any>>}>
+
+### Parameters
+
+*   `page`  the deposition page instance
+*   `formData`  the form data containing data, files, and expected errors
+
+## fill
+
+[src/services/form.ts:27-27][280]
+
+Fill form fields with the provided data.
+It will call `fill&lt;FieldName>` method for each provided field on the DepositPage instance.
+
+Type: function (page: [BasePage][5], data: [Array][206]<\[[string][174], any]>): [Promise][166]<{page: [BasePage][5], filledData: [Array][206]\<any>}>
+
+## save
+
+[src/services/form.ts:33-33][281]
+
+Save the form and return the resulting page.
+To verify expected error messages, use the `expectErrors` method after this one.
+
+Type: function (page: [BasePage][5]): [Promise][166]<[BasePage][5]>
+
+## expectErrors
+
+[src/services/form.ts:44-44][282]
+
+Verify error messages on the form.
+The expectedErrors array contains strings or regex patterns to match against
+error messages. If string is used, the whole error message must match this string.
+
+The onlyTheseErrors flag indicates whether to check for only the expected errors
+or allow others. The default is strict checking (onlyTheseErrors = true), that is,
+the caller must provide all expected errors or the check will fail.
+
+Type: function (page: [BasePage][5], expectedErrors: [Array][206]\<ExpectedError>, onlyTheseErrors: [boolean][202]): [Promise][166]<[BasePage][5]>
+
+## uploadFiles
+
+[src/services/form.ts:51-51][283]
+
+Upload files to the form.
+Upload a specific file from UploadFiles folder.
+
+Type: function (page: [BasePage][5], fileNames: [Array][206]<[string][174]>): [Promise][166]<{page: [BasePage][5], filledData: [Array][206]\<any>}>
+
 ## PageFixtureParams
 
-[src/fixtures/utils.ts:9-13][38]
+[src/fixtures/utils.ts:10-16][284]
 
 PageFixtureParams defines the parameters required to create a page instance.
 User pages might extend this type to include additional parameters.
 
-Type: {page: Page, locators: L, availablePages: {: [object][23]}}
+Type: {page: Page, locators: L, availablePages: [AllPages][146]\<L>, services: Services\<L>, expect: Expect<[I18nExpected][162]>}
 
 ### Properties
 
 *   `page` **Page**&#x20;
 *   `locators` **L**&#x20;
-*   `availablePages` **{: [object][23]}**&#x20;
+*   `availablePages` **[AllPages][146]\<L>**&#x20;
+*   `services` **Services\<L>**&#x20;
+*   `expect` **Expect<[I18nExpected][162]>**&#x20;
 
 ## UseFunction
 
-[src/fixtures/utils.ts:18-18][39]
+[src/fixtures/utils.ts:21-21][285]
 
 UseFunction is a type that represents a function callback used in fixture definitions.
 
-Type: function (r: InstanceType\<T>): [Promise][25]\<void>
+Type: function (r: InstanceType\<T>): [Promise][166]\<void>
 
 ## FixtureRegistrationFunction
 
-[src/fixtures/utils.ts:24-27][40]
+[src/fixtures/utils.ts:27-30][286]
 
 FixtureRegistrationFunction is a type that represents a function used to register
 a page fixture.
 
-Type: function (params: [PageFixtureParams][17]\<L>, use: [UseFunction][19]\<L, T>): [Promise][25]\<void>
+Type: function (params: [PageFixtureParams][157]\<L>, use: [UseFunction][159]\<L, T>): [Promise][166]\<void>
 
 ## Locators
 
-[src/locators/index.ts:9-9][41]
+[src/locators/index.ts:10-10][287]
 
 Type definition for the locators object.
 
 Type: any
 
-[1]: #basepage
+## I18nExpected
 
-[2]: #parameters
+[src/services/i18n.ts:9-19][288]
 
-[3]: #validatepageloaded
+Type that adds translation checking methods to Playwright's expect function
 
-[4]: #expectlogovisible
+Type: any
 
-[5]: #navigatetohomepage
+[1]: #
 
-[6]: #homepage
+[2]: #fileuploadhelper
 
-[7]: #validatepageloaded-1
+[3]: #parameters
 
-[8]: #performsearch
+[4]: #uploadrandomfileandconfirm
 
-[9]: #parameters-1
+[5]: #basepage
 
-[10]: #searchpage
+[6]: #parameters-1
 
-[11]: #validatepageloaded-2
+[7]: #validatepageloaded
 
-[12]: #locators
+[8]: #expectlogovisible
 
-[13]: #registerpage
+[9]: #navigatetohomepage
 
-[14]: #parameters-2
+[10]: #communitiespage
 
-[15]: #updatelocators
+[11]: #navigatetofirstcommunity
+
+[12]: #fillsearchfield
+
+[13]: #parameters-2
+
+[14]: #submitsearch
+
+[15]: #performsearch
 
 [16]: #parameters-3
 
-[17]: #pagefixtureparams
+[17]: #verifycommunityname
 
-[18]: #properties
+[18]: #parameters-4
 
-[19]: #usefunction
+[19]: #communitydetailpage
 
-[20]: #fixtureregistrationfunction
+[20]: #navigatetosettingssection
 
-[21]: #locators-1
+[21]: #navigatetorecordssection
 
-[22]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/basePage.ts#L8-L60 "Source code on GitHub"
+[22]: #navigatetomemberssection
 
-[23]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[23]: #navigatetocurationpolicysection
 
-[24]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/basePage.ts#L34-L36 "Source code on GitHub"
+[24]: #navigatetoaboutsection
 
-[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
+[25]: #editcommunityname
 
-[26]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/basePage.ts#L41-L45 "Source code on GitHub"
+[26]: #filldeleteconfirmationinput
 
-[27]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/basePage.ts#L53-L59 "Source code on GitHub"
+[27]: #selectrolebyindex
 
-[28]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/homePage.ts#L10-L65 "Source code on GitHub"
+[28]: #parameters-5
 
-[29]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/homePage.ts#L26-L29 "Source code on GitHub"
+[29]: #fillcurationpolicy
 
-[30]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/homePage.ts#L61-L64 "Source code on GitHub"
+[30]: #parameters-6
 
-[31]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[31]: #fillaboutpage
 
-[32]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/searchPage.ts#L8-L27 "Source code on GitHub"
+[32]: #parameters-7
 
-[33]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/pages/searchPage.ts#L23-L26 "Source code on GitHub"
+[33]: #getcommunityheadername
 
-[34]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/locators/defaultLocators.ts#L5-L16 "Source code on GitHub"
+[34]: #clicksavebutton
 
-[35]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/fixtures/utils.ts#L62-L103 "Source code on GitHub"
+[35]: #clickdeletecommunitybutton
 
-[36]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+[36]: #clickpermanentlydeletebutton
 
-[37]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/locators/index.ts#L56-L61 "Source code on GitHub"
+[37]: #clickinvitebutton
 
-[38]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/fixtures/utils.ts#L5-L8 "Source code on GitHub"
+[38]: #clickinvitebuttonconfirmation
 
-[39]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/fixtures/utils.ts#L15-L17 "Source code on GitHub"
+[39]: #verifycommunityname-1
 
-[40]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/fixtures/utils.ts#L20-L23 "Source code on GitHub"
+[40]: #parameters-8
 
-[41]: https://github.com/oarepo/invenio-e2e/blob/72cee4a08f0f277da00de63b4173d28aa7a6f53d/src/locators/index.ts#L6-L8 "Source code on GitHub"
+[41]: #verifyupdatedcommunityname
+
+[42]: #parameters-9
+
+[43]: #verifycommunitynotpresent
+
+[44]: #parameters-10
+
+[45]: #depositpage
+
+[46]: #validatepageloaded-1
+
+[47]: #fillmetadataonly
+
+[48]: #parameters-11
+
+[49]: #uploadfile
+
+[50]: #parameters-12
+
+[51]: #uploadfileandconfirm
+
+[52]: #parameters-13
+
+[53]: #verifyerrormessages
+
+[54]: #parameters-14
+
+[55]: #homepage
+
+[56]: #openpage
+
+[57]: #validatepageloaded-2
+
+[58]: #gotocommunitiespage
+
+[59]: #clickquickcreatebutton
+
+[60]: #performsearch-1
+
+[61]: #parameters-15
+
+[62]: #selectnewcommunity
+
+[63]: #selectnewupload
+
+[64]: #loginpage
+
+[65]: #openpage-1
+
+[66]: #parameters-16
+
+[67]: #validatepageloaded-3
+
+[68]: #loginuser
+
+[69]: #parameters-17
+
+[70]: #mydashboardpage
+
+[71]: #navigatetocommunities
+
+[72]: #navigatetomydashboard
+
+[73]: #firstrecorddetail
+
+[74]: #navigatetofirstcommunity-1
+
+[75]: #navigatetorequests
+
+[76]: #clickeditbutton
+
+[77]: #clickacceptbutton
+
+[78]: #parameters-18
+
+[79]: #clickdeclinebutton
+
+[80]: #parameters-19
+
+[81]: #isdeclinebuttonpresent
+
+[82]: #parameters-20
+
+[83]: #clickacceptbuttonconfirm
+
+[84]: #clickdeclinebuttonconfirm
+
+[85]: #clickversionstoggle
+
+[86]: #verifyrecordisabsent
+
+[87]: #parameters-21
+
+[88]: #isalldonemessagepresent
+
+[89]: #isnewversiondraftlabelpresent
+
+[90]: #isrecordtitlematching
+
+[91]: #parameters-22
+
+[92]: #newcommunitypage
+
+[93]: #navigatetohome
+
+[94]: #navigatetomydashboard-1
+
+[95]: #firstrecorddetail-1
+
+[96]: #fillcommunityname
+
+[97]: #parameters-23
+
+[98]: #fillcommunityidentifier
+
+[99]: #parameters-24
+
+[100]: #clicknewcommunitybutton
+
+[101]: #selectpubliccommunity
+
+[102]: #selectrestrictedcommunity
+
+[103]: #clickcreatecommunity
+
+[104]: #getcommunityname
+
+[105]: #verifycommunityname-2
+
+[106]: #parameters-25
+
+[107]: #previewpage
+
+[108]: #validatepageloaded-4
+
+[109]: #verifysavedraftpreview
+
+[110]: #verifysavedraftpreviewversions
+
+[111]: #verifyuploadedfile
+
+[112]: #parameters-26
+
+[113]: #verifycreator
+
+[114]: #parameters-27
+
+[115]: #verifytitle
+
+[116]: #parameters-28
+
+[117]: #verifyresourcetype
+
+[118]: #parameters-29
+
+[119]: #verifydescription
+
+[120]: #parameters-30
+
+[121]: #countuploadedfiles
+
+[122]: #waitforuploadedfilestable
+
+[123]: #searchpage
+
+[124]: #validatepageloaded-5
+
+[125]: #i18nservice
+
+[126]: #parameters-31
+
+[127]: #getlocalizedtext
+
+[128]: #parameters-32
+
+[129]: #appconfig
+
+[130]: #test
+
+[131]: #get
+
+[132]: #parameters-33
+
+[133]: #apply
+
+[134]: #parameters-34
+
+[135]: #locators
+
+[136]: #registerpage
+
+[137]: #parameters-35
+
+[138]: #updatelocators
+
+[139]: #parameters-36
+
+[140]: #selectsortoption
+
+[141]: #parameters-37
+
+[142]: #issortoptionselected
+
+[143]: #parameters-38
+
+[144]: #constructor
+
+[145]: #parameters-39
+
+[146]: #allpages
+
+[147]: #translations
+
+[148]: #i18nserviceinterface
+
+[149]: #skiptests
+
+[150]: #parameters-40
+
+[151]: #fillform
+
+[152]: #parameters-41
+
+[153]: #fill
+
+[154]: #save
+
+[155]: #expecterrors
+
+[156]: #uploadfiles
+
+[157]: #pagefixtureparams
+
+[158]: #properties
+
+[159]: #usefunction
+
+[160]: #fixtureregistrationfunction
+
+[161]: #locators-1
+
+[162]: #i18nexpected
+
+[163]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/depositPage.ts#L419-L425 "Source code on GitHub"
+
+[164]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/helpers/fileUploadHelper.ts#L14-L59 "Source code on GitHub"
+
+[165]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/helpers/fileUploadHelper.ts#L36-L58 "Source code on GitHub"
+
+[166]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
+
+[167]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/basePage.ts#L10-L88 "Source code on GitHub"
+
+[168]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/basePage.ts#L49-L51 "Source code on GitHub"
+
+[169]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/basePage.ts#L56-L60 "Source code on GitHub"
+
+[170]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/basePage.ts#L68-L75 "Source code on GitHub"
+
+[171]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communitiesPage.ts#L9-L84 "Source code on GitHub"
+
+[172]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communitiesPage.ts#L15-L28 "Source code on GitHub"
+
+[173]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communitiesPage.ts#L36-L41 "Source code on GitHub"
+
+[174]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+
+[175]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communitiesPage.ts#L48-L54 "Source code on GitHub"
+
+[176]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communitiesPage.ts#L62-L65 "Source code on GitHub"
+
+[177]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communitiesPage.ts#L74-L83 "Source code on GitHub"
+
+[178]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
+
+[179]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L9-L206 "Source code on GitHub"
+
+[180]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L15-L17 "Source code on GitHub"
+
+[181]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L22-L24 "Source code on GitHub"
+
+[182]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L29-L31 "Source code on GitHub"
+
+[183]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L36-L38 "Source code on GitHub"
+
+[184]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L43-L45 "Source code on GitHub"
+
+[185]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L53-L63 "Source code on GitHub"
+
+[186]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L68-L78 "Source code on GitHub"
+
+[187]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L84-L88 "Source code on GitHub"
+
+[188]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L94-L100 "Source code on GitHub"
+
+[189]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L106-L112 "Source code on GitHub"
+
+[190]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L118-L123 "Source code on GitHub"
+
+[191]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L130-L134 "Source code on GitHub"
+
+[192]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L139-L143 "Source code on GitHub"
+
+[193]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L148-L154 "Source code on GitHub"
+
+[194]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L159-L161 "Source code on GitHub"
+
+[195]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L166-L170 "Source code on GitHub"
+
+[196]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L178-L183 "Source code on GitHub"
+
+[197]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L189-L194 "Source code on GitHub"
+
+[198]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communityDetailPage.ts#L200-L205 "Source code on GitHub"
+
+[199]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/depositPage.ts#L14-L432 "Source code on GitHub"
+
+[200]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/depositPage.ts#L31-L33 "Source code on GitHub"
+
+[201]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/depositPage.ts#L53-L66 "Source code on GitHub"
+
+[202]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+
+[203]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/depositPage.ts#L72-L76 "Source code on GitHub"
+
+[204]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/depositPage.ts#L82-L100 "Source code on GitHub"
+
+[205]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/depositPage.ts#L270-L331 "Source code on GitHub"
+
+[206]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+
+[207]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/homePage.ts#L10-L127 "Source code on GitHub"
+
+[208]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/homePage.ts#L18-L22 "Source code on GitHub"
+
+[209]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/homePage.ts#L29-L32 "Source code on GitHub"
+
+[210]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/homePage.ts#L58-L67 "Source code on GitHub"
+
+[211]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/homePage.ts#L72-L78 "Source code on GitHub"
+
+[212]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/homePage.ts#L87-L90 "Source code on GitHub"
+
+[213]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/homePage.ts#L95-L102 "Source code on GitHub"
+
+[214]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/homePage.ts#L108-L126 "Source code on GitHub"
+
+[215]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/loginPage.ts#L8-L78 "Source code on GitHub"
+
+[216]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/loginPage.ts#L14-L22 "Source code on GitHub"
+
+[217]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/loginPage.ts#L29-L33 "Source code on GitHub"
+
+[218]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/loginPage.ts#L73-L77 "Source code on GitHub"
+
+[219]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L8-L177 "Source code on GitHub"
+
+[220]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L15-L22 "Source code on GitHub"
+
+[221]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L27-L29 "Source code on GitHub"
+
+[222]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L34-L38 "Source code on GitHub"
+
+[223]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L43-L50 "Source code on GitHub"
+
+[224]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L55-L57 "Source code on GitHub"
+
+[225]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L64-L68 "Source code on GitHub"
+
+[226]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L74-L78 "Source code on GitHub"
+
+[227]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L84-L88 "Source code on GitHub"
+
+[228]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L95-L101 "Source code on GitHub"
+
+[229]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L106-L110 "Source code on GitHub"
+
+[230]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L115-L119 "Source code on GitHub"
+
+[231]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L124-L128 "Source code on GitHub"
+
+[232]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L137-L139 "Source code on GitHub"
+
+[233]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L144-L148 "Source code on GitHub"
+
+[234]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L154-L164 "Source code on GitHub"
+
+[235]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/myDashboardPage.ts#L171-L176 "Source code on GitHub"
+
+[236]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L8-L123 "Source code on GitHub"
+
+[237]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L15-L17 "Source code on GitHub"
+
+[238]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L22-L24 "Source code on GitHub"
+
+[239]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L29-L33 "Source code on GitHub"
+
+[240]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L42-L47 "Source code on GitHub"
+
+[241]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L54-L60 "Source code on GitHub"
+
+[242]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L67-L71 "Source code on GitHub"
+
+[243]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L76-L78 "Source code on GitHub"
+
+[244]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L83-L87 "Source code on GitHub"
+
+[245]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L92-L96 "Source code on GitHub"
+
+[246]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L103-L107 "Source code on GitHub"
+
+[247]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/newCommunityPage.ts#L113-L122 "Source code on GitHub"
+
+[248]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L8-L212 "Source code on GitHub"
+
+[249]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L14-L20 "Source code on GitHub"
+
+[250]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L27-L34 "Source code on GitHub"
+
+[251]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L39-L46 "Source code on GitHub"
+
+[252]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L52-L61 "Source code on GitHub"
+
+[253]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L67-L82 "Source code on GitHub"
+
+[254]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L89-L106 "Source code on GitHub"
+
+[255]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L112-L123 "Source code on GitHub"
+
+[256]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L129-L142 "Source code on GitHub"
+
+[257]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L195-L200 "Source code on GitHub"
+
+[258]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/previewPage.ts#L206-L211 "Source code on GitHub"
+
+[259]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/searchPage.ts#L8-L28 "Source code on GitHub"
+
+[260]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/searchPage.ts#L24-L27 "Source code on GitHub"
+
+[261]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/i18n.ts#L47-L222 "Source code on GitHub"
+
+[262]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/i18n.ts#L124-L155 "Source code on GitHub"
+
+[263]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/config/env.ts#L33-L47 "Source code on GitHub"
+
+[264]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/fixtures/index.ts#L241-L295 "Source code on GitHub"
+
+[265]: https://playwright.dev/docs/api/class-test
+
+[266]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/fixtures/index.ts#L246-L277 "Source code on GitHub"
+
+[267]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/fixtures/index.ts#L284-L294 "Source code on GitHub"
+
+[268]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/locators/defaultLocators.ts#L5-L232 "Source code on GitHub"
+
+[269]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/fixtures/utils.ts#L64-L110 "Source code on GitHub"
+
+[270]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/locators/index.ts#L54-L61 "Source code on GitHub"
+
+[271]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communitySearchPage.ts#L12-L19 "Source code on GitHub"
+
+[272]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/communitySearchPage.ts#L28-L32 "Source code on GitHub"
+
+[273]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/form.ts#L61-L61 "Source code on GitHub"
+
+[274]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/pages/index.ts#L31-L42 "Source code on GitHub"
+
+[275]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/i18n.ts#L24-L28 "Source code on GitHub"
+
+[276]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/i18n.ts#L33-L42 "Source code on GitHub"
+
+[277]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/fixtures/index.ts#L232-L232 "Source code on GitHub"
+
+[278]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/form.ts#L16-L20 "Source code on GitHub"
+
+[279]: https://developer.mozilla.org/docs/Web/API/FormData
+
+[280]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/form.ts#L27-L27 "Source code on GitHub"
+
+[281]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/form.ts#L33-L33 "Source code on GitHub"
+
+[282]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/form.ts#L44-L44 "Source code on GitHub"
+
+[283]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/form.ts#L51-L51 "Source code on GitHub"
+
+[284]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/fixtures/utils.ts#L6-L9 "Source code on GitHub"
+
+[285]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/fixtures/utils.ts#L18-L20 "Source code on GitHub"
+
+[286]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/fixtures/utils.ts#L23-L26 "Source code on GitHub"
+
+[287]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/locators/index.ts#L7-L9 "Source code on GitHub"
+
+[288]: https://github.com/oarepo/invenio-e2e/blob/18dd781e9e1aa670642d01f9a84d75d1f5ce37aa/src/services/i18n.ts#L6-L8 "Source code on GitHub"

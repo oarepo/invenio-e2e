@@ -1,12 +1,12 @@
 import { test } from "../../src/fixtures";
 import { recordsApiTests } from '../../src/tests/api';
-import { appConfig } from "../../src/config/env";
+import { appConfig } from "../../src/config";
 
 import type { BrowserContext } from "@playwright/test";
 import { readFileSync } from 'fs';
 import path from 'path';
 
-const authUserFilePath = process.env.AUTH_USER_FILE || path.join(__dirname, '../../playwright/.auth/user.json');
+const authUserFilePath = path.resolve(__dirname, '../../', appConfig.authUserFilePath);
 const authUserFile = JSON.parse(readFileSync(authUserFilePath, 'utf-8')) as Awaited<ReturnType<BrowserContext['storageState']>>;
 
 test.use({

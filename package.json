@@ -34,9 +34,7 @@
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jsdoc": "^60.5.0",
-    "playwright-qase-reporter": "^2.1.5",
     "prettier": "^3.6.2",
-    "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.44.1"
   },
@@ -46,6 +44,7 @@
     "dotenv": "^17.0.0",
     "i18next": "^25.0.0",
     "i18next-conv": "^15.0.0",
-    "ts-deepmerge": "^7.0.3"
+    "ts-deepmerge": "^7.0.3",
+    "playwright-qase-reporter": "^2.1.5"
   }
 }

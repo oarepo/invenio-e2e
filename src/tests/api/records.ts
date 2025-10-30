@@ -2,8 +2,12 @@ import { InvenioTest } from '../../fixtures';
 import { expect } from '@playwright/test';
 
 /**
- * Runs a set of API tests for the Records API.
- * @param test The InvenioTest instance to use for the tests.
+ * Declares the core API regression tests for Invenio records.
+ *
+ * The suite verifies that listing existing records works and that creating a new
+ * metadata-only record, publishing it, and retrieving it again follows the expected flow.
+ * @param test The Playwright test fixture enhanced by `InvenioTest`.
+ * @param recordsApiPath Optional path to the Records API root endpoint, defaults to `/api/records`.
  */
 export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/api/records') {
     test.describe('API Record Tests', () => {
