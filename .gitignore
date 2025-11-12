@@ -110,6 +110,11 @@ temp/
 
 # End of https://www.gitignore.io/api/node
 
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
 package-lock.json
 yarn.lock
 pnpm-lock.yaml

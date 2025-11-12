@@ -1,0 +1,38 @@
+name: "Install dependencies"
+description: "Install the required dependencies for the project"
+inputs:
+  python_version:
+    description: "The version of Python to install"
+    required: true
+    default: "3.13"
+  pnpm_version:
+    description: "The version of PNPM package manager"
+    required: true
+    default: "10"
+  node_version:
+    description: "The version of Node.js to install"
+    required: true
+    default: "20"
+
+runs:
+  using: "composite"
+  steps:
+  - name: "Set up Python ${{ inputs.python_version }}"
+    uses: "actions/setup-python@v5"
+    with:
+      python-version: "${{ inputs.python_version }}"
+
+  - name: Install pnpm
+    uses: pnpm/action-setup@v4
+    with:
+      version: ${{ inputs.pnpm_version }}
+      run_install: false
+
+  - name: Set up Node.js ${{ inputs.node_version }}
+    uses: actions/setup-node@v4
+    with:
+      node-version: ${{ inputs.node_version }}
+
+  - name: Install Node.js dependencies
+    shell: bash
+    run: pnpm install --prefer-offline

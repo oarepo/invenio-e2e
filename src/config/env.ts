@@ -36,6 +36,7 @@ export const appConfig = {
   userEmail: process.env.INVENIO_USER_EMAIL || "invenio@test.com",
   userPassword: process.env.INVENIO_USER_PASSWORD || "invenio",
   authUserFilePath: process.env.AUTH_USER_FILE_PATH || "playwright/.auth/user.json",
+  dataFolderPath: process.env.DATA_FOLDER_PATH || "data",
   qase: {
     apiToken: process.env.QASE_TESTOPS_API_TOKEN || "",
     projectCode: process.env.QASE_TESTOPS_PROJECT || "",

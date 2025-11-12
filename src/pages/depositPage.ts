@@ -6,6 +6,7 @@ import { ExpectedTexts } from "../locators/expectedTexts";
 import { getCurrentDateFormatted } from "../fixtures/utils";
 import { ExpectedError as ErrorWithLocation } from "../services/form";
 import path from "path";
+import { appConfig } from "../config";
 
 /**
  * Class representing a Deposit page in the application.
@@ -70,7 +71,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
    * @param filename Name of the file to upload
    */
   async uploadFile(filename: string) {
-    const filePath = path.join(__dirname, "../data/UploadFiles", filename);
+    const filePath = path.join(__dirname, "..", appConfig.dataFolderPath, "UploadFiles", filename);
     await this.page.setInputFiles('input[type="file"]', filePath);
     console.log(`[BasePage] Uploading file: ${filePath}`);
   }

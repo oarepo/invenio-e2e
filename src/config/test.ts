@@ -5,6 +5,7 @@ export const testConfig = {
     userEmail: appConfig.userEmail,
     userPassword: appConfig.userPassword,
     baseURL: appConfig.baseURL,
+    dataFolderPath: appConfig.dataFolderPath,
 };
 
 export type TestConfig = typeof testConfig;

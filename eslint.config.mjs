@@ -38,6 +38,7 @@ export default defineConfig(
     // Additional rules to override those in the extended configs
     rules: {
       "camelcase": ["error", { properties: "never", ignoreDestructuring: true }], // Invenio rule
+      "jsdoc/text-escaping": "off", // Conflicts with TypeScript generics syntax
     }
   },
   {

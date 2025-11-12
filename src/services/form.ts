@@ -21,7 +21,7 @@ export interface FormServiceInterface {
 
     /**
      * Fill form fields with the provided data.
-     * It will call `fill&lt;FieldName>` method for each provided field on the DepositPage instance.
+     * It will call `fill<FieldName>` method for each provided field on the DepositPage instance.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fill: (page: BasePage, data: Array<[string, any]>) => Promise<{ page: BasePage; filledData: any[] }>;
@@ -168,12 +168,13 @@ export class FormService implements FormServiceInterface {
     /**
      * Helper method to find the appropriate method name for a field.
      */
-    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private getMethod(page: any, field: string, methodPrefixes: string[]): string {
         const triedMethods = [];
         for (const prefix of methodPrefixes) {
             const methodName = `${prefix}${field.charAt(0).toUpperCase() + field.slice(1)}`;
             triedMethods.push(methodName);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (typeof page[methodName] === "function") {
                 return methodName;
             }
@@ -182,5 +183,4 @@ export class FormService implements FormServiceInterface {
             `No method found for filling field ${field}. Tried: ${triedMethods.join(", ")}`
         );
     }
-    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
 }
