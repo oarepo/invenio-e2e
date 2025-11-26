@@ -85,7 +85,7 @@ export class BasePage<
    * @param credentials.password Optional password to log in with.
    * @returns The current page instance for method chaining.
    */
-  async login(credentials?: { username?: string; password?: string }): Promise<this> {
+  async login(credentials?: { username: string; password: string }): Promise<this> {
     const loginService = this.services.login;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await loginService.login(this as any, credentials);
