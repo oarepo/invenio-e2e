@@ -80,7 +80,7 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
 
             // Publish the record
             /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
-            const publishResponse = await request.post(createdRecord.links.publish);
+            const publishResponse = await request.post(createdRecord.links?.publish);
 
             expect(publishResponse.status()).toBe(202);
 
@@ -96,7 +96,7 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
             }));
 
             // Verify the record is published
-            const record = await request.get(publishedRecord.links.self);
+            const record = await request.get(publishedRecord.links?.self);
 
             expect(record.status()).toBe(200);
             expect(await record.json(), "should return again the published record with correct structure").toEqual(expect.objectContaining({
