@@ -10,7 +10,7 @@ import { appConfig } from "../src/config/env"; //  use centralized config
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  // Include both legacy ./tests and new ./src/tests directories
+  // Rename default test directory to repository tests directory
   testDir: '.',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -27,7 +27,7 @@ export default defineConfig({
   reporter: [
     ["list"],
     ["html", { outputFolder: "playwright-report", open: "never" }],
-    ...(appConfig.qase
+    ...(appConfig?.qase
       ? [
           [
             "playwright-qase-reporter",
