@@ -2,14 +2,15 @@
  * This file is just for testing this library, it is not intended to be used for real repositories.
  * For those, please use invenio-cli init with the appropriate template.
  */
-import { defineConfig, devices } from "@playwright/test";
+
+import { defineConfig, devices } from '@playwright/test';
 import { appConfig } from "../src/config/env"; //  use centralized config
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  // Include both legacy ./tests and new ./src/tests directories
+  // Rename default test directory to repository tests directory
   testDir: '.',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -19,12 +20,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
+  /* Set global timeout for each test */
+  timeout: 10_000,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   // Multiple reporters (console + HTML + Qase)
   reporter: [
     ["list"],
     ["html", { outputFolder: "playwright-report", open: "never" }],
-    ...(appConfig.qase
+    ...(appConfig?.qase
       ? [
           [
             "playwright-qase-reporter",
@@ -61,9 +64,9 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      testIgnore: /api\/.*/,
       use: { ...devices['Desktop Chrome'] },
     },
-
     // {
     //   name: 'firefox',
     //   use: { ...devices['Desktop Firefox'] },
@@ -73,6 +76,19 @@ export default defineConfig({
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },
     // },
+
+    /* API Testing */
+    { name: 'API Testing Setup', 
+      testMatch: /api\/.*\.setup\.ts$/ 
+    },
+    {
+      name: 'API',
+      testMatch: /api\/.*\.spec.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+      dependencies: ['API Testing Setup'],
+    },
 
     /* Test against mobile viewports. */
     // {
