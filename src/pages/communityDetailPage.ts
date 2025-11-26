@@ -10,35 +10,35 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
   // NAVIGATION --------------------------------------------------------
 
   /**
-   * Navigate to the Settings section of the community.
+   * Navigates to the Settings section of the community.
    */
   async navigateToSettingsSection() {
     await this.page.click(this.locators.communityDetailPage.settingsTab);
   }
 
   /**
-   * Navigate to the Records section of the community.
+   * Navigates to the Records section of the community.
    */
   async navigateToRecordsSection() {
     await this.page.click(this.locators.communityDetailPage.recordsTab);
   }
 
   /**
-   * Navigate to the Members section of the community.
+   * Navigates to the Members section of the community.
    */
   async navigateToMembersSection() {
     await this.page.click(this.locators.communityDetailPage.membersTab);
   }
 
   /**
-   * Navigate to the Curation Policy section of the community.
+   * Navigates to the Curation Policy section of the community.
    */
   async navigateToCurationPolicySection() {
     await this.page.click(this.locators.communityDetailPage.curationPolicyTab);
   }
 
   /**
-   * Navigate to the About section of the community.
+   * Navigates to the About section of the community.
    */
   async navigateToAboutSection() {
     await this.page.click(this.locators.communityDetailPage.aboutTab);
@@ -134,7 +134,7 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
   }
 
   /**
-   * Click the Delete Community button.
+   * Clicks the Delete Community button to initiate community deletion.
    */
   async clickDeleteCommunityButton() {
     await this.page
@@ -172,8 +172,8 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
   // VERIFICATION ------------------------------------------------------
 
   /**
-   * Verify that the community name matches the expected value.
-   * @param expectedName Expected community name.
+   * Verifies that the community name matches the expected value.
+   * @param expectedName Expected community name to verify.
    */
   async verifyCommunityName(expectedName: string) {
     const locator = this.page.locator(

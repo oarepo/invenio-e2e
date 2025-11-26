@@ -1,11 +1,16 @@
 import { test as setup } from '../../fixtures';
 import { expect } from '@playwright/test';
 
-import path from 'path';
-
-export function setupApiTesting(authFilePath?: string) {
-  authFilePath = authFilePath ?? path.join(__dirname, '../../../playwright/.auth/user.json');
-
+/**
+ * Registers the authentication setup needed before running API tests.
+ *
+ * The helper signs in through the UI once, stores the resulting authenticated
+ * Playwright storage state, and makes it available to subsequent API tests.
+ * @param authFilePath Absolute path where the authenticated storage
+ * state should be saved. Defaults to `playwright/.auth/user.json` inside the project.
+ */
+export function setupApiTesting(authFilePath: string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setup('Authentication for API Testing', async ({ loginPage, homePage, page }) => {
     await homePage.openPage();
     const loggedInHomePage = await homePage.login();

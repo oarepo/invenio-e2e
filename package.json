@@ -7,6 +7,10 @@
   "scripts": {
     "build": "tsc; cat package.json | sed 's@dist/index.ts@dist/index.js@' > dist/package.json; cp -r scripts dist/",
     "docs": "documentation build src/**/*.ts -f md -o api_docs.md --shallow --github --sort-order kind",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier": "prettier --check \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
+    "prettier:fix": "prettier --write \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
     "collect-translations": "node scripts/collect-translations.js",
     "collect-translations:validate": "node scripts/collect-translations.js --validate",
     "generate-pot": "node scripts/generate-pot.js",
@@ -19,14 +23,18 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=20.11.0"
+  },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "@types/i18next": "^12.1.0",
     "@types/node": "^24.3.1",
     "documentation": "^14.0.3",
     "eslint": "^9.36.0",
-    "playwright-qase-reporter": "^2.1.5",
-    "ts-node": "^10.9.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsdoc": "^60.5.0",
+    "prettier": "^3.6.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.44.1"
   },
@@ -37,5 +45,8 @@
     "i18next": "^25.0.0",
     "i18next-conv": "^15.0.0",
     "ts-deepmerge": "^7.0.3"
+  },
+  "optionalDependencies": {
+    "playwright-qase-reporter": "^2.1.5"
   }
 }

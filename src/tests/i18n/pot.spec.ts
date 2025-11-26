@@ -5,12 +5,11 @@ import path from "path";
 
 /**
  * Runs a set of tests for POT file generation.
- *
- * @param test - The InvenioTest instance to use for the tests.
+ * @param test The InvenioTest instance to use for the tests.
  */
 export function i18nPOTTests(test: InvenioTest) {
   test.describe("POT file generation (fast, no browser)", () => {
-    test("POT file exists and contains translatable strings", async () => {
+    test("POT file exists and contains translatable strings", () => {
       const potFilePath = path.resolve("translations/messages.pot");
 
       expect(fs.existsSync(potFilePath), "POT file should exist. Run `npm run generate-pot`.").toBe(

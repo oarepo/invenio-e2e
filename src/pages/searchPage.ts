@@ -17,6 +17,7 @@ export class SearchPage<T extends Locators = Locators> extends BasePage<T> {
     }
 
     // VALIDATION
+
     /**
      * Validates that the search page has loaded by checking for the search result list.
      */

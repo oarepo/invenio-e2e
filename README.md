@@ -2,6 +2,11 @@
 
 **Note:** This is a suggestion only; it might be changed or abandoned at any time.
 
+## Dependencies
+
+- [Node.js](https://nodejs.org/en/) (v20.11.0 or higher)
+- [pnpm](https://pnpm.io/) (v9.0.0 or higher)
+
 ## How to Try It Out
 
 ### Directory Structure
@@ -59,7 +64,7 @@ parent-directory
     pnpm install
     ```
 
-5. Configure environment variables:
+5. Configure environment variables (see `src/config/env.ts` for all options):
 
     You will need a test user that can deposit records in your InvenioRDM instance.
 
@@ -81,3 +86,23 @@ parent-directory
     cd <my-repository>/e2e
     npx playwright test
     ```
+
+## API Testing
+
+The project also ships with a lightweight API regression suite that reuses the same authentication helpers as the UI tests.
+
+1. Generate an authenticated storage state once by running:
+
+    ```bash
+    npx playwright test tests/api/auth.setup.ts
+    ```
+
+    The state is saved to `tests/playwright/.auth/user.json` by default. Override the destination by setting the `AUTH_USER_FILE_PATH` environment variable.
+
+2. Execute the API suite:
+
+    ```bash
+    npx playwright test tests/api/invenio-api.spec.ts
+    ```
+
+    Requests target various endpoints like `/api/records` unless you provide a different base URL. See the JSDoc in `src/tests/api` for additional customization options.

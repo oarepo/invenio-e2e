@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { InvenioTest } from '../../fixtures';
 import { expect } from '@playwright/test';
 
 /**
  * Runs a set of tests for the login page.
- * 
- * @param test - The InvenioTest instance to use for the tests.
+ * @param test The InvenioTest instance to use for the tests.
  */
 export function loginTests(test: InvenioTest) {
     // If Login Tests are skipped, return early
@@ -19,7 +19,7 @@ export function loginTests(test: InvenioTest) {
         });
 
         test('Logged in fixture works', async ({ defaultUserLoggedIn, loginService }) => {
-            expect(loginService.isUserLoggedIn()).toBeTruthy();
+            expect(await loginService.isUserLoggedIn()).toBeTruthy();
         });
     });
 };

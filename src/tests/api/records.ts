@@ -2,9 +2,12 @@ import { InvenioTest } from '../../fixtures';
 import { expect } from '@playwright/test';
 
 /**
- * Runs a set of API tests for the Records API.
- * 
- * @param test - The InvenioTest instance to use for the tests.
+ * Declares the core API regression tests for Invenio records.
+ *
+ * The suite verifies that listing existing records works and that creating a new
+ * metadata-only record, publishing it, and retrieving it again follows the expected flow.
+ * @param test The Playwright test fixture enhanced by `InvenioTest`.
+ * @param recordsApiPath Optional path to the Records API root endpoint, defaults to `/api/records`.
  */
 export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/api/records') {
     test.describe('API Record Tests', () => {
@@ -34,6 +37,7 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
 
             expect(response.status()).toBe(201);
 
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const createdRecord = await response.json();
 
             expect(createdRecord, "should not have any errors").not.toHaveProperty("errors");
@@ -75,6 +79,7 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
             }));
 
             // Publish the record
+            /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
             const publishResponse = await request.post(createdRecord.links?.publish);
 
             expect(publishResponse.status()).toBe(202);
@@ -103,6 +108,7 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
                 created: publishedRecord.created, // created timestamp should be the same as when published
                 updated: publishedRecord.updated, // updated timestamp should be the same as when published
             }));
+            /* eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
         });
     });
 };

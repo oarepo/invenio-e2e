@@ -1,6 +1,8 @@
+/* eslint-disable no-empty-pattern */
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
+import type { TestDetails } from '@playwright/test';
 
-import { AllPages, BasePage, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
+import { AllPages, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
 import {
     I18nExpected, I18nService, LocalLoginService, Services, Translations, FormService,
 } from '../services';
@@ -9,9 +11,9 @@ import { defaultDepositionData, DepositionData } from './depositionData';
 import { defaultCommunityData, CommunityData } from './communityData';
 import { defaultRecordsApiData, RecordsApiData } from './api';
 
-import type { Config } from '../config';
+import type { TestConfig } from '../config';
 import type { Locators } from '../locators';
-import { config } from '../config';
+import { testConfig } from '../config';
 import { locators } from '../locators';
 import { registerPage } from './utils';
 import { FileUploadHelper } from '../helpers/fileUploadHelper';
@@ -22,7 +24,7 @@ export type { CommunityData, CommunityDataRecord } from './communityData';
 
 
 const _test = base.extend<{
-    config: Config;
+    config: TestConfig;
     locators: Locators;
     availablePages: AllPages<Locators>;
 
@@ -34,7 +36,7 @@ const _test = base.extend<{
     i18nService: I18nService<Locators>;
     loginService: LocalLoginService<Locators>;
     defaultUserLoggedIn: true;
-    formService: FormService<Locators>;
+    formService: FormService;
     services: Services<Locators>;
 
     communityData: CommunityData;
@@ -70,12 +72,13 @@ const _test = base.extend<{
     initialLocale: undefined,
 
     // translations loaded from pre-compiled file
-    translations: async ({ }, use) => {
-        let translations = {};
+    translations: async ({}, use) => {
+        let translations: Translations = {};
         try {
-            const translationsFile = require('@collected-translations/translations.json');
+            // eslint-disable-next-line @typescript-eslint/no-require-imports -- we cannot use import here because "@collected-translations" alias is registered when Playwright is run inside an external/tested repository
+            const translationsFile = require('@collected-translations/translations.json') as Translations;
             translations = translationsFile;
-        } catch (error) {
+        } catch {
             throw new Error(
                 'Pre-compiled translations not found. Please generate translations first:\n\n' +
                 'run: npm run collect-translations\n' +
@@ -129,7 +132,7 @@ const _test = base.extend<{
         ".btn:not(:empty)",
     ],
 
-    config,
+    config: testConfig,
 
     // browser context with initial locale
     context: async ({ context: originalContext, initialLocale }, use) => {
@@ -150,6 +153,7 @@ const _test = base.extend<{
         await use(loginService);
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     defaultUserLoggedIn: async ({ loginService, homePage, loginPage }, use) => {
         // this fixture logs in the default user
         await homePage.openPage();
@@ -157,15 +161,15 @@ const _test = base.extend<{
         await use(true);
     },
 
-    communityData: async ({ }, use) => {
+    communityData: async ({}, use) => {
         await use(defaultCommunityData);
     },
 
-    depositionData: async ({ }, use) => {
+    depositionData: async ({}, use) => {
         await use(defaultDepositionData);
     },
 
-    recordsApiData: async ({ }, use) => {
+    recordsApiData: async ({}, use) => {
         await use(defaultRecordsApiData);
     },
 
@@ -218,12 +222,12 @@ type _invenio_base_test = typeof _test;
  */
 export interface InvenioTest extends _invenio_base_test {
     __skipped_tests?: string[];
+
     /**
      * Call the callback function with the skipped tests list. If a test inside the callback
      * has a title that is in the skipped tests list, it will be skipped.
-     * 
-     * @param skippedTests  a list of test titles to skip
-     * @param callback      a callback function that contains the tests to run
+     * @param skippedTests a list of test titles to skip
+     * @param callback a callback function that contains the tests to run
      */
     skipTests: (skippedTests: string[], callback: () => void) => void;
 }
@@ -231,22 +235,24 @@ export interface InvenioTest extends _invenio_base_test {
 /**
  * InvenioTest is a normal Playwright test object with additional functionality
  * to skip tests based on a list of skipped tests.
+ * @augments _test
+ * @see {@link https://playwright.dev/docs/api/class-test} for more information about the Playwright test object.
  */
-export const test = new Proxy(_test as InvenioTest, {
+export const test: InvenioTest = new Proxy(_test as InvenioTest, {
 
     /**
      * Proxy getter to handle .describe and .skipTests methods.
      */
-    get: (target, prop) => {
+    get: (target, prop: keyof InvenioTest) => {
         switch (prop) {
             case 'describe':
                 // return a wrapper around the describe method that can skip tests
-                return (title: string, annotation?: any, callback?: () => void) => {
+                return (title: string, details?: TestDetails, callback?: () => void) => {
                     const skippedTests = target.__skipped_tests || [];
                     if (skippedTests.includes(title)) {
-                        return target.describe.skip(title, annotation, callback || (() => { }));
+                        return target.describe.skip(title, details as TestDetails, callback || (() => { }));
                     } else {
-                        return target.describe(title, annotation, callback || (() => { }));
+                        return target.describe(title, details as TestDetails, callback || (() => { }));
                     }
                 }
             case 'skipTests':
@@ -266,23 +272,24 @@ export const test = new Proxy(_test as InvenioTest, {
                     }
                 }
             default:
-                return (target as any)[prop];
+                return target[prop];
         }
     },
 
     /**
-     * Handles the case test("test title", ({fixtures}) => { test body })
+     * Handles the case test("test title", ({fixtures}) => { test body }).
      * If the test has a title that is in the skipped tests list, the test
-     * will be marked as .skip
+     * will be marked as .skip.
      */
-    apply: (target, thisArg, args: any[]) => {
+    apply: (target, thisArg, args: Parameters<InvenioTest>) => {
         const skippedTests = target.__skipped_tests || [];
         // if the first argument is a string, it is a test title
         if (typeof args[0] === 'string' && skippedTests.includes(args[0])) {
             // skip the test if it is in the skipped tests list
-            // @ts-ignore
-            return (target as any).skip(...args);
+            // @ts-expect-error - Skip method not properly typed on test function
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+            return (target as unknown).skip(...args);
         }
-        return target.apply(thisArg, args as any);
+        return target.apply(thisArg, args);
     }
 });

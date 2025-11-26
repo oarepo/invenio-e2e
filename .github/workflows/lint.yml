@@ -1,0 +1,21 @@
+name: Lint and Prettify
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  lint-prettify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: ./.github/actions/install_dependencies
+      
+      - name: Run ESLint
+        run: pnpm run lint
+
+      # - name: Run Prettier
+      #   run: pnpm run prettier

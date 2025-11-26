@@ -4,7 +4,7 @@
  */
 
 import { defineConfig, devices } from '@playwright/test';
-import { appConfig } from "../src/config/env"; //  use centralized config
+import { appConfig } from "../src/config"; //  use centralized config
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -32,13 +32,13 @@ export default defineConfig({
           [
             "playwright-qase-reporter",
             {
-              apiToken: appConfig.qase.token,
-              projectCode: appConfig.qase.project,
-              runName: `E2E Run - ${new Date().toISOString()}`,
+              apiToken: appConfig.qase.apiToken,
+              projectCode: appConfig.qase.projectCode,
+              runName: appConfig.qase.runName || `E2E Run - ${new Date().toISOString()}`,
               environment: appConfig.qase.environment,
-              rootSuiteTitle: "Playwright E2E",
+              rootSuiteTitle: appConfig.qase.rootSuiteTitle,
               runComplete: appConfig.qase.runComplete,
-            } as const,
+            },
           ] as const,
         ]
       : []),
