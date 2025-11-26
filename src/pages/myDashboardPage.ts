@@ -3,19 +3,17 @@ import { Locators } from "../locators";
 
 /**
  * Class representing the user Dashboard page.
+ * Provides navigation, button actions, and verifications for dashboard content.
  */
 
 export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> {
-    
   // NAVIGATION ------------------------------------------------------------------------
 
   /**
    * Navigate to the "Communities" section from the dashboard.
    */
   async navigateToCommunities() {
-    await this.page
-      .locator(this.locators.myDashboardPage.communitiesLink)
-      .click();
+    await this.page.locator(this.locators.myDashboardPage.communitiesLink).click();
     await this.page.waitForSelector(this.locators.communitiesPage.pageTitle, {
       state: "visible",
     });
@@ -32,18 +30,14 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    * Opens the detail of the first record in the dashboard.
    */
   async firstRecordDetail() {
-    await this.page
-      .locator(this.locators.myDashboardPage.firstRecordDetail)
-      .click();
+    await this.page.locator(this.locators.myDashboardPage.firstRecordDetail).click();
   }
 
   /**
    * Opens the first community card in the dashboard.
    */
   async navigateToFirstCommunity() {
-    await this.page
-      .locator(this.locators.myDashboardPage.firstCommunityCard)
-      .click();
+    await this.page.locator(this.locators.myDashboardPage.firstCommunityCard).click();
     await this.page.waitForSelector(this.locators.myDashboardPage.recordsTab, {
       state: "visible",
     });
@@ -62,9 +56,7 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    * Clicks the edit button for the first record in the dashboard.
    */
   async clickEditButton() {
-    await this.page
-      .locator(this.locators.myDashboardPage.editFirstRecordButton)
-      .click();
+    await this.page.locator(this.locators.myDashboardPage.editFirstRecordButton).click();
   }
 
   /**
@@ -72,9 +64,7 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    * @param index Index of the request (default 0).
    */
   async clickAcceptButton(index = 0) {
-    await this.page
-      .locator(this.locators.myDashboardPage.acceptButton(index))
-      .click();
+    await this.page.locator(this.locators.myDashboardPage.acceptButton(index)).click();
   }
 
   /**
@@ -82,9 +72,7 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    * @param index Index of the request (default 0).
    */
   async clickDeclineButton(index = 0) {
-    await this.page
-      .locator(this.locators.myDashboardPage.declineButton(index))
-      .click();
+    await this.page.locator(this.locators.myDashboardPage.declineButton(index)).click();
   }
 
   /**
@@ -94,9 +82,7 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    */
   async isDeclineButtonPresent(index = 0): Promise<boolean> {
     return (
-      (await this.page
-        .locator(this.locators.myDashboardPage.declineButton(index))
-        .count()) > 0
+      (await this.page.locator(this.locators.myDashboardPage.declineButton(index)).count()) > 0
     );
   }
 
@@ -104,27 +90,21 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    * Confirms the accept action by clicking the confirmation button.
    */
   async clickAcceptButtonConfirm() {
-    await this.page
-      .locator(this.locators.myDashboardPage.acceptConfirmButton)
-      .click();
+    await this.page.locator(this.locators.myDashboardPage.acceptConfirmButton).click();
   }
 
   /**
    * Confirms the decline action by clicking the confirmation button.
    */
   async clickDeclineButtonConfirm() {
-    await this.page
-      .locator(this.locators.myDashboardPage.declineConfirmButton)
-      .click();
+    await this.page.locator(this.locators.myDashboardPage.declineConfirmButton).click();
   }
 
   /**
    * Toggles the versions dropdown for a record.
    */
   async clickVersionsToggle() {
-    await this.page
-      .locator(this.locators.myDashboardPage.versionsToggle)
-      .click();
+    await this.page.locator(this.locators.myDashboardPage.versionsToggle).click();
   }
 
   // VERIFICATIONS -----------------------------------------------------------------------
@@ -140,11 +120,10 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
 
   /**
    * Checks if the "All Done" message is present on the dashboard.
+   * @returns True if the message is visible, false otherwise.
    */
   async isAllDoneMessagePresent(): Promise<boolean> {
-    return this.page
-      .locator(this.locators.myDashboardPage.allDoneMessage)
-      .isVisible();
+    return this.page.locator(this.locators.myDashboardPage.allDoneMessage).isVisible();
   }
 
   /**
@@ -153,10 +132,10 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    */
   async isNewVersionDraftLabelPresent(): Promise<boolean> {
     try {
-      await this.page.waitForSelector(
-        this.locators.myDashboardPage.newVersionDraftLabel,
-        { state: "visible", timeout: 5000 }
-      );
+      await this.page.waitForSelector(this.locators.myDashboardPage.newVersionDraftLabel, {
+        state: "visible",
+        timeout: 5000,
+      });
       return true;
     } catch {
       return false;
@@ -169,9 +148,7 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    * @returns True if matching record is found, false otherwise.
    */
   async isRecordTitleMatching(title: string): Promise<boolean> {
-    const recordTitleLocator = this.page.locator(
-      this.locators.myDashboardPage.recordTitle(title)
-    );
+    const recordTitleLocator = this.page.locator(this.locators.myDashboardPage.recordTitle(title));
     return (await recordTitleLocator.count()) > 0;
   }
 }

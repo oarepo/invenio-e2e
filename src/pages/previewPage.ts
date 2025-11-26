@@ -4,19 +4,19 @@ import { expect } from "@playwright/test";
 
 /**
  * Class representing a preview / record detail page.
+ * Provides methods for verifying record details, uploaded files, metadata, and creator information.
  */
+
 export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
   // VALIDATION ------------------------------------------------------------------------
 
   /**
-   * Validates that the preview page has fully loaded.
+   * Validates that the preview page has fully loaded by checking the record title element.
    */
   async validatePageLoaded(): Promise<void> {
     await super.validatePageLoaded();
     // check that the record title element is visible - these checks can be extended
-    await expect(
-      this.page.locator(this.locators.uploadPage.recordTitleHeader)
-    ).toBeVisible();
+    await expect(this.page.locator(this.locators.uploadPage.recordTitleHeader)).toBeVisible();
   }
 
   // VERIFICATIONS ---------------------------------------------------------------------
@@ -25,9 +25,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
    * Verifies the informational message shown when a draft is being previewed.
    */
   async verifySaveDraftPreview(): Promise<void> {
-    const successMessage = this.page.locator(
-      this.locators.previewPage.saveDraftInfoMessage
-    );
+    const successMessage = this.page.locator(this.locators.previewPage.saveDraftInfoMessage);
     await expect(successMessage).toHaveText(
       "Preview You are previewing a new record that has not yet been published."
     );
@@ -40,9 +38,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     const successMessage = this.page.locator(
       this.locators.previewPage.saveDraftVersionsInfoMessage
     );
-    await expect(successMessage).toHaveText(
-      "PreviewOnly published versions are displayed."
-    );
+    await expect(successMessage).toHaveText("PreviewOnly published versions are displayed.");
   }
 
   /**
@@ -52,9 +48,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
   async verifyUploadedFile(filename: string): Promise<void> {
     await this.waitForUploadedFilesTable();
 
-    const uploaded = this.page.locator(
-      this.locators.uploadPage.uploadedFile(filename)
-    );
+    const uploaded = this.page.locator(this.locators.uploadPage.uploadedFile(filename));
 
     await expect(uploaded).toBeVisible({ timeout: 10000 });
     console.log(`Verified uploaded file is visible: ${filename}`);
@@ -69,13 +63,10 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     await creatorLocator.first().waitFor({ state: "visible", timeout: 10000 });
 
     const actualValue = (await creatorLocator.first().textContent())?.trim();
-    const expectedValue =
-      typeof expected === "string" ? expected : expected.name;
+    const expectedValue = typeof expected === "string" ? expected : expected.name;
 
     if (actualValue !== expectedValue) {
-      throw new Error(
-        `Expected Creator "${expectedValue}", but found "${actualValue}"`
-      );
+      throw new Error(`Expected Creator "${expectedValue}", but found "${actualValue}"`);
     }
 
     console.log(`Verified Creator: ${actualValue}`);
@@ -87,9 +78,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
    * @param expectedTitle The title string that should appear on the page.
    */
   async verifyTitle(expectedTitle: string): Promise<void> {
-    const titleLocator = this.page.locator(
-      this.locators.uploadPage.recordTitleHeader
-    );
+    const titleLocator = this.page.locator(this.locators.uploadPage.recordTitleHeader);
 
     // Wait until the record title becomes visible
     await titleLocator.waitFor({ state: "visible", timeout: 10000 });
@@ -99,9 +88,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     if (titleText === expectedTitle.trim()) {
       console.log(`Record with title "${expectedTitle}" exists.`);
     } else {
-      throw new Error(
-        `Expected title "${expectedTitle}", but found "${titleText}".`
-      );
+      throw new Error(`Expected title "${expectedTitle}", but found "${titleText}".`);
     }
   }
 
@@ -114,9 +101,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     await locator.waitFor({ state: "visible", timeout: 10000 });
     const actualValue = (await locator.textContent())?.trim();
     if (actualValue !== expectedValue) {
-      throw new Error(
-        `Expected Resource type "${expectedValue}", but found "${actualValue}"`
-      );
+      throw new Error(`Expected Resource type "${expectedValue}", but found "${actualValue}"`);
     } else {
       console.log(`Verified Resource type: ${actualValue}`);
     }
@@ -127,20 +112,20 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
    * @param expectedValue Expected description text.
    */
   async verifyDescription(expectedValue: string): Promise<void> {
-    const locator = this.page.locator(
-      this.locators.previewPage.recordDescription
-    );
+    const locator = this.page.locator(this.locators.previewPage.recordDescription);
     const actualValue = (await locator.textContent())?.trim();
 
     if (actualValue !== expectedValue) {
-      throw new Error(
-        `Expected description "${expectedValue}", but got "${actualValue}"`
-      );
+      throw new Error(`Expected description "${expectedValue}", but got "${actualValue}"`);
     }
 
     console.log(`Description verified: ${actualValue}`);
   }
 
+  /**
+   * Iterates over provided field-value pairs and calls the corresponding verification methods.
+   * @param filledData Array of [field, value] pairs for verification.
+   */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async verifyData(filledData: any[][]): Promise<void> {
     for (const data of filledData) {
@@ -149,9 +134,7 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const [field, value] = data;
       if (!field) {
-        throw new Error(
-          `verifyData: expected [field, value], but got ${JSON.stringify(data)}`
-        );
+        throw new Error(`verifyData: expected [field, value], but got ${JSON.stringify(data)}`);
       }
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -166,26 +149,31 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     }
   }
 
+  /**
+   * Verifies that the record is marked as metadata-only.
+   */
   async verifyMetadataOnly(): Promise<void> {
-    const locator = this.page.locator(
-      this.locators.previewPage.metadataOnlyLabel
-    );
+    const locator = this.page.locator(this.locators.previewPage.metadataOnlyLabel);
     await expect(locator).toBeVisible({ timeout: 5000 });
     console.log("Verified record is metadata-only");
   }
 
   // GETTERS ---------------------------------------------------------------------------
 
+  /**
+   * Gets the record description text.
+   * @returns The description text of the record.
+   */
   async getRecordDescription(): Promise<string> {
-    return await this.page
-      .locator(this.locators.previewPage.recordDescription)
-      .innerText();
+    return await this.page.locator(this.locators.previewPage.recordDescription).innerText();
   }
 
+  /**
+   * Gets the record title text.
+   * @returns The title text of the record.
+   */
   async getRecordTitle(): Promise<string> {
-    return await this.page
-      .locator(this.locators.uploadPage.recordTitleHeader)
-      .innerText();
+    return await this.page.locator(this.locators.uploadPage.recordTitleHeader).innerText();
   }
 
   /**
@@ -201,7 +189,6 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Waits until at least one uploaded file row is visible in the table.
-   * Ensures that the uploaded files table has rendered.
    */
   async waitForUploadedFilesTable(): Promise<void> {
     await this.page

@@ -3,42 +3,44 @@ import { Locators } from "../locators";
 import { BasePage } from "./basePage";
 
 /**
- * Class representing the Community Detail page.
+ * Represents the Community Detail page.
+ * Provides methods to interact with and verify elements of a specific community.
  */
 
 export class CommunityDetailPage<T extends Locators = Locators> extends BasePage<T> {
+  
   // NAVIGATION --------------------------------------------------------
 
   /**
-   * Navigates to the Settings section of the community.
+   * Navigates to the Settings section.
    */
   async navigateToSettingsSection() {
     await this.page.click(this.locators.communityDetailPage.settingsTab);
   }
 
   /**
-   * Navigates to the Records section of the community.
+   * Navigates to the Records section.
    */
   async navigateToRecordsSection() {
     await this.page.click(this.locators.communityDetailPage.recordsTab);
   }
 
   /**
-   * Navigates to the Members section of the community.
+   * Navigates to the Members section.
    */
   async navigateToMembersSection() {
     await this.page.click(this.locators.communityDetailPage.membersTab);
   }
 
   /**
-   * Navigates to the Curation Policy section of the community.
+   * Navigates to the Curation Policy section.
    */
   async navigateToCurationPolicySection() {
     await this.page.click(this.locators.communityDetailPage.curationPolicyTab);
   }
 
   /**
-   * Navigates to the About section of the community.
+   * Navigates to the About section.
    */
   async navigateToAboutSection() {
     await this.page.click(this.locators.communityDetailPage.aboutTab);
@@ -47,13 +49,11 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
   // FIELDS ------------------------------------------------------------
 
   /**
-   * Edit the community name by appending '_EDITED'.
-   * Returns the updated name.
+   * Edits the community name by appending '_EDITED'.
+   * @returns The updated community name.
    */
   async editCommunityName(): Promise<string> {
-    const nameField = this.page.locator(
-      this.locators.communityDetailPage.communityNameInput
-    );
+    const nameField = this.page.locator(this.locators.communityDetailPage.communityNameInput);
     await nameField.waitFor({ state: "visible" });
     const currentName = await nameField.inputValue();
     const editedName = `${currentName}_EDITED`;
@@ -82,9 +82,7 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
    * @param index Index of the role checkbox to select.
    */
   async selectRoleByIndex(index: number): Promise<void> {
-    await this.page
-      .locator(this.locators.communityDetailPage.roleCheckbox(index))
-      .click();
+    await this.page.locator(this.locators.communityDetailPage.roleCheckbox(index)).click();
   }
 
   /**
@@ -125,7 +123,7 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
   // BUTTONS -----------------------------------------------------------
 
   /**
-   * Click the Save button in community detail settings.
+   * Clicks the Save button.
    */
   async clickSaveButton() {
     const btn = this.page.locator(this.locators.communityDetailPage.saveButton);
@@ -134,21 +132,17 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
   }
 
   /**
-   * Clicks the Delete Community button to initiate community deletion.
+   * Clicks the Delete Community button.
    */
   async clickDeleteCommunityButton() {
-    await this.page
-      .locator(this.locators.communityDetailPage.deleteCommunityButton)
-      .click();
+    await this.page.locator(this.locators.communityDetailPage.deleteCommunityButton).click();
   }
 
   /**
    * Click the Permanently Delete button to confirm deletion.
    */
   async clickPermanentlyDeleteButton() {
-    const btn = this.page.locator(
-      this.locators.communityDetailPage.permanentlyDeleteButton
-    );
+    const btn = this.page.locator(this.locators.communityDetailPage.permanentlyDeleteButton);
     await btn.waitFor({ state: "visible" });
     if (await btn.isEnabled()) await btn.click();
   }
@@ -164,9 +158,7 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
    * Confirm the invitation by clicking the Invite button in the dialog.
    */
   async clickInviteButtonConfirmation() {
-    await this.page
-      .locator(this.locators.communityDetailPage.inviteConfirmButton)
-      .click();
+    await this.page.locator(this.locators.communityDetailPage.inviteConfirmButton).click();
   }
 
   // VERIFICATION ------------------------------------------------------
@@ -176,9 +168,7 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
    * @param expectedName Expected community name to verify.
    */
   async verifyCommunityName(expectedName: string) {
-    const locator = this.page.locator(
-      this.locators.communityDetailPage.headerCommunityName
-    );
+    const locator = this.page.locator(this.locators.communityDetailPage.headerCommunityName);
     await expect(locator).toHaveText(expectedName);
   }
 
@@ -187,9 +177,7 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
    * @param expectedName Expected text within the community name.
    */
   async verifyUpdatedCommunityName(expectedName: string) {
-    const locator = this.page.locator(
-      this.locators.communityDetailPage.headerCommunityName
-    );
+    const locator = this.page.locator(this.locators.communityDetailPage.headerCommunityName);
     await expect(locator).toContainText(expectedName);
   }
 
