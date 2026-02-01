@@ -1,6 +1,4 @@
-import { test } from "../../src/fixtures";
-import { recordsApiTests } from '../../src/tests/api';
-import { appConfig } from "../../src/config";
+import { test, recordsApiTests, appConfig } from "@inveniosoftware/invenio-e2e";
 
 import type { BrowserContext } from "@playwright/test";
 import { readFileSync } from 'fs';
