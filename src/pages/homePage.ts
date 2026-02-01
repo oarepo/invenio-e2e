@@ -48,7 +48,7 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
   /**
    * Submits the search query and navigates to the Search Page.
    * @returns Instance of {@link SearchPage} after search is completed.
-   */ 
+   */
   async submitSearch(): Promise<SearchPage> {
     const submitButton = this.page.locator(this.locators.homePage.searchButton);
     await submitButton.click();
@@ -62,11 +62,19 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
    * Navigates to the Communities page by clicking the header link.
    */
   async goToCommunitiesPage(): Promise<void> {
-    const communitiesLink = this.page.locator(this.locators.header.communitiesLink);
-    await communitiesLink.click();
-    await this.page.waitForLoadState("networkidle");
+    const communitiesLink = this.page
+      .locator(this.locators.header.communitiesLink)
+      .first();
+    await communitiesLink.waitFor({ state: "visible", timeout: 10000 });
+
+    await Promise.all([
+      this.page.waitForURL(/\/communities\/?(\?.*)?$/, { timeout: 15000 }),
+      communitiesLink.click(),
+    ]);
+
     await this.page.waitForSelector(this.locators.communitiesPage.pageTitle, {
       state: "visible",
+      timeout: 15000,
     });
   }
 
@@ -96,7 +104,9 @@ export class HomePage<T extends Locators = Locators> extends BasePage<T> {
    */
   async selectNewCommunity(): Promise<void> {
     await this.clickQuickCreateButton();
-    const newCommunityItem = this.page.locator(this.locators.homePage.newCommunityMenuItem);
+    const newCommunityItem = this.page.locator(
+      this.locators.homePage.newCommunityMenuItem
+    );
     await newCommunityItem.click();
     await this.page.waitForLoadState("networkidle");
   }

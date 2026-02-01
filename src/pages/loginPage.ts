@@ -61,7 +61,7 @@ export class LoginPage<T extends Locators = Locators> extends BasePage<T> {
    * Submits the login form.
    * @param afterLoginPage Page instance expected after login.
    * @returns The expected page after performing the login.
-   */ 
+   */
   async submitLogin<S extends BasePage<T>>(afterLoginPage: S): Promise<S> {
     const submitButton = this.page.locator(this.locators.loginPage.submitButton);
     await submitButton.click();
@@ -88,5 +88,22 @@ export class LoginPage<T extends Locators = Locators> extends BasePage<T> {
     await this.fillUsernameField(username);
     await this.fillPasswordField(password);
     return await this.submitLogin(afterLoginPage);
+  }
+
+  /**
+   * Logs out the currently authenticated user via the header profile menu.
+   */
+  async logout(): Promise<void> {
+    const profileButton = this.page.locator(
+      this.locators.header.userProfileDropdownButton
+    );
+    await profileButton.waitFor({ state: "visible", timeout: 5000 });
+    await profileButton.click();
+
+    const logoutItem = this.page.locator(this.locators.header.logoutMenuItem);
+    await logoutItem.waitFor({ state: "visible", timeout: 5000 });
+    await logoutItem.click();
+
+    await this.page.waitForLoadState("networkidle");
   }
 }

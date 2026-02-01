@@ -1,5 +1,6 @@
 import { BasePage } from "./basePage";
 import { Locators } from "../locators";
+import { expect } from "@playwright/test";
 
 /**
  * Class representing the New Community creation page.
@@ -8,28 +9,10 @@ import { Locators } from "../locators";
  */
 
 export class NewCommunityPage<T extends Locators = Locators> extends BasePage<T> {
+  
   // NAVIGATION --------------------------------------------------------------------------
 
-  /**
-   * Navigates to the home page.
-   */
-  async navigateToHome() {
-    await this.page.goto("/");
-  }
 
-  /**
-   * Navigate to the user dashboard page.
-   */
-  async navigateToMyDashboard() {
-    await this.page.goto("/me");
-  }
-
-  /**
-   * Navigate to the detail of the first record in the dashboard.
-   */
-  async firstRecordDetail() {
-    await this.page.locator(this.locators.myDashboardPage.firstRecordDetail).click();
-  }
 
   // FIELDS ------------------------------------------------------------------------------
 
@@ -39,7 +22,9 @@ export class NewCommunityPage<T extends Locators = Locators> extends BasePage<T>
    * @returns The community name that was filled.
    */
   async fillCommunityName(name: string) {
-    await this.page.locator(this.locators.newCommunityPage.communityNameField).fill(name);
+    await this.page
+      .locator(this.locators.newCommunityPage.communityNameField)
+      .fill(name);
     return name;
   }
 
@@ -50,7 +35,9 @@ export class NewCommunityPage<T extends Locators = Locators> extends BasePage<T>
    */
   async fillCommunityIdentifier(identifier?: string) {
     const id = identifier ?? `community_${Math.floor(Math.random() * 1000000)}`;
-    await this.page.locator(this.locators.newCommunityPage.communityIdentifierField).fill(id);
+    await this.page
+      .locator(this.locators.newCommunityPage.communityIdentifierField)
+      .fill(id);
     return id;
   }
 
@@ -81,7 +68,9 @@ export class NewCommunityPage<T extends Locators = Locators> extends BasePage<T>
    * Clicks the "Create Community" button.
    */
   async clickCreateCommunity() {
-    await this.page.locator(this.locators.newCommunityPage.createCommunityButton).click();
+    await this.page
+      .locator(this.locators.newCommunityPage.createCommunityButton)
+      .click();
   }
 
   // VERIFICATION ------------------------------------------------------------------------
@@ -94,17 +83,12 @@ export class NewCommunityPage<T extends Locators = Locators> extends BasePage<T>
     return this.page.locator(this.locators.newCommunityPage.communityNameHeader);
   }
 
-  /**
-   * Verifies that the created community name matches the expected name.
-   * @param expectedName The expected community name to verify.
-   * @throws Error if the actual community name does not match the expected name.
-   */
-  async verifyCommunityName(expectedName: string) {
-    const locator = this.getCommunityName();
-    await locator.waitFor({ state: "visible" });
-    const actualName = await locator.textContent();
-    if (actualName?.trim() !== expectedName) {
-      throw new Error(`Expected community name "${expectedName}", but got "${actualName}"`);
-    }
+
+  async verifyCommunityName(expectedName: string, index: number = 0): Promise<void> {
+    const communityNameElement = this.page
+      .locator('a.ui.fluid.card[href^="/communities/"] div.content > div.header')
+      .nth(index);
+
+    await expect(communityNameElement).toHaveText(expectedName);
   }
 }

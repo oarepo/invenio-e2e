@@ -14,6 +14,7 @@ import { appConfig } from "../config";
  */
 
 export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
+  
   // NAVIGATION ------------------------------------------------------------------------
 
   /**
@@ -49,7 +50,9 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
    * @param description Description text to enter.
    */
   async fillDescription(description: string): Promise<void> {
-    await this.page.locator(this.locators.uploadPage.descriptionField).fill(description);
+    await this.page
+      .locator(this.locators.uploadPage.descriptionField)
+      .fill(description);
   }
 
   /**
@@ -72,7 +75,13 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
    * @param filename Name of the file to upload
    */
   async uploadFile(filename: string) {
-    const filePath = path.join(__dirname, "..", appConfig.dataFolderPath, "UploadFiles", filename);
+    const filePath = path.join(
+      __dirname,
+      "..",
+      appConfig.dataFolderPath,
+      "UploadFiles",
+      filename
+    );
     await this.page.setInputFiles('input[type="file"]', filePath);
     console.log(`[BasePage] Uploading file: ${filePath}`);
   }
@@ -123,7 +132,9 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
    */
   async fillPublicationDate(date?: string): Promise<void> {
     const dateToUse = date ?? getCurrentDateFormatted();
-    await this.page.locator(this.locators.uploadPage.publicationDateField).fill(dateToUse);
+    await this.page
+      .locator(this.locators.uploadPage.publicationDateField)
+      .fill(dateToUse);
   }
 
   /**
@@ -170,7 +181,10 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
    * Clicks the Save button in the Add Creator dialog.
    */
   async clickAddCreatorSaveButton(): Promise<void> {
-    await this.page.locator(this.locators.uploadPage.saveAddCreatorButton).nth(1).click();
+    await this.page
+      .locator(this.locators.uploadPage.saveAddCreatorButton)
+      .nth(1)
+      .click();
   }
 
   /**
@@ -246,7 +260,9 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
    * @param expectedText Expected text to appear in the toast message.
    */
   private async verifyToastMessage(expectedText: string): Promise<void> {
-    const toast = this.page.locator(this.locators.uploadPage.toastMessage(expectedText));
+    const toast = this.page.locator(
+      this.locators.uploadPage.toastMessage(expectedText)
+    );
     await expect(toast).toBeVisible();
     await expect(toast).toHaveText(new RegExp(expectedText, "i"));
   }
@@ -296,7 +312,9 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
           <div class="ui pointing above prompt label">error message</>
         </div>
     */
-    const errorFieldsLocator = this.page.locator(this.locators.uploadPage.fieldWithError);
+    const errorFieldsLocator = this.page.locator(
+      this.locators.uploadPage.fieldWithError
+    );
     // let's extract the field name and the error message
     const foundErrors: string[][] = [];
     const count = await errorFieldsLocator.count();
@@ -352,7 +370,10 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
    * @param errorMessages Array of actual [fieldName, errorMessage] pairs.
    * @returns Object containing unmatched expected and actual error messages.
    */
-  private _matchErrorMessages(messages: ErrorWithLocation[], errorMessages: string[][]) {
+  private _matchErrorMessages(
+    messages: ErrorWithLocation[],
+    errorMessages: string[][]
+  ) {
     // make copy of the error messages
     errorMessages = errorMessages.slice();
     const unmatchedErrors: ErrorWithLocation[] = [];
@@ -431,6 +452,66 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
       await this.fillCreatorGivenName(data.givenName);
     }
     await this.clickAddCreatorSaveButton();
+  }
+
+  /**
+   * Sets the record access level for the whole record (e.g. Restricted / Public).
+   * This is the "Full record" access option (not files-only).
+   */
+  async setFullRecordAccess(level: "Restricted" | "Public"): Promise<void> {
+    const dropdown = this.page.locator(
+      this.locators.uploadPage.fullRecordAccessDropdown
+    );
+    await dropdown.waitFor({ state: "visible" });
+    await dropdown.click();
+
+    const option = this.page.getByRole("option", { name: level });
+    await option.waitFor({ state: "visible" });
+    await option.click();
+
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  /**
+   * Toggles "Apply an embargo" option.
+   */
+  async enableEmbargo(enabled: boolean): Promise<void> {
+    const checkbox = this.page.locator(this.locators.uploadPage.embargoCheckbox);
+    await checkbox.waitFor({ state: "visible" });
+
+    const input = checkbox.locator('input[type="checkbox"]');
+    const isChecked = await input.isChecked();
+
+    if (isChecked !== enabled) {
+      await checkbox.click();
+    }
+  }
+
+  /**
+   * Fills "Embargo until" with a relative date (e.g. +7 days).
+   */
+  async setEmbargoUntilDateRelative(offset: { days: number }): Promise<void> {
+    const field = this.page.locator(this.locators.uploadPage.embargoUntilField);
+    await field.waitFor({ state: "visible" });
+
+    const date = new Date();
+    date.setDate(date.getDate() + offset.days);
+
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+
+    // Adjust formatting if your UI expects different format
+    await field.fill(`${yyyy}-${mm}-${dd}`);
+  }
+
+  /**
+   * Fills "Embargo reason".
+   */
+  async fillEmbargoReason(text: string): Promise<void> {
+    const field = this.page.locator(this.locators.uploadPage.embargoReasonField);
+    await field.waitFor({ state: "visible" });
+    await field.fill(text);
   }
 
   // WAITS --------------------------------------------------------------------------------

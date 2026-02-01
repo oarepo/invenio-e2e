@@ -33,8 +33,8 @@ dotenv.config({ path: path.resolve(__dirname, `../.env.${ENV}`) });
 export const appConfig = {
   baseURL: process.env.BASE_URL || "https://127.0.0.1:5000",
   // User login for tested app
-  userEmail: process.env.INVENIO_USER_EMAIL || "invenio@test.com",
-  userPassword: process.env.INVENIO_USER_PASSWORD || "invenio",
+  userEmail: process.env.INVENIO_USER_EMAIL || "aaa@test.com",
+  userPassword: process.env.INVENIO_USER_PASSWORD || "aaaaaa",
   authUserFilePath: process.env.AUTH_USER_FILE_PATH || "playwright/.auth/user.json",
   dataFolderPath: process.env.DATA_FOLDER_PATH || "data",
   qase: {

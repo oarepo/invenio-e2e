@@ -8,7 +8,6 @@ import { expect } from "@playwright/test";
  */
 
 export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> {
-
   // NAVIGATION ------------------------------------------------------------------------
 
   /**
@@ -30,6 +29,77 @@ export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> 
     });
   }
 
+  /**
+   * Opens a community detail page by clicking the community name link.
+   */
+  async openCommunityByName(name: string): Promise<void> {
+    const link = this.page
+      .locator(this.locators.communitiesPage.communityNameLink)
+      .filter({
+        hasText: name,
+      });
+
+    await link.first().waitFor({ state: "visible" });
+    await link.first().click();
+  }
+
+  /**
+   * Waits until the communities list is loaded (first community name is visible).
+   * @param timeoutMs Max time to wait (default 30s).
+   */
+  async waitForListLoaded(timeoutMs: number = 30000): Promise<void> {
+    const firstName = this.page
+      .locator(this.locators.communitiesPage.communityNameLink)
+      .first();
+    await expect(firstName).toBeVisible({ timeout: timeoutMs });
+  }
+
+  /**
+   * Waits until a community with the given name appears in the list.
+   * @param name Community name to wait for.
+   * @param timeoutMs Max time to wait (default 30s).
+   */
+  async waitForCommunityVisible(
+    name: string,
+    timeoutMs: number = 30000
+  ): Promise<void> {
+    const match = this.page
+      .locator(this.locators.communitiesPage.communityNameLink)
+      .filter({ hasText: name })
+      .first();
+
+    await expect(match).toBeVisible({ timeout: timeoutMs });
+  }
+
+  /**
+   * Refreshes the page and waits until a community with the given name appears in the list.
+   */
+  async refreshAndWaitForCommunity(
+    name: string,
+    timeoutMs: number = 30000
+  ): Promise<void> {
+    await this.waitForListLoaded(timeoutMs);
+
+    const match = this.page
+      .locator(this.locators.communitiesPage.communityNameLink)
+      .filter({ hasText: name })
+      .first();
+
+    try {
+      await expect(match).toBeVisible({ timeout: Math.min(5000, timeoutMs) });
+      return;
+    } catch {
+      await this.page.reload({ waitUntil: "domcontentloaded" });
+      await this.waitForListLoaded(timeoutMs);
+      await expect(
+        this.page
+          .locator(this.locators.communitiesPage.communityNameLink)
+          .filter({ hasText: name })
+          .first()
+      ).toBeVisible({ timeout: timeoutMs });
+    }
+  }
+
   // FIELDS ------------------------------------------------------------------------------
 
   /**
@@ -37,9 +107,7 @@ export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> 
    * @param query The text to enter into the search field.
    */
   async fillSearchField(query: string): Promise<void> {
-    const searchInput = this.page.locator(
-      this.locators.communitiesPage.searchField
-    );
+    const searchInput = this.page.locator(this.locators.communitiesPage.searchField);
     await searchInput.fill(query);
   }
 
@@ -50,9 +118,7 @@ export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> 
    * Waits for network idle state after clicking.
    */
   async submitSearch(): Promise<void> {
-    const submitButton = this.page.locator(
-      this.locators.communitiesPage.searchButton
-    );
+    const submitButton = this.page.locator(this.locators.communitiesPage.searchButton);
     await submitButton.click();
     await this.page.waitForLoadState("networkidle");
   }
@@ -76,14 +142,31 @@ export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> 
    * @param expectedName The expected community name to verify.
    * @param index Index of the community in the list (default 0).
    */
-  async verifyCommunityName(
-    expectedName: string,
-    index: number = 0
-  ): Promise<void> {
+  async verifyCommunityName(expectedName: string, index: number = 0): Promise<void> {
     const communityNameElement = this.page
       .locator(this.locators.communitiesPage.communityNameLink)
       .nth(index);
-    const communityName = await communityNameElement.textContent();
-    expect(communityName?.trim()).toBe(expectedName);
+    await expect(communityNameElement).toHaveText(expectedName);
+  }
+
+  /**
+   * Returns the visible name of the first community in the list.
+   * Useful for comparisons between logged-in and logged-out state.
+   */
+    async getFirstCommunityNameText(): Promise<string> {
+    return await this.getFirstText(
+      this.locators.communitiesPage.communityNameLink
+    );
+  }
+
+  /**
+   * Verify that the community is not present in the list.
+   * @param name Name of the community expected to be absent.
+   */
+  async verifyCommunityNotPresent(name: string) {
+    const locator = this.page.locator(`.community-list .community-item`, {
+      hasText: name,
+    });
+    await expect(locator).toHaveCount(0);
   }
 }
