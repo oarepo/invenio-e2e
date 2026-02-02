@@ -73,7 +73,7 @@ export class FormService implements FormServiceInterface {
         const fillResult = await this.fill(page, formData.data);
         page = fillResult.page;
         if (fillResult.filledData.length > 0) {
-            filledData.push(fillResult.filledData);
+            filledData.push(...fillResult.filledData);
         }
 
         // Upload files if any
@@ -81,7 +81,7 @@ export class FormService implements FormServiceInterface {
             const uploadResult = await this.uploadFiles(page, formData.files);
             page = uploadResult.page;
             if (uploadResult.filledData.length > 0) {
-                filledData.push(uploadResult.filledData);
+                filledData.push(...uploadResult.filledData);
             }
         }
 
