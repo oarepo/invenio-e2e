@@ -1,0 +1,8 @@
+{
+  "extends": "../../invenio-e2e/tsconfig.json",
+  "exclude": [
+    "node_modules/**", 
+    "playwright-report/**", 
+    "test-results/**"
+  ]
+}

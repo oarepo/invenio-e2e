@@ -4,8 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier": "prettier --check \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
+    "prettier:fix": "prettier --write \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
     "collect-translations": "invenio-e2e-collect-translations",
-    "i18n-setup": "node -e \"require('invenio-e2e').tools.i18n_setup(process.argv.slice(2))\""
+    "collect-translations:validate": "invenio-e2e-collect-translations --validate",
+    "generate-pot": "invenio-e2e-generate-pot",
+    "i18n:validate": "npm run generate-pot && npm run collect-translations:validate"
   },
   "keywords": [],
   "author": "",
@@ -13,12 +19,21 @@
   "devDependencies": {
     "@playwright/test": "^1.54.1",
     "@types/node": "^24.0.13",
-    "ts-deepmerge": "^7.0.3"
+    "ts-deepmerge": "^7.0.3",
+    "playwright-qase-reporter": "^2.1.5",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "i18next-conv": "^15.1.1",
     "module-alias": "^2.2.3",
     "@inveniosoftware/invenio-e2e": "workspace:*"
+  },
+  "optionalDependencies": {
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsdoc": "^60.5.0",
+    "typescript-eslint": "^8.44.1",
+    "prettier": "^3.6.2"
   },
   "_moduleAliases": {
     "@collected-translations": "./translations"
