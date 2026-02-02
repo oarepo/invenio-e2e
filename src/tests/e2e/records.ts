@@ -3,7 +3,7 @@ import { expect } from "@playwright/test";
 
 export function recordLandingPageTests(test: InvenioTest) {
   test.describe("Record Landing Page", () => {
-    test.beforeEach(async ({ homePage, loginPage }) => {
+    test.beforeEach(async ({ homePage, loginPage }) => { // eslint-disable-line
       // Open application and log in
       await homePage.openPage();
       await homePage.login();

@@ -3,7 +3,7 @@ import { expect } from "@playwright/test";
 
 export function newCommunityTests(test: InvenioTest) {
   test.describe("Communities – New Community", () => {
-    test.beforeEach(async ({ homePage, loginPage }) => {
+    test.beforeEach(async ({ homePage, loginPage }) => { // eslint-disable-line
       await homePage.openPage();
       await homePage.login();
     });

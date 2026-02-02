@@ -104,3 +104,15 @@ The project also ships with a lightweight API regression suite that reuses the s
     ```
 
     Requests target various endpoints like `/api/records` unless you provide a different base URL. See the JSDoc in `src/tests/api` for additional customization options.
+
+## Development
+
+This package contains linter configuration and scripts to build and test the code.
+Please run:
+
+```bash
+pnpm install
+
+npm run lint
+npm run lint:fix
+```

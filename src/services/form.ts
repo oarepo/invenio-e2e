@@ -24,7 +24,7 @@ export interface FormServiceInterface {
      * It will call `fill<FieldName>` method for each provided field on the DepositPage instance.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fill: (page: BasePage, data: Array<[string, any]>) => Promise<{ page: BasePage; filledData: any[] }>;
+    fill: (page: BasePage, data: Array<[string, any]>) => Promise<{ page: BasePage; filledData: any[][] }>;
 
     /**
      * Save the form and return the resulting page.
@@ -48,7 +48,7 @@ export interface FormServiceInterface {
      * Upload a specific file from UploadFiles folder.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    uploadFiles: (page: BasePage, fileNames: string[]) => Promise<{ page: BasePage; filledData: any[] }>;
+    uploadFiles: (page: BasePage, fileNames: string[]) => Promise<{ page: BasePage; filledData: any[][] }>;
 }
 
 export class FormService implements FormServiceInterface {
@@ -96,7 +96,7 @@ export class FormService implements FormServiceInterface {
 
     // Dynamic form field handling - requires any types for method resolution
     /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
-    async fill(page: BasePage, data: Array<[string, any]>): Promise<{ page: BasePage; filledData: any[] }> {
+    async fill(page: BasePage, data: Array<[string, any]>): Promise<{ page: BasePage; filledData: any[][] }> {
         const _p: any = page; // cast to any to allow dynamic method calls
 
         for (const [key, value] of data) {
@@ -153,8 +153,8 @@ export class FormService implements FormServiceInterface {
     /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    async uploadFiles(page: BasePage, fileNames: string[]): Promise<{ page: BasePage; filledData: any[] }> {
-        const filledData: any[] = [];
+    async uploadFiles(page: BasePage, fileNames: string[]): Promise<{ page: BasePage; filledData: any[][] }> {
+        const filledData: any[][] = [];
 
         for (const fileName of fileNames) {
             await (page as DepositPage).uploadFileAndConfirm(fileName);

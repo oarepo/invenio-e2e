@@ -1,4 +1,4 @@
-/* eslint-disable jsdoc/text-escaping */
+ 
 import { locators } from './defaultLocators';
 import { merge } from 'ts-deepmerge';
 
