@@ -6,6 +6,7 @@ export const testConfig = {
     userPassword: appConfig.userPassword,
     baseURL: appConfig.baseURL,
     dataFolderPath: appConfig.dataFolderPath,
+    logXhrRequests: appConfig.logXhrRequests,
 };
 
 export type TestConfig = typeof testConfig;

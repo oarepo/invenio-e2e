@@ -22,6 +22,7 @@ dotenv.config({ path: path.resolve(__dirname, `../.env.${ENV}`) });
  * @property userEmail - Login email for authentication in the tested application.
  * @property userPassword - Login password for authentication in the tested application.
  * @property authUserFilePath - Path (relative to project root) to the file where the authenticated user state is stored.
+ * @property logXhrRequests - Enable logging of XHR and fetch requests/responses. Set LOG_XHR=true to enable.
  * @property qase - Configuration options for Qase TestOps integration. See {@link https://developers.qase.io/docs/configuration-options Qase Configuration Options}.
  * @property qase.apiToken - API token used to authenticate with Qase TestOps.
  * @property qase.projectCode - Project identifier within Qase TestOps.
@@ -37,6 +38,7 @@ export const appConfig = {
   userPassword: process.env.INVENIO_USER_PASSWORD || "aaaaaa",
   authUserFilePath: process.env.AUTH_USER_FILE_PATH || "playwright/.auth/user.json",
   dataFolderPath: process.env.DATA_FOLDER_PATH || "data",
+  logXhrRequests: process.env.LOG_XHR === "true",
   qase: {
     apiToken: process.env.QASE_TESTOPS_API_TOKEN || "",
     projectCode: process.env.QASE_TESTOPS_PROJECT || "",

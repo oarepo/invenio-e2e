@@ -22,6 +22,22 @@ export { registerPage } from './utils';
 export type { DepositionData, FormData } from './depositionData';
 export type { CommunityData, CommunityDataRecord } from './communityData';
 
+/**
+ * Helper function to format JSON for logging.
+ * If the JSON is longer than 100 lines, it will show the first 50 and last 50 lines with ellipsis.
+ */
+function formatJsonForLogging(jsonData: unknown): string {
+    const formatted = JSON.stringify(jsonData, null, 2);
+    const lines = formatted.split('\n');
+
+    if (lines.length > 100) {
+        const firstLines = lines.slice(0, 50).join('\n');
+        const lastLines = lines.slice(-50).join('\n');
+        return `${firstLines}\n... (${lines.length - 100} lines omitted) ...\n${lastLines}`;
+    }
+
+    return formatted;
+}
 
 const _test = base.extend<{
     config: TestConfig;
@@ -72,7 +88,7 @@ const _test = base.extend<{
     initialLocale: undefined,
 
     // translations loaded from pre-compiled file
-    translations: async ({}, use) => {
+    translations: async ({ }, use) => {
         let translations: Translations = {};
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports -- we cannot use import here because "@collected-translations" alias is registered when Playwright is run inside an external/tested repository
@@ -143,6 +159,53 @@ const _test = base.extend<{
         await use(originalContext);
     },
 
+    // page fixture with optional XHR/Fetch request/response logging
+    page: async ({ page, config }, use) => {
+        if (config.logXhrRequests) {
+            // Log requests
+            page.on('request', request => {
+                if (request.resourceType() === 'xhr' || request.resourceType() === 'fetch') {
+                    console.log('➡️', request.method(), request.url());
+                    console.log('Headers:', request.headers());
+
+                    const postData = request.postData();
+                    if (postData) {
+                        try {
+                            const jsonData = JSON.parse(postData); // eslint-disable-line
+                            console.log('Request payload (JSON):', formatJsonForLogging(jsonData));
+                        } catch {
+                            // Not JSON, skip logging
+                        }
+                    }
+                }
+            });
+
+            // Log responses
+            page.on('response', async (response) => {
+                if (response.request().resourceType() === 'xhr' || response.request().resourceType() === 'fetch') {
+                    console.log('⬅️', response.status(), response.url());
+                    console.log('Response headers:', response.headers());
+
+                    try {
+                        const body = await response.text();
+                        if (body) {
+                            try {
+                                const jsonData = JSON.parse(body); // eslint-disable-line
+                                console.log('Response payload (JSON):', formatJsonForLogging(jsonData));
+                            } catch {
+                                // Not JSON, skip logging
+                            }
+                        }
+                    } catch {
+                        // Unable to get response body, skip
+                    }
+                }
+            });
+        }
+
+        await use(page);
+    },
+
     i18nService: async ({ page, locators, initialLocale, translations, untranslatedStrings, translatableSelectors }, use) => {
         const i18nService = new I18nService(page, locators, initialLocale, translations, untranslatedStrings, translatableSelectors);
         await use(i18nService);
@@ -161,15 +224,15 @@ const _test = base.extend<{
         await use(true);
     },
 
-    communityData: async ({}, use) => {
+    communityData: async ({ }, use) => {
         await use(defaultCommunityData);
     },
 
-    depositionData: async ({}, use) => {
+    depositionData: async ({ }, use) => {
         await use(defaultDepositionData);
     },
 
-    recordsApiData: async ({}, use) => {
+    recordsApiData: async ({ }, use) => {
         await use(defaultRecordsApiData);
     },
 
