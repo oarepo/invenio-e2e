@@ -52,9 +52,7 @@ parent-directory
 3. Create the `e2e` directory inside your repository:
 
     ```bash
-    gh repo clone mesemus/sample-e2e-repository temp-repository
-    mv temp-repository/e2e <my-repository>/e2e
-    rm -rf temp-repository
+    cp -r invenio-e2e/e2e <my-repository>/e2e
     ```
 
 4. Install dependencies:
