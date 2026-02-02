@@ -95,4 +95,18 @@ export class BasePage<
     ).toBe(true);
     return this;
   }
+
+  /**
+   * Returns trimmed text content of the first element matching the selector.
+   * Useful as a small helper for assertions and comparisons.
+   * @param selector Locator selector string.
+   */
+  async getFirstText(selector: string): Promise<string> {
+    const el = this.page.locator(selector).first();
+    await el.waitFor({ state: "visible" });
+
+    const text = await el.textContent();
+    if (!text) throw new Error(`Text is empty for selector: ${selector}`);
+    return text.trim();
+  }
 }

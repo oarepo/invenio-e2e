@@ -2,7 +2,7 @@
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
 import type { TestDetails } from '@playwright/test';
 
-import { AllPages, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage } from '../pages';
+import { AllPages, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage, RecordDetailPage, } from '../pages';
 import {
     I18nExpected, I18nService, LocalLoginService, Services, Translations, FormService,
 } from '../services';
@@ -55,7 +55,7 @@ const _test = base.extend<{
     newCommunityPage: NewCommunityPage;
     depositPage: DepositPage;
     previewPage: PreviewPage;
-
+    recordDetailPage: RecordDetailPage;
     uploadHelper: FileUploadHelper;
 }>({
     // locators are used to find elements on the page and they are separated
@@ -208,6 +208,7 @@ const _test = base.extend<{
     ...registerPage("communitySearchPage", CommunitySearchPage),
     ...registerPage("myDashboardPage", MyDashboardPage),
     ...registerPage("newCommunityPage", NewCommunityPage),
+    ...registerPage("recordDetailPage", RecordDetailPage),
 
 })
 

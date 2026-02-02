@@ -14,6 +14,8 @@ export const locators = {
    * @property {string} logoLink - Selector for the main logo that redirects to the home page.
    * @property {string} logInButton - Selector for the "Log in" button in the header.
    * @property {string} communitiesLink - Selector for the navigation link to the "Communities" page.
+   * @property {string} userProfileDropdownButton - Selector for the user profile dropdown trigger.
+   * @property {string} logoutMenuItem - Selector for the "Log out" menu item in the user dropdown.
    */
 
   header: {
@@ -24,7 +26,13 @@ export const locators = {
     logInButton: 'a[href^="/login/"]',
 
     /** Selector for the navigation link that opens the Communities page. */
-    communitiesLink: 'a[href="/communities"]',
+    communitiesLink: '#invenio-menu a[href="/communities"]',
+
+    /** Selector for the user profile dropdown button in the header. */
+    userProfileDropdownButton: "#user-profile-dropdown-btn",
+
+    /** Selector for the "Log out" action inside the user profile dropdown menu. */
+    logoutMenuItem: 'role=menuitem[name="Log out"]',
   },
 
   // ------------------------ HOME PAGE ------------------------
@@ -146,7 +154,7 @@ export const locators = {
       `//div[contains(@role, "listbox")]//div[contains(text(), "${optionText}")]`,
 
     /** Selector for the "Add creator" button. */
-    addCreatorButton: 'button:has-text("Add creator")',
+    addCreatorButton: 'button:has-text("Add author")',
 
     /** Selector for the creator’s family name input. */
     familyNameField: 'input[name="person_or_org.family_name"]',
@@ -168,7 +176,8 @@ export const locators = {
      * @param filename Name of the uploaded file.
      * @returns Selector for the uploaded file element.
      */
-    uploadedFile: (filename: string) => `.uppy-Dashboard-Item-name:has-text("${filename}")`,
+    uploadedFile: (filename: string) =>
+      `.uppy-Dashboard-Item-name:has-text("${filename}")`,
 
     /** Selector for the button that removes an uploaded file. */
     removeFileButton: '[data-testid="remove-file"]',
@@ -215,13 +224,28 @@ export const locators = {
      * @param communityName communityName The name of the community to be selected in the dropdown.
      * @returns The XPath selector for the community option element in the dropdown.
      */
-    communityOption: (communityName: string) => `ul[role="listbox"] >> text=${communityName}`,
+    communityOption: (communityName: string) =>
+      `ul[role="listbox"] >> text=${communityName}`,
 
     /** Radio button to select embargo access for the record. */
     embargoRadioButton: '[data-testid="embargo-access-radio-button"]',
 
     /** Input field to set the embargo end date. */
     embargoDateInput: '[name="embargo-until"]',
+
+    /** Dropdown for "Full record" access level (Restricted/Public). */
+    fullRecordAccessDropdown: '[aria-label="Full record access"]',
+
+    /** "Apply an embargo" checkbox (record access). */
+    embargoCheckbox: 'label:has-text("Apply an embargo")',
+
+    /** "Embargo until" date input. */
+    embargoUntilField:
+      'input[name="access.embargo.until"], input[name="embargo.until"]',
+
+    /** "Embargo reason" input/textarea. */
+    embargoReasonField:
+      'textarea[name="access.embargo.reason"], textarea[name="embargo.reason"]',
 
     /** Button to switch to the Metadata tab. */
     metadataTab: 'button:has-text("Metadata")',
@@ -371,7 +395,7 @@ export const locators = {
     createCommunityButton: "button.ui.icon.positive.left.labeled.button",
 
     /** Header element showing the community name after creation. */
-    communityNameHeader: "h1.ui.medium.header.mb-0",
+    communityNameHeader: 'a.ui.small.header[href^="/communities/"]',
   },
 
   // ------------------------ COMMUNITIES PAGE ------------------------
@@ -392,7 +416,7 @@ export const locators = {
     pageTitle: 'h1:has-text("Communities")',
 
     /** First community card displayed on the page. */
-    firstCommunityCard: "div.centered.image.fallback_image",
+    firstCommunityCard: 'a.ui.fluid.card[href^="/communities/"]',
 
     /** Tab to view records of a selected community. */
     recordsTab: 'a.item.active:has-text("Records")',
@@ -404,7 +428,8 @@ export const locators = {
     searchButton: 'button[type="submit"]',
 
     /** Link element for the community name. */
-    communityNameLink: "a.ui.medium.header.mb-0",
+    communityNameLink:
+      'a.ui.fluid.card[href^="/communities/"] div.content > div.header',
   },
 
   // ------------------------ COMMUNITY SEARCH PAGE ------------------------
@@ -419,7 +444,8 @@ export const locators = {
 
   communitySearchPage: {
     /** Dropdown to sort community search results. */
-    sortDropdown: '(//div[@aria-label="Sort" and contains(@class, "ui selection dropdown")])[2]',
+    sortDropdown:
+      '(//div[@aria-label="Sort" and contains(@class, "ui selection dropdown")])[2]',
 
     /**
      * Returns a selector for a specific sort option in the dropdown.
@@ -430,7 +456,8 @@ export const locators = {
       `//div[contains(@class,"visible menu")]/div[@role="option"]/span[text()="${option}"]`,
 
     /** Selector for the currently selected sort option. */
-    sortOptionSelected: '//div[@aria-label="Sort"]//div[contains(@class,"divider text")]',
+    sortOptionSelected:
+      '//div[@aria-label="Sort"]//div[contains(@class,"divider text")]',
   },
 
   // ------------------------ COMMUNITY DETAIL PAGE ------------------------
@@ -513,6 +540,9 @@ export const locators = {
     /** Selector for the "Closed Requests" button */
     closedRequestsButton: 'button.request-search-filter:has-text("Closed")',
 
+    /**  Selector for the date tag label displayed on community records. */
+    recordDateTagLabel: "div.ui.small.horizontal.label.primary",
+
     // Fields ----------------------------------
 
     /** Input field for the community name */
@@ -534,7 +564,8 @@ export const locators = {
     deleteIdentifierInput: "#confirm-delete",
 
     /** Field to select community members */
-    memberField: 'div.field:has-text("Member") div.ui.fluid.multiple.search.selection.dropdown',
+    memberField:
+      'div.field:has-text("Member") div.ui.fluid.multiple.search.selection.dropdown',
 
     /**
      * Returns a selector for a member role checkbox by index
@@ -552,13 +583,14 @@ export const locators = {
     aboutPageIframe: '(//div[@class="tox-edit-area"])[2]',
 
     /** Header element showing the community name */
-    headerCommunityName: "h1.ui.medium.header.mb-0",
+    headerCommunityName: 'a.ui.small.header[href^="/communities/"][href$="/records"]',
 
     /** Dropdown to select member roles */
     roleDropdown: '//div[@aria-label="Role owner"]',
 
     /** Dropdown to select community visibility */
-    visibilityDropdown: '//div[@aria-label="Visibility Hidden" or @aria-label="Visibility Public"]',
+    visibilityDropdown:
+      '//div[@aria-label="Visibility Hidden" or @aria-label="Visibility Public"]',
 
     // Buttons ----------------------------------
 
@@ -578,13 +610,15 @@ export const locators = {
     inviteButton: "button.ui.tiny.compact.fluid.icon.positive.left.labeled",
 
     /** Button to confirm inviting members */
-    inviteConfirmButton: 'button.ui.icon.primary.left.labeled.button:has-text("Invite")',
+    inviteConfirmButton:
+      'button.ui.icon.primary.left.labeled.button:has-text("Invite")',
 
     /** Button to leave the community */
     leaveButton: "button.ui.tiny.compact.fluid.icon.negative.left.labeled.button",
 
     /** Button to remove a member from the community */
-    removeButton: 'button.ui.tiny.compact.fluid.icon.left.labeled.button:has-text("Remove...")',
+    removeButton:
+      'button.ui.tiny.compact.fluid.icon.left.labeled.button:has-text("Remove...")',
 
     /** Button to save privilege changes */
     saveButtonPrivileges: "button.ui.icon.primary.toggle.left.labeled.button",
@@ -601,7 +635,8 @@ export const locators = {
     restrictedLabel: "div.ui.small.horizontal.label.access-status.restricted",
 
     /** Message displayed when no restricted records exist */
-    noRestrictedRecords: 'h2.ui.header:has-text("We couldn\'t find any matches for your search")',
+    noRestrictedRecords:
+      'h2.ui.header:has-text("We couldn\'t find any matches for your search")',
 
     /**
      * Returns a selector for a community member based on email
@@ -664,7 +699,7 @@ export const locators = {
     // Navigation ----------------------------------
 
     /** Link to the user's communities page */
-    communitiesLink: 'a.item[href="/me/communities"]',
+    communitiesLink: '#invenio-menu a[href="/communities"]',
 
     /** Link to the user's requests page */
     requestsLink: 'a:has-text("Requests")',
@@ -673,7 +708,7 @@ export const locators = {
     firstRecordDetail: "a.truncate-lines-2",
 
     /** First community card element */
-    firstCommunityCard: "div.centered.image.fallback_image",
+    firstCommunityCard: 'a.ui.fluid.card[href^="/communities/"]',
 
     /** Tab showing user's records */
     recordsTab: 'a.item.active:has-text("Records")',
@@ -712,6 +747,140 @@ export const locators = {
 
     /** Label indicating a new draft version */
     newVersionDraftLabel: 'text="New version draft"',
+  },
+
+  // ------------------------ RECORD DETAIL PAGE ------------------------
+
+  /**
+   * Locators for the Record Detail (Landing) Page section.
+   * Contains record header fields, record management actions, export/citation controls,
+   * versions navigation, and access-status verification elements.
+   *
+   * Fields:
+   * @property {string} recordTitle - Selector for the record title heading.
+   * @property {string} citationText - Selector for the citation text container.
+   * @property {string} citationSelectedStyle - Selector for the selected citation style label.
+   *
+   * Buttons:
+   * @property {string} editButton - Selector for the "Edit" button.
+   * @property {string} newVersionButton - Selector for the "New version" button.
+   * @property {string} shareButton - Selector for the "Share" button.
+   * @property {string} exportSelectionDropdown - Selector for the "Export selection" dropdown trigger.
+   * @property {string} exportButton - Selector for the "Export" button that triggers download.
+   * @property {string} downloadAllButton - Selector for the "Download all" button (archive link).
+   * @property {string} previewButton - Selector for the file "Preview" action link.
+   * @property {string} downloadButton - Selector for the file "Download" action link.
+   *
+   * Dropdowns / Dynamic locators:
+   * @property {(style: string) => string} citationStyleOption - Returns selector for a citation style option.
+   * @property {(format: string) => string} exportFormatOption - Returns selector for an export format option.
+   *
+   * Navigation:
+   * @property {string} versionV1Link - Selector for the "Version v1" link in Versions section.
+   *
+   * Verification:
+   * @property {string} versionV2ActiveLabel - Selector for active "Version v2" item label.
+   * @property {string} versionV1HeaderLabel - Selector for "Version v1" label on the record header.
+   * @property {string} embargoedLabel - Selector for the "Embargoed" access status label.
+   * @property {string} embargoedStatusSection - Selector for the embargoed access status section.
+   * @property {string} restrictedLabel - Selector for the "Restricted" access status label.
+   * @property {string} recordAccessStatusSection - Selector for the restricted access status section.
+   * @property {string} restrictedFilesMessage - Selector for the restricted files warning message.
+   * @property {string} filesPreviewContainer - Selector for the opened file preview container.
+   * @property {string} filesPreviewIframe - Selector for the preview iframe inside preview container.
+   */
+
+  recordDetailPage: {
+    // Fields ----------------------------------
+
+    /** Selector for the record title heading on the landing page. */
+    recordTitle: "#record-title",
+
+    /** Selector for the citation text container (Citation section). */
+    citationText: '//div[@id="citation-text"]/div[text()]',
+
+    /** Selector for the selected citation style label (Citation dropdown). */
+    citationSelectedStyle: ".ui.selection.dropdown.citation-dropdown .divider.text",
+
+    // Buttons ----------------------------------
+
+    /** Selector for the "Edit" button in the record management panel. */
+    editButton: 'role=button[name="Edit"]',
+
+    /** Selector for the "New version" button in the record management panel. */
+    newVersionButton: 'role=button[name="New version"]',
+
+    /** Selector for the "Share" button in the record management panel. */
+    shareButton: 'role=button[name="Share"]',
+
+    /** Selector for the export selection dropdown trigger. */
+    exportSelectionDropdown: '//div[@aria-label="Export selection"]',
+
+    /** Selector for the "Export" button which starts file download. */
+    exportButton: 'role=button[name="Export"]',
+
+    /** Selector for the "Download all" button (archive link). */
+    downloadAllButton: '//th/a[@role="button"][contains(@class,"archive-link")]',
+
+    /** Selector for the file "Preview" action link (if available). */
+    previewButton: '//span/a[@role="button"][contains(@class,"preview-link")]',
+
+    /** Selector for the file "Download" action link (non-preview download link). */
+    downloadButton: '//span/a[@role="button"][not(contains(@class,"preview"))]',
+
+    // Dropdowns / Dynamic locators ----------------------------------
+
+    /**
+     * Returns selector for a citation style option inside citation dropdown.
+     * @param style Citation style (e.g., "Harvard", "APA", "IEEE").
+     * @returns Selector for the citation style option.
+     */
+    citationStyleOption: (style: string) => `.menu .item:has-text("${style}")`,
+
+    /**
+     * Returns selector for export file format option in Export selection dropdown.
+     * @param format Export format label (e.g., "JSON", "JSON-LD", "DCAT", "DataCite JSON").
+     * @returns Selector for the export format option.
+     */
+    exportFormatOption: (format: string) =>
+      `//div[@aria-label="Export selection"]//span[contains(@class,"text") and normalize-space()="${format}"]`,
+
+    // Navigation ----------------------------------
+
+    /** Selector for the "Version v1" link in Versions section. */
+    versionV1Link: 'div.item a.text-break:has-text("Version v1")',
+
+    // Verification ----------------------------------
+
+    /** Selector for active Version v2 label in Versions list. */
+    versionV2ActiveLabel:
+      'div.item.version.active >> div.left.floated.content >> span.text-break:text("Version v2")',
+
+    /** Selector for the Version v1 label on the record page header. */
+    versionV1HeaderLabel: 'span.label.text-muted:has-text("Version v1")',
+
+    /** Selector for the "Embargoed" access status label. */
+    embargoedLabel: "span.ui.label.horizontal.small.access-status.embargoed.mb-5",
+
+    /** Selector for the embargoed access status section. */
+    embargoedStatusSection: "section#record-access-status.ui.warning.message.rel-mt-1",
+
+    /** Selector for the "Restricted" access status label. */
+    restrictedLabel: "span.ui.label.horizontal.small.access-status.restricted.mb-5",
+
+    /** Selector for the record access status section (restricted). */
+    recordAccessStatusSection:
+      "section#record-access-status.ui.negative.message.rel-mt-1",
+
+    /** Selector for the restricted files warning message. */
+    restrictedFilesMessage: "div.ui.negative.message.file-box-message",
+
+    /** Selector for the opened file preview container. */
+    filesPreviewContainer:
+      "div#files-preview-accordion-panel.active.content.preview-container.open",
+
+    /** Selector for the preview iframe inside the preview container. */
+    filesPreviewIframe: "div#files-preview-accordion-panel iframe#preview-iframe",
   },
 
   // ---------------------------- LOGIN ----------------------------

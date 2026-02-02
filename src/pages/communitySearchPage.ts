@@ -7,7 +7,6 @@ import { BasePage } from "./basePage";
  */
 
 export class CommunitySearchPage<T extends Locators = Locators> extends BasePage<T> {
-
   // NAVIGATION -------------------------------------------------------------------------
 
   /**
@@ -31,7 +30,9 @@ export class CommunitySearchPage<T extends Locators = Locators> extends BasePage
    * @returns True if the option is selected, otherwise false.
    */
   async isSortOptionSelected(option: string): Promise<boolean> {
-    const selectedTextLocator = this.page.locator(this.locators.communitySearchPage.sortOptionSelected).first();
+    const selectedTextLocator = this.page
+      .locator(this.locators.communitySearchPage.sortOptionSelected)
+      .first();
     const text = await selectedTextLocator.textContent();
     return text?.trim() === option;
   }
