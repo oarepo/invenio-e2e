@@ -61,7 +61,7 @@ export default defineConfig({
     screenshot: "on",
 
     /* Collect video when retrying the failed test. */
-    video: 'on',
+    video: 'retain-on-failure',
 
     // headless: process.env.CI ? true : false, // CI vs local
 
@@ -86,19 +86,20 @@ export default defineConfig({
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },
     // },
-    
+
     /* API Testing */
-    { name: 'API Testing Setup', 
-      testMatch: /api\/.*\.setup\.ts$/ 
+    {
+      name: 'API Testing Setup',
+      testMatch: /api\/.*\.setup\.ts$/
     },
-        {
+    {
       name: 'API',
       testMatch: /api\/.*\.spec.ts/,
       use: {
         ...devices['Desktop Chrome'],
       },
       dependencies: ['API Testing Setup'],
-        },
+    },
     /* Test against mobile viewports. */
     // {
     //   name: 'Mobile Chrome',
