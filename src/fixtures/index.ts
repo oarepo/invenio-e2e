@@ -1,6 +1,8 @@
 /* eslint-disable no-empty-pattern */
 import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
-import type { TestDetails } from '@playwright/test';
+import type { TestDetails, APIRequestContext } from '@playwright/test';
+
+import { readFile } from 'fs/promises';
 
 import { AllPages, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage, RecordDetailPage, } from '../pages';
 import {
@@ -44,6 +46,8 @@ const _test = base.extend<{
     recordsApiData: RecordsApiData;
 
     expect: Expect<I18nExpected>;
+
+    createApiContext: (authFilePath: string) => Promise<APIRequestContext>;
 
     homePage: HomePage;
     searchPage: SearchPage;
@@ -193,6 +197,21 @@ const _test = base.extend<{
     uploadHelper: async ({ page }, use) => {
         const helper = new FileUploadHelper(page);
         await use(helper);
+    },
+
+    createApiContext: async ({ playwright }, use) => {
+        const createApiContext = async (authFilePath: string) => {
+            const authFile = JSON.parse(await readFile(authFilePath, 'utf-8')) as Awaited<ReturnType<APIRequestContext['storageState']>>;
+            const apiContext = await playwright.request.newContext({
+                extraHTTPHeaders: {
+                    'X-CSRFToken': authFile.cookies.find(cookie => cookie.name === 'csrftoken')?.value || '',
+                    'Referer': testConfig.baseURL,
+                },
+                storageState: authFile,
+            });
+            return apiContext;
+        };
+        await use(createApiContext);
     },
 
     // pages provide a set of methods to interact with a UI page, abstracting low-level

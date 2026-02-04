@@ -1,5 +1,5 @@
 import { InvenioTest } from '../../fixtures';
-import { expect } from '@playwright/test';
+import { APIRequestContext, expect } from '@playwright/test';
 
 /**
  * Declares the core API regression tests for Invenio records.
@@ -7,12 +7,24 @@ import { expect } from '@playwright/test';
  * The suite verifies that listing existing records works and that creating a new
  * metadata-only record, publishing it, and retrieving it again follows the expected flow.
  * @param test The Playwright test fixture enhanced by `InvenioTest`.
+ * @param authUserFilePath Absolute path to the file where the authenticated user
+ * state is stored.
  * @param recordsApiPath Optional path to the Records API root endpoint, defaults to `/api/records`.
  */
-export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/api/records') {
+export function recordsApiTests(test: InvenioTest, authUserFilePath: string, recordsApiPath: string = '/api/records') {
+    let apiContext: APIRequestContext;
+
+    test.beforeAll(async ({ createApiContext }) => {
+        apiContext = await createApiContext(authUserFilePath);
+    });
+
+    test.afterAll(async () => {
+        await apiContext.dispose();
+    });
+
     test.describe('API Record Tests', () => {
-        test('Should return list of records with correct structure', async ({ request }) => {
-            const response = await request.get(recordsApiPath);
+        test('Should return list of records with correct structure', async () => {
+            const response = await apiContext.get(recordsApiPath);
             expect(response.status()).toBe(200);
             expect(await response.json()).toEqual(expect.objectContaining({
                 hits: expect.objectContaining({
@@ -27,11 +39,11 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
             }));
         });
 
-        test('Should create and publish a new metadata-only record', async ({ request, recordsApiData }) => {
+        test('Should create and publish a new metadata-only record', async ({ recordsApiData }) => {
             const defaultRecord = recordsApiData["defaultRecord"];
 
             // Create a new record
-            const response = await request.post(recordsApiPath, {
+            const response = await apiContext.post(recordsApiPath, {
                 data: defaultRecord,
             });
 
@@ -80,7 +92,7 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
 
             // Publish the record
             /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
-            const publishResponse = await request.post(createdRecord.links?.publish);
+            const publishResponse = await apiContext.post(createdRecord.links?.publish);
 
             expect(publishResponse.status()).toBe(202);
 
@@ -96,7 +108,7 @@ export function recordsApiTests(test: InvenioTest, recordsApiPath: string = '/ap
             }));
 
             // Verify the record is published
-            const record = await request.get(publishedRecord.links?.self);
+            const record = await apiContext.get(publishedRecord.links?.self);
 
             expect(record.status()).toBe(200);
             expect(await record.json(), "should return again the published record with correct structure").toEqual(expect.objectContaining({

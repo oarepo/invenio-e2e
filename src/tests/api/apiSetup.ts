@@ -1,6 +1,8 @@
 import { test as setup } from '../../fixtures';
 import { expect } from '@playwright/test';
 
+import fs from 'fs';
+
 /**
  * Registers the authentication setup needed before running API tests.
  *
@@ -19,5 +21,14 @@ export function setupApiTesting(authFilePath: string) {
 
     // Save the authenticated context
     await page.context().storageState({ path: authFilePath });
+  });
+};
+
+export function apiTestingCleanup(authFilePath: string) {
+  setup('API Testing Teardown', () => {
+    // Delete the auth file after tests
+    if (fs.existsSync(authFilePath)) {
+      fs.unlinkSync(authFilePath);
+    }
   });
 };

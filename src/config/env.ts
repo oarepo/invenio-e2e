@@ -19,6 +19,7 @@ dotenv.config({ path: path.resolve(__dirname, `../.env.${ENV}`) });
  * Defaults to local development values when relevant environment variables
  * are not provided.
  * @property baseURL - Base URL of the tested application.
+ * @property e2eRootPath - Root path for end-to-end tests.
  * @property userEmail - Login email for authentication in the tested application.
  * @property userPassword - Login password for authentication in the tested application.
  * @property authUserFilePath - Path (relative to project root) to the file where the authenticated user state is stored.
@@ -32,9 +33,10 @@ dotenv.config({ path: path.resolve(__dirname, `../.env.${ENV}`) });
  */
 export const appConfig = {
   baseURL: process.env.BASE_URL || "https://127.0.0.1:5000",
+  e2eRootPath: process.env.E2E_ROOT_PATH || process.cwd(),
   // User login for tested app
-  userEmail: process.env.INVENIO_USER_EMAIL || "aaa@test.com",
-  userPassword: process.env.INVENIO_USER_PASSWORD || "aaaaaa",
+  userEmail: process.env.INVENIO_USER_EMAIL || "user@demo.org",
+  userPassword: process.env.INVENIO_USER_PASSWORD || "123456",
   authUserFilePath: process.env.AUTH_USER_FILE_PATH || "playwright/.auth/user.json",
   dataFolderPath: process.env.DATA_FOLDER_PATH || "data",
   qase: {
