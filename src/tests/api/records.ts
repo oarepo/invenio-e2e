@@ -2,14 +2,14 @@ import { appConfig } from '../../config';
 import { InvenioTest } from '../../fixtures';
 import { APIRequestContext, expect } from '@playwright/test';
 
+import { readFileSync } from 'fs'
+import { ReadableStream } from 'node:stream/web';
+import { Readable } from 'node:stream';
+import crypto from 'crypto'
 import path from 'path';
-import fs from 'fs';
 
 /**
  * Declares the core API regression tests for Invenio records.
- *
- * The suite verifies that listing existing records works and that creating a new
- * metadata-only record, publishing it, and retrieving it again follows the expected flow.
  * @param test The Playwright test fixture enhanced by `InvenioTest`.
  * @param authUserFilePath Absolute path to the file where the authenticated user
  * state is stored.
@@ -128,7 +128,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             /* eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
         });
 
-        test('Should create and publish a new record with files', async ({ recordsApiData }) => {
+        test('Should create and publish a new record with files', async ({ page, recordsApiData }) => {
             const defaultRecord = {
                 ...recordsApiData["defaultRecord"],
                 files: {
@@ -195,13 +195,19 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
                 3. Commit file upload (POST to the 'commit' link from step 1)
             */
 
+            const testFiles = [
+                { key: "Anon.jpg", path: path.join(uploadFolderPath, "Anon.jpg"), mimetype: "image/jpeg", },
+                { key: "logo-invenio-rdm.svg", path: "https://inveniordm.docs.cern.ch/images/logo-invenio-rdm.svg", mimetype: "image/svg+xml", },
+                { key: "Anon2.jpg", path: path.join(uploadFolderPath, "Anon2.jpg"), mimetype: "image/jpeg", },
+            ]
+
             // File upload with Local transfer method
 
             // Start draft file upload https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#start-draft-file-uploads
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
             const startFilesUploadResponse = await apiContext.post(createdRecord.links.files, {
                 data: [
-                    { "key": "Anon.jpg" }
+                    { "key": testFiles[0].key, },
                 ],
             });
 
@@ -213,7 +219,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             expect(startFilesUploadData, "should be pending and have links section").toEqual(expect.objectContaining({
                 entries: expect.arrayContaining([
                     expect.objectContaining({
-                        key: "Anon.jpg",
+                        key: testFiles[0].key,
                         status: "pending",
                         links: expect.objectContaining({
                             content: expect.any(String),
@@ -225,13 +231,15 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             }));
 
             // Upload file content
+            const fileContent = readFileSync(testFiles[0].path);
+
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
             const fileUploadResponse = await apiContext.put(startFilesUploadData.entries[0].links.content, {
                 headers: {
                     "Content-Type": "application/octet-stream",
                 },
                 // Read the file content from the UploadFiles folder
-                data: fs.readFileSync(path.join(uploadFolderPath, "Anon.jpg")),
+                data: fileContent,
             });
 
             expect(fileUploadResponse.status()).toBe(200);
@@ -244,20 +252,99 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const committedFileData = await commitFileResponse.json();
+            const fileChecksum = crypto.createHash('md5').update(fileContent).digest('hex');
 
-            expect(committedFileData, "should be available after commit").toEqual(expect.objectContaining({
-                key: "Anon.jpg",
+            expect(committedFileData, "should be completed and have valid checksum after commit").toEqual(expect.objectContaining({
+                key: testFiles[0].key,
                 status: "completed",
-                mimetype: "image/jpeg",
+                mimetype: testFiles[0].mimetype,
                 size: expect.any(Number),
-                checksum: expect.any(String),
+                checksum: `md5:${fileChecksum}`,
             }));
 
 
+
             // File upload with Fetch transfer method
+            // NOTE: RECORDS_RESOURCES_FILES_ALLOWED_DOMAINS must be configured if using external url (https://inveniordm.docs.cern.ch/reference/file_transfer/#security)
 
+            // Start draft file upload with fetch method
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+            const startFetchUploadResponse = await apiContext.post(createdRecord.links.files, {
+                data: [{
+                    key: testFiles[1].key,
+                    // Fetch method requires a URL to fetch the file from
+                    transfer: {
+                        type: "F",
+                        // Using Invenio RDM logo as test file to fetch, since it's a stable URL and a small image suitable for testing
+                        url: testFiles[1].path,
+                    }
+                }],
+            });
 
+            expect(startFetchUploadResponse.status()).toBe(201);
 
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const startFetchUploadData = await startFetchUploadResponse.json();
+
+            // Verify file was initiated with fetch method
+            expect(startFetchUploadData, `file ${testFiles[1].key} should be pending with fetch method`).toEqual(expect.objectContaining({
+                entries: expect.arrayContaining([
+                    expect.objectContaining({
+                        key: testFiles[1].key,
+                        status: "pending",
+                        transfer: {
+                            type: "F",
+                        },
+                        links: expect.objectContaining({
+                            content: expect.any(String),
+                            self: expect.any(String),
+                            commit: expect.any(String),
+                        }),
+                    }),
+                ]),
+            }));
+
+            // Wait for the file to be fetched by polling the 'self' link until the status becomes 'completed'
+            await expect.poll(async () => {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+                const response = await apiContext.get(startFetchUploadData.entries[1].links.self);
+                if (response.status() !== 200) return false;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                const data = await response.json();
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                if (data.status === "completed") return true;
+                return false;
+            }, { message: `file transfer of ${testFiles[1].key} should be completed` }).toBe(true);
+
+            // Commit the fetched file
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+            const commitFetchResponse = await apiContext.post(startFetchUploadData.entries[1].links.commit);
+            
+            expect(commitFetchResponse.status()).toBe(200);
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const committedFetchData = await commitFetchResponse.json();
+
+            // To verify the checksum, we need to fetch the file content from the original URL and calculate its checksum, since with Fetch transfer the file is fetched directly by the server 
+            // and we don't have access to the file content in the test to calculate the checksum before commit like we did with Local transfer
+            const remoteFileResponse = await fetch(testFiles[1].path);
+            const remoteFileStream = Readable.fromWeb(remoteFileResponse.body as ReadableStream);
+            const fetchFileChecksumHash = crypto.createHash('md5');
+            for await (const chunk of remoteFileStream) {
+                fetchFileChecksumHash.update(chunk as Buffer); 
+            } 
+            const fetchFileChecksum = fetchFileChecksumHash.digest('hex');
+
+            expect(committedFetchData, `commit of ${testFiles[1].key} should be completed with valid checksum`).toEqual(expect.objectContaining({
+                key: testFiles[1].key,
+                status: "completed",
+                transfer: {
+                    type: "L",
+                },
+                mimetype: testFiles[1].mimetype,
+                size: expect.any(Number),
+                checksum: `md5:${fetchFileChecksum}`,
+            }));
 
 
             // Rest of the publishing process
