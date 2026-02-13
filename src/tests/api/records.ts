@@ -44,6 +44,7 @@ type ApiRecordResponse = {
         files: string;
         [key: string]: string;
     };
+    metadata: Record<string, unknown>;
     created: string;
     updated: string;
     [key: string]: unknown;
@@ -187,7 +188,10 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
         const record = await apiContext.get(publishedRecord.links?.self);
 
         expect(record.status()).toBe(200);
-        expect(await record.json(), "should return again the published record with correct structure").toEqual(expect.objectContaining({
+
+        const recordData = await record.json() as ApiRecordResponse;
+
+        expect(recordData, "should return again the published record with correct structure").toEqual(expect.objectContaining({
             id: createdRecord.id,
             status: "published",
             is_published: true,
@@ -197,6 +201,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             updated: publishedRecord.updated, // updated timestamp should be the same as when published
         }));
         /* eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
+        return recordData;
     };
 
     const uploadFileWithLocalTransfer = async (createdRecord: ApiRecordResponse, file: FileUploadDescriptor) => {
@@ -514,6 +519,37 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             const largeFileBuffer = Buffer.alloc(appConfig.s3DefaultBlockSize + Math.ceil(appConfig.s3DefaultBlockSize / 10), "a");
             await uploadFileWithMultipartTransfer(createdRecord, testFiles[3], 2, largeFileBuffer);
             await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
+        });
+
+        test('Should create and publish a new record and then edit metadata successfully', async ({ recordsApiData }) => {
+            const defaultRecord = recordsApiData["defaultRecord"] as unknown as DefaultRecord;
+            const { createdRecord, recordObjectMatchers } = await createDraftRecord(defaultRecord);
+            const publishedRecord = await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
+
+            const publishedToDraftResponse = await apiContext.post(publishedRecord.links.draft);
+
+            expect(publishedToDraftResponse.status()).toBe(201);
+
+            const updatedDefaultRecord = {
+                ...defaultRecord,
+                metadata: {
+                    ...defaultRecord.metadata,
+                    title: "Updated Title",
+                },
+            };
+            
+            const updateResponse = await apiContext.put((await publishedToDraftResponse.json() as ApiRecordResponse).links.self, {
+                data: updatedDefaultRecord,
+            });
+
+            expect(updateResponse.status()).toBe(200);
+
+            const updatedRecord = await updateResponse.json() as ApiRecordResponse;
+
+            const publishedUpdatedRecord = await publishAndVerifyRecord(updatedRecord, buildRecordObjectMatchers(updatedDefaultRecord));
+
+            expect(publishedUpdatedRecord, "should have the same id").toHaveProperty("id", publishedRecord.id);
+            expect(publishedUpdatedRecord, "should have the updated title").toHaveProperty("metadata.title", "Updated Title");
         });
     });
 };
