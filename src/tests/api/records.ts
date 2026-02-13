@@ -17,7 +17,6 @@ import path from 'path';
  */
 export function recordsApiTests(test: InvenioTest, authUserFilePath: string, recordsApiPath: string = '/api/records') {
     let apiContext: APIRequestContext;
-    const uploadFolderPath = path.resolve(__dirname, "../..", appConfig.dataFolderPath, "UploadFiles");
 
     test.beforeAll(async ({ createApiContext }) => {
         apiContext = await createApiContext(authUserFilePath);
@@ -128,7 +127,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             /* eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
         });
 
-        test('Should create and publish a new record with files', async ({ page, recordsApiData }) => {
+        test('Should create and publish a new record with files', async ({ recordsApiData }) => {
             const defaultRecord = {
                 ...recordsApiData["defaultRecord"],
                 files: {
@@ -196,9 +195,10 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             */
 
             const testFiles = [
-                { key: "Anon.jpg", path: path.join(uploadFolderPath, "Anon.jpg"), mimetype: "image/jpeg", },
+                { key: "Anon.jpg", path: path.resolve(__dirname, "../..", appConfig.dataFolderPath, "UploadFiles", "Anon.jpg"), mimetype: "image/jpeg", },
                 { key: "logo-invenio-rdm.svg", path: "https://inveniordm.docs.cern.ch/images/logo-invenio-rdm.svg", mimetype: "image/svg+xml", },
-                { key: "Anon2.jpg", path: path.join(uploadFolderPath, "Anon2.jpg"), mimetype: "image/jpeg", },
+                { key: "test.pdf", path: path.resolve(__dirname, "../..", appConfig.dataFolderPath, "api", "test.pdf"), mimetype: "application/pdf", },
+                { key: "large-file-5mb.dat", path: "", mimetype: "application/octet-stream", }, // This file will be generated on the fly for testing multipart upload with a large file
             ]
 
             // File upload with Local transfer method
@@ -261,7 +261,6 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
                 size: expect.any(Number),
                 checksum: `md5:${fileChecksum}`,
             }));
-
 
 
             // File upload with Fetch transfer method
@@ -345,6 +344,135 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
                 size: expect.any(Number),
                 checksum: `md5:${fetchFileChecksum}`,
             }));
+
+            // File upload with Multipart transfer method
+
+            const uploadFileWithMultipartTransfer = async (file: { path: string; key: string; mimetype: string }, partsCount: number, fileBuffer?: Buffer) => {
+                const multipartFileContent = fileBuffer ?? readFileSync(file.path);
+
+                // Start multipart upload
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+                const startMultipartTransferResponse = await apiContext.post(createdRecord.links.files, {
+                    data: [{
+                        key: file.key,
+                        size: multipartFileContent.length,
+                        transfer: {
+                            type: "M",
+                            parts: partsCount, // For testing purposes, we can specify a small number of parts
+                        }
+                    }],
+                });
+
+                expect(startMultipartTransferResponse.status()).toBe(201);
+
+                const startMultipartTransferData = await startMultipartTransferResponse.json() as { 
+                    entries: Array<{
+                        key: string;
+                        status: string;
+                        transfer: {
+                            type: string;
+                        };
+                        links: {
+                            parts: Array<{
+                                part: number;
+                                url: string;
+                            }>;
+                            self: string;
+                            commit: string;
+                        };
+                    }>;
+                };
+
+                // Verify file was initiated with multipart method
+                expect(startMultipartTransferData, `file ${file.key} should be pending with multipart method`).toEqual(expect.objectContaining({
+                    entries: expect.arrayContaining([
+                        expect.objectContaining({
+                            key: file.key,
+                            status: "pending",
+                            transfer: {
+                                type: "M",
+                                parts: partsCount,
+                            },
+                            links: expect.objectContaining({
+                                parts: expect.arrayContaining([
+                                    expect.objectContaining({
+                                        part: expect.any(Number),
+                                        url: expect.any(String),
+                                    }),
+                                ]),
+                                self: expect.any(String),
+                                commit: expect.any(String),
+                            }),
+                        }),
+                    ]),
+                }));
+
+                const partLinks = startMultipartTransferData.entries.find(entry => entry.key === file.key)!.links.parts;
+
+                expect(partLinks.length, `should have ${partsCount} parts as specified`).toBe(partsCount);
+
+                const uploadPart = async (partUrl: string, data: Buffer) => {
+                    const response = await apiContext.put(partUrl, {
+                        headers: {
+                            "Content-Type": "application/octet-stream",
+                        },
+                        data,
+                    });
+                    return response;
+                };
+
+                // Upload parts in parallel
+                const partsUploadResponses = await Promise.all(partLinks.map((part, index) => {
+                    // For testing, we will split the file into S3_DEFAULT_BLOCK_SIZE sized parts, with the last part taking the remaining bytes
+                    const partStart = index * appConfig.s3DefaultBlockSize;
+                    const partEnd = index === partLinks.length - 1
+                        ? multipartFileContent.length
+                        : Math.min((index + 1) * appConfig.s3DefaultBlockSize, multipartFileContent.length);
+                    const partData = multipartFileContent.subarray(partStart, partEnd);
+                    return uploadPart(part.url, partData);
+                }));
+
+                // Verify all parts were uploaded successfully
+                for (let i = 0; i < partsUploadResponses.length; i++) {
+                    expect(partsUploadResponses[i].status(), `upload of part ${i+1} should be successful`).toBe(200);
+                    // expect(await partsUploadResponses[i].json()).toEqual(expect.objectContaining({
+                    //     status: "pending",
+                    //     transfer: {
+                    //         type: "M",
+                    //     },
+                    // }));
+                }
+
+                // Commit multipart upload
+                const commitMultipartResponse = await apiContext.post(startMultipartTransferData.entries.find(entry => entry.key === file.key)!.links.commit);
+
+                expect(commitMultipartResponse.status()).toBe(200);
+
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                const commitMultipartData = await commitMultipartResponse.json();
+
+                // TODO: Calculate correct multipart checksum
+                // const multipartFileChecksum = crypto.createHash('md5').update(multipartFileContent).digest('hex');
+
+                expect(commitMultipartData, `commit of ${file.key} should be completed with valid checksum`).toEqual(expect.objectContaining({
+                    key: file.key,
+                    status: "completed",
+                    transfer: {
+                        type: "L", // After successful multipart upload, the transfer type should be updated to Local
+                    },
+                    mimetype: file.mimetype,
+                    size: multipartFileContent.length,
+                    // checksum: `md5:${multipartFileChecksum}`,
+                }));
+            };
+
+            // Test multipart upload with the third test file
+            await uploadFileWithMultipartTransfer(testFiles[2], 1);
+
+            // S3_DEFAULT_BLOCK_SIZE=5MB is the minimum by default
+            // Let's allocate S3_DEFAULT_BLOCK_SIZE + 1/10*S3_DEFAULT_BLOCK_SIZE to ensure we can use exactly 2 parts
+            const largeFileBuffer = Buffer.alloc(appConfig.s3DefaultBlockSize + Math.ceil(appConfig.s3DefaultBlockSize / 10), "a");
+            await uploadFileWithMultipartTransfer(testFiles[3], 2, largeFileBuffer);
 
 
             // Rest of the publishing process

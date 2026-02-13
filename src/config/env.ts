@@ -23,6 +23,8 @@ dotenv.config({ path: path.resolve(__dirname, `../.env.${ENV}`) });
  * @property userEmail - Login email for authentication in the tested application.
  * @property userPassword - Login password for authentication in the tested application.
  * @property authUserFilePath - Path (relative to project root) to the file where the authenticated user state is stored.
+ * @property dataFolderPath - Path (relative to project root) to the folder where test data files are stored.
+ * @property s3DefaultBlockSize - Default block size in bytes for multipart uploads to S3-compatible storage.
  * @property qase - Configuration options for Qase TestOps integration. See {@link https://developers.qase.io/docs/configuration-options Qase Configuration Options}.
  * @property qase.apiToken - API token used to authenticate with Qase TestOps.
  * @property qase.projectCode - Project identifier within Qase TestOps.
@@ -39,6 +41,7 @@ export const appConfig = {
   userPassword: process.env.INVENIO_USER_PASSWORD || "123456",
   authUserFilePath: process.env.AUTH_USER_FILE_PATH || "playwright/.auth/user.json",
   dataFolderPath: process.env.DATA_FOLDER_PATH || "data",
+  s3DefaultBlockSize:  process.env.S3_DEFAULT_BLOCK_SIZE ? parseInt(process.env.S3_DEFAULT_BLOCK_SIZE) : 5 * 1024 * 1024, // S3_DEFAULT_BLOCK_SIZE=5MB by default; change in invenio.cfg
   qase: {
     apiToken: process.env.QASE_TESTOPS_API_TOKEN || "",
     projectCode: process.env.QASE_TESTOPS_PROJECT || "",
