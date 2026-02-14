@@ -89,13 +89,41 @@ parent-directory
 
 The project also ships with a lightweight API regression suite that reuses the same authentication helpers as the UI tests.
 
-1. Generate an authenticated storage state once by running:
+### InvenioRDM Instance Setup
+
+Add this to your `invenio.cfg` to enable API testing:
+
+```python
+# invenio.cfg
+
+RECORDS_RESOURCES_FILES_ALLOWED_DOMAINS = [
+    "inveniordm.docs.cern.ch",
+]
+```
+
+Setup a test user and admin (and possibly other users) in your InvenioRDM instance with the credentials matching those in your environment variables (see `src/config/env.ts`).:
+
+```bash
+invenio users create user@demo.org --password 123456 --active --confirm
+
+invenio roles create admin
+invenio access allow administration-access role admin
+invenio users create admin@demo.org --password 123456 --active --confirm
+invenio roles add admin@demo.org admin
+invenio access allow superuser-access user admin@demo.org
+```
+
+### Running the API Tests
+
+1. Generate authenticated storage states for all tested users once by running (or let it be automatically generated when you run `npx playwright test`):
 
     ```bash
     npx playwright test tests/api/auth.setup.ts
     ```
 
-    The state is saved to `tests/playwright/.auth/user.json` by default. Override the destination by setting the `AUTH_USER_FILE_PATH` environment variable.
+    The user state is saved in `tests/playwright/.auth/user.json` and admin state in `tests/playwright/.auth/admin.json` by default. Override the destination by setting the `AUTH_USER_FILE_PATH` and `AUTH_ADMIN_FILE_PATH` environment variables (see `src/config/env.ts` for details).
+
+    NOTE: You need to first create the test user and admin in your InvenioRDM instance.
 
 2. Execute the API suite:
 
@@ -115,4 +143,7 @@ pnpm install
 
 npm run lint
 npm run lint:fix
+
+npm run prettier
+npm run prettier:fix
 ```

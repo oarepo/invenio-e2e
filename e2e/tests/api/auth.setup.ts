@@ -1,9 +1,8 @@
-import { setupApiTesting, appConfig } from '@inveniosoftware/invenio-e2e';
-
-
+import { authenticateUserForApiTesting, appConfig } from '@inveniosoftware/invenio-e2e';
 import path from 'path';
 
-// TODO: fix this
-const authFileAbsolutePath = path.resolve(__dirname, '../../', appConfig.authUserFilePath);
+const userAuthFileAbsolutePath = path.resolve(appConfig.e2eRootPath, appConfig.authUserFilePath);
+const adminAuthFileAbsolutePath = path.resolve(appConfig.e2eRootPath, appConfig.authAdminFilePath);
 
-setupApiTesting(authFileAbsolutePath);
+authenticateUserForApiTesting(appConfig.userEmail, appConfig.userPassword, userAuthFileAbsolutePath);
+authenticateUserForApiTesting(appConfig.adminEmail, appConfig.adminPassword, adminAuthFileAbsolutePath);

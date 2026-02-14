@@ -3,14 +3,6 @@ import { appConfig } from '@inveniosoftware/invenio-e2e';
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
-
-/**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
@@ -92,7 +84,12 @@ export default defineConfig({
     /* API Testing */
     {
       name: 'API Testing Setup',
-      testMatch: /api\/.*\.setup\.ts$/
+      testMatch: /api\/.*\.setup\.ts$/,
+      teardown: 'API Testing Cleanup',
+    },
+    {
+      name: 'API Testing Cleanup',
+      testMatch: /api\/.*\.teardown\.ts$/,
     },
     {
       name: 'API',
@@ -100,6 +97,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
       },
+      retries: 3,
       dependencies: ['API Testing Setup'],
     },
     /* Test against mobile viewports. */
