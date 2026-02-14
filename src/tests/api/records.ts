@@ -305,7 +305,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             entries: expect.arrayContaining([
                 expect.objectContaining({
                     key: file.key,
-                    status: "pending",
+                    status: expect.stringMatching(/pending|completed/), // Depending on timing, the transfer might already be completed
                     transfer: {
                         type: "F",
                     },
@@ -318,21 +318,24 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             ]),
         }));
 
-        // Wait for the file to be fetched by polling the 'self' link until the status becomes 'completed'
-        await expect.poll(async () => {
-            const fileEntry = startFetchUploadData.entries.find((entry) => entry.key === file.key);
-            expect(fileEntry, `expected upload entry for ${file.key}`).toBeDefined();
-            const response = await apiContext.get(fileEntry!.links.self);
-            if (response.status() !== 200) return false;
-            const data = await response.json() as { status?: string };
-            if (data.status === "completed") return true;
-            return false;
-        }, { message: `file transfer of ${file.key} should be completed` }).toBe(true);
+        const fetchedFileEntry = startFetchUploadData.entries.find((entry) => entry.key === file.key);
+
+        if (fetchedFileEntry?.status !== "completed") {
+            // Wait for the file to be fetched by polling the 'self' link until the status becomes 'completed'
+            await expect.poll(async () => {
+                const response = await apiContext.get(fetchedFileEntry!.links.self);
+                if (response.status() !== 200) return false;
+                const data = await response.json() as { status?: string };
+                if (data.status === "completed") return true;
+                return false;
+            }, { 
+                message: `file transfer of ${file.key} should be completed`,
+                intervals: [1000, 3000, 6000, 15000], // Polling intervals in milliseconds
+            }).toBe(true);
+        }
 
         // Commit the fetched file
-        const fileEntry = startFetchUploadData.entries.find((entry) => entry.key === file.key);
-        expect(fileEntry, `expected upload entry for ${file.key}`).toBeDefined();
-        const commitFetchResponse = await apiContext.post(fileEntry!.links.commit);
+        const commitFetchResponse = await apiContext.post(fetchedFileEntry!.links.commit);
 
         expect(commitFetchResponse.status()).toBe(200);
 
