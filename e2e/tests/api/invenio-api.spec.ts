@@ -1,11 +1,8 @@
-import { test, recordsApiTests, appConfig } from "@inveniosoftware/invenio-e2e";
-import path from 'path';
-
-const authUserFilePath = path.resolve(appConfig.e2eRootPath, '../../', appConfig.authUserFilePath);
+import { test, recordsApiTests } from "@inveniosoftware/invenio-e2e";
 
 // Run all API tests by calling the function with the test instance and other parameters
 
-recordsApiTests(test, authUserFilePath);
+recordsApiTests(test);
 
 /*
  * To skip some tests inside the default test suite, you can use the `skipTests` method:

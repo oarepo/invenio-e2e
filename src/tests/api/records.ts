@@ -88,21 +88,32 @@ type RecordFilesListResponse = {
 };
 
 /**
- * Declares the core API regression tests for Invenio records.
+ * Declares the core API end-to-end tests for Invenio records.
  * @param test The Playwright test fixture enhanced by `InvenioTest`.
  * @param authUserFilePath Absolute path to the file where the authenticated user
  * state is stored.
+ * @param authAdminFilePath Absolute path to the file where the authenticated admin user state is stored.
  * @param recordsApiPath Optional path to the Records API root endpoint, defaults to `/api/records`.
  */
-export function recordsApiTests(test: InvenioTest, authUserFilePath: string, recordsApiPath: string = '/api/records') {
-    let apiContext: APIRequestContext;
+export function recordsApiTests(
+    test: InvenioTest, 
+    authUserFilePath: string = path.resolve(appConfig.e2eRootPath, appConfig.authUserFilePath),
+    authAdminFilePath: string = path.resolve(appConfig.e2eRootPath, appConfig.authAdminFilePath), 
+    recordsApiPath: string = '/api/records'
+) {
+    let userApiContext: APIRequestContext;
+    let adminApiContext: APIRequestContext;
 
     test.beforeAll(async ({ createApiContext }) => {
-        apiContext = await createApiContext(authUserFilePath);
+        userApiContext = await createApiContext(authUserFilePath);
+        adminApiContext = await createApiContext(authAdminFilePath);
     });
 
     test.afterAll(async () => {
-        await apiContext.dispose();
+        await Promise.allSettled([
+            userApiContext.dispose(),
+            adminApiContext.dispose(),
+        ]);
     });
 
     // Shared test files used across all upload transfer scenarios.
@@ -146,7 +157,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
         defaultRecord: DefaultRecord,
         expectFilesLink = false,
     ): Promise<{ createdRecord: ApiRecordResponse; recordObjectMatchers: Record<string, unknown> }> => {
-        const createResponse = await apiContext.post(recordsApiPath, {
+        const createResponse = await userApiContext.post(recordsApiPath, {
             data: defaultRecord,
         });
 
@@ -184,7 +195,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
     const publishAndVerifyRecord = async (createdRecord: ApiRecordResponse, recordObjectMatchers: Record<string, unknown>) => {
         // Publish the record
         /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
-        const publishResponse = await apiContext.post(createdRecord.links?.publish);
+        const publishResponse = await userApiContext.post(createdRecord.links?.publish);
 
         expect(publishResponse.status()).toBe(202);
 
@@ -200,7 +211,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
         }));
 
         // Verify the record is published
-        const record = await apiContext.get(publishedRecord.links?.self);
+        const record = await userApiContext.get(publishedRecord.links?.self);
 
         expect(record.status()).toBe(200);
 
@@ -228,7 +239,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
         */
 
         // Start draft file upload https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#start-draft-file-uploads
-        const startFilesUploadResponse = await apiContext.post(createdRecord.links.files, {
+        const startFilesUploadResponse = await userApiContext.post(createdRecord.links.files, {
             data: [
                 { "key": file.key, },
             ],
@@ -258,7 +269,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
         const contentUrl = startFilesUploadData.entries[0]?.links.content;
         expect(contentUrl, `content upload link should exist for ${file.key}`).toBeDefined();
 
-        const fileUploadResponse = await apiContext.put(contentUrl!, {
+        const fileUploadResponse = await userApiContext.put(contentUrl!, {
             headers: {
                 "Content-Type": "application/octet-stream",
             },
@@ -268,7 +279,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
         expect(fileUploadResponse.status()).toBe(200);
 
         // Commit file upload
-        const commitFileResponse = await apiContext.post(startFilesUploadData.entries[0].links.commit);
+        const commitFileResponse = await userApiContext.post(startFilesUploadData.entries[0].links.commit);
 
         expect(commitFileResponse.status()).toBe(200);
 
@@ -286,8 +297,8 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
 
     const uploadFileWithFetchTransfer = async (createdRecord: ApiRecordResponse, file: FileUploadDescriptor) => {
         // NOTE: RECORDS_RESOURCES_FILES_ALLOWED_DOMAINS must be configured if using external url (https://inveniordm.docs.cern.ch/reference/file_transfer/#security)
-        // Start draft file upload with fetch method
-        const startFetchUploadResponse = await apiContext.post(createdRecord.links.files, {
+        // Start draft file upload with fetch method (only admins with super-user access can use fetch transfer by default)
+        const startFetchUploadResponse = await adminApiContext.post(createdRecord.links.files, {
             data: [{
                 key: file.key,
                 transfer: {
@@ -323,7 +334,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
         if (fetchedFileEntry?.status !== "completed") {
             // Wait for the file to be fetched by polling the 'self' link until the status becomes 'completed'
             await expect.poll(async () => {
-                const response = await apiContext.get(fetchedFileEntry!.links.self);
+                const response = await adminApiContext.get(fetchedFileEntry!.links.self);
                 if (response.status() !== 200) return false;
                 const data = await response.json() as { status?: string };
                 if (data.status === "completed") return true;
@@ -335,7 +346,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
         }
 
         // Commit the fetched file
-        const commitFetchResponse = await apiContext.post(fetchedFileEntry!.links.commit);
+        const commitFetchResponse = await adminApiContext.post(fetchedFileEntry!.links.commit);
 
         expect(commitFetchResponse.status()).toBe(200);
 
@@ -374,7 +385,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
         const multipartFileContent = fileBuffer ?? readFileSync(file.path);
 
         // Start multipart upload
-        const startMultipartTransferResponse = await apiContext.post(createdRecord.links.files, {
+        const startMultipartTransferResponse = await userApiContext.post(createdRecord.links.files, {
             data: [{
                 key: file.key,
                 size: multipartFileContent.length,
@@ -419,7 +430,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
         expect(partLinks.length, `should have ${partsCount} parts as specified`).toBe(partsCount);
 
         const uploadPart = async (partUrl: string, data: Buffer) => {
-            const response = await apiContext.put(partUrl, {
+            const response = await userApiContext.put(partUrl, {
                 headers: {
                     "Content-Type": "application/octet-stream",
                 },
@@ -442,7 +453,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             expect(partsUploadResponses[i].status(), `upload of part ${i + 1} should be successful`).toBe(200);
         }
 
-        const commitMultipartResponse = await apiContext.post(multipartEntry!.links.commit);
+        const commitMultipartResponse = await userApiContext.post(multipartEntry!.links.commit);
 
         expect(commitMultipartResponse.status()).toBe(200);
 
@@ -462,7 +473,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
 
     test.describe('API Record Tests', () => {
         test('Should return list of records with correct structure', async () => {
-            const response = await apiContext.get(recordsApiPath);
+            const response = await userApiContext.get(recordsApiPath);
             expect(response.status()).toBe(200);
             expect(await response.json()).toEqual(expect.objectContaining({
                 hits: expect.objectContaining({
@@ -545,7 +556,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             const publishedRecord = await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
 
             // First, transition the published record back to draft
-            const publishedToDraftResponse = await apiContext.post(publishedRecord.links.draft);
+            const publishedToDraftResponse = await userApiContext.post(publishedRecord.links.draft);
 
             expect(publishedToDraftResponse.status()).toBe(201);
 
@@ -558,7 +569,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             };
             
             // Then, update the record metadata while in draft state
-            const updateResponse = await apiContext.put((await publishedToDraftResponse.json() as ApiRecordResponse).links.self, {
+            const updateResponse = await userApiContext.put((await publishedToDraftResponse.json() as ApiRecordResponse).links.self, {
                 data: updatedDefaultRecord,
             });
 
@@ -587,13 +598,13 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             const firstPublishedVersion = await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
 
             // Capture files from first published version.
-            const firstVersionFilesResponse = await apiContext.get(firstPublishedVersion.links.files);
+            const firstVersionFilesResponse = await userApiContext.get(firstPublishedVersion.links.files);
             expect(firstVersionFilesResponse.status()).toBe(200);
             const firstVersionFiles = await firstVersionFilesResponse.json() as RecordFilesListResponse;
             expect(firstVersionFiles.entries.length, 'first version should have uploaded files').toBeGreaterThan(0);
 
             // Create new draft version.
-            const createVersionResponse = await apiContext.post(firstPublishedVersion.links.versions);
+            const createVersionResponse = await userApiContext.post(firstPublishedVersion.links.versions);
             expect(createVersionResponse.status()).toBe(201);
             const newDraftVersion = await createVersionResponse.json() as ApiRecordResponse;
 
@@ -622,13 +633,13 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             expect(newDraftParentId, 'new version should be linked to same parent.id as previous version').toBe(firstParentId);
 
             // New version draft starts without files.
-            const beforeImportFilesResponse = await apiContext.get(newDraftVersion.links.files);
+            const beforeImportFilesResponse = await userApiContext.get(newDraftVersion.links.files);
             expect(beforeImportFilesResponse.status()).toBe(200);
             const beforeImportFiles = await beforeImportFilesResponse.json() as RecordFilesListResponse;
             expect(beforeImportFiles.entries).toHaveLength(0);
 
             // Link all files from previous version.
-            const filesImportResponse = await apiContext.post(`${newDraftVersion.links.self}/actions/files-import`);
+            const filesImportResponse = await userApiContext.post(`${newDraftVersion.links.self}/actions/files-import`);
             expect(filesImportResponse.status()).toBe(201);
             const importedDraftFiles = await filesImportResponse.json() as RecordFilesListResponse;
 
@@ -641,7 +652,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             ]));
 
             // Update metadata in the new draft version to include compulsory publication_date field
-            const updateMetadataResponse = await apiContext.put(newDraftVersion.links.self, {
+            const updateMetadataResponse = await userApiContext.put(newDraftVersion.links.self, {
                 data: {
                     ...newDraftVersion,
                     metadata: {
@@ -653,7 +664,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             expect(updateMetadataResponse.status()).toBe(200);
 
             // Publish new version.
-            const publishNewVersionResponse = await apiContext.post(newDraftVersion.links.publish);
+            const publishNewVersionResponse = await userApiContext.post(newDraftVersion.links.publish);
             expect(publishNewVersionResponse.status()).toBe(202);
             const secondPublishedVersion = await publishNewVersionResponse.json() as ApiRecordResponse;
             const secondPublishedParentId = (secondPublishedVersion as { parent?: { id?: string } }).parent?.id;
@@ -668,7 +679,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             expect(secondPublishedParentId, 'published new version should keep same parent.id').toBe(firstParentId);
 
             // Verify linked files are present in the newly published version.
-            const secondVersionFilesResponse = await apiContext.get(secondPublishedVersion.links.files);
+            const secondVersionFilesResponse = await userApiContext.get(secondPublishedVersion.links.files);
             expect(secondVersionFilesResponse.status()).toBe(200);
             const secondVersionFiles = await secondVersionFilesResponse.json() as RecordFilesListResponse;
 
