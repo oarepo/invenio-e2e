@@ -699,5 +699,62 @@ export function recordsApiTests(
                 status: 'completed',
             }));
         });
+
+        test('Should create and publish an embargoed restricted record and keep it hidden from unauthenticated users', async ({ recordsApiData, playwright }) => {
+            const embargoUntil = '2100-10-01';
+            const embargoedRecord = {
+                ...recordsApiData["defaultRecord"],
+                access: {
+                    record: 'restricted',
+                    files: 'restricted',
+                    embargo: {
+                        active: true,
+                        until: embargoUntil,
+                        reason: 'Integration test embargo',
+                    },
+                },
+            } as DefaultRecord;
+
+            const { createdRecord, recordObjectMatchers } = await createDraftRecord(embargoedRecord);
+            const publishedEmbargoedRecord = await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
+
+            expect(publishedEmbargoedRecord).toEqual(expect.objectContaining({
+                access: expect.objectContaining({
+                    record: 'restricted',
+                    files: 'restricted',
+                    embargo: expect.objectContaining({
+                        active: true,
+                        until: embargoUntil,
+                    }),
+                }),
+            }));
+
+            const unauthenticatedApiContext = await playwright.request.newContext({
+                baseURL: appConfig.baseURL,
+            });
+
+            try {
+                // Unauthenticated users should not be able to access the restricted embargoed record directly.
+                const unauthGetRecordResponse = await unauthenticatedApiContext.get(publishedEmbargoedRecord.links.self);
+                expect(unauthGetRecordResponse.status(), 'restricted embargoed record should not be visible to unauthenticated users').toBe(403);
+
+                // Unauthenticated users should not be able to access files of the restricted embargoed record.
+                const unauthGetFilesResponse = await unauthenticatedApiContext.get(publishedEmbargoedRecord.links.files);
+                expect(unauthGetFilesResponse.status(), 'files of restricted embargoed record should not be visible to unauthenticated users').toBe(403);
+
+                // Public search should not reveal this restricted embargoed record.
+                const unauthSearchResponse = await unauthenticatedApiContext.get(recordsApiPath, {
+                    params: {
+                        q: `id:${publishedEmbargoedRecord.id}`,
+                    },
+                });
+                expect(unauthSearchResponse.status(), 'search endpoint should be accessible').toBe(200);
+                const searchData = await unauthSearchResponse.json() as { hits?: { hits?: Array<{ id?: string }> } };
+                const returnedIds = (searchData.hits?.hits ?? []).map((hit) => hit.id);
+                expect(returnedIds, 'restricted embargoed record should not appear in unauthenticated search results').not.toContain(publishedEmbargoedRecord.id);
+            } finally {
+                await unauthenticatedApiContext.dispose();
+            }
+        });
     });
 };
