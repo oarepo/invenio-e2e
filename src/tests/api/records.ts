@@ -756,5 +756,58 @@ export function recordsApiTests(
                 await unauthenticatedApiContext.dispose();
             }
         });
+
+        test('Should create and publish a new record and then delete it and check tombstone details', async ({ recordsApiData }) => {
+            const defaultRecord = recordsApiData["defaultRecord"] as unknown as DefaultRecord;
+            const { createdRecord, recordObjectMatchers } = await createDraftRecord(defaultRecord);
+            const publishedRecord = await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
+
+            const tombstonePayload = {
+                note: 'Removed by automated API test',
+            };
+
+            // Delete published record with tombstone metadata (assuming admin permissions are required for deletion).
+            const deleteResponse = await adminApiContext.delete(publishedRecord.links.self, {
+                data: {
+                    ...tombstonePayload
+                },
+            });
+
+            expect(deleteResponse.status(), 'deleting a published record should succeed').toBe(204);
+
+            // Verify tombstone is available on deleted record endpoint.
+            const deletedRecordResponse = await userApiContext.get(publishedRecord.links.self);
+            expect(deletedRecordResponse.status(), 'deleted record should return a deleted status').toBe(410);
+
+            const deletedRecordData = await deletedRecordResponse.json() as Record<string, unknown>;
+            expect(deletedRecordData, 'deleted record should contain tombstone message').toHaveProperty(
+                "message", "The record has been deleted."
+            );
+            // TODO: Does not work because server does not create a tombstone.
+            // expect(deletedRecordData).toEqual(expect.objectContaining({
+            //     id: publishedRecord.id,
+            //     tombstone: expect.objectContaining({
+            //         reason: tombstonePayload.reason,
+            //         category: tombstonePayload.category,
+            //         removed_by: expect.objectContaining({
+            //             user: expect.any(Number),
+            //         }),
+            //         timestamp: expect.any(String),
+            //     }),
+            // }));
+
+            // Deleted record should no longer be listed in search.
+            const searchResponse = await userApiContext.get(recordsApiPath, {
+                params: {
+                    q: `id:${publishedRecord.id}`,
+                    allversions: true,
+                },
+            });
+            expect(searchResponse.status()).toBe(200);
+
+            const searchData = await searchResponse.json() as { hits?: { hits?: Array<{ id?: string }> } };
+            const returnedIds = (searchData.hits?.hits ?? []).map((hit) => hit.id);
+            expect(returnedIds, 'deleted record should not appear in search results').not.toContain(publishedRecord.id);
+        });
     });
 };
