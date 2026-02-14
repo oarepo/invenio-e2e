@@ -72,6 +72,21 @@ type StartUploadResponse = {
     entries: UploadEntry[];
 };
 
+type RecordFileEntry = {
+    key: string;
+    checksum: string;
+    mimetype: string;
+    size: number;
+    status: string;
+    [key: string]: unknown;
+};
+
+type RecordFilesListResponse = {
+    enabled: boolean;
+    entries: RecordFileEntry[];
+    [key: string]: unknown;
+};
+
 /**
  * Declares the core API regression tests for Invenio records.
  * @param test The Playwright test fixture enhanced by `InvenioTest`.
@@ -526,6 +541,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
             const { createdRecord, recordObjectMatchers } = await createDraftRecord(defaultRecord);
             const publishedRecord = await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
 
+            // First, transition the published record back to draft
             const publishedToDraftResponse = await apiContext.post(publishedRecord.links.draft);
 
             expect(publishedToDraftResponse.status()).toBe(201);
@@ -538,6 +554,7 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
                 },
             };
             
+            // Then, update the record metadata while in draft state
             const updateResponse = await apiContext.put((await publishedToDraftResponse.json() as ApiRecordResponse).links.self, {
                 data: updatedDefaultRecord,
             });
@@ -546,10 +563,127 @@ export function recordsApiTests(test: InvenioTest, authUserFilePath: string, rec
 
             const updatedRecord = await updateResponse.json() as ApiRecordResponse;
 
+            // Finally, publish the updated record again and verify the changes
             const publishedUpdatedRecord = await publishAndVerifyRecord(updatedRecord, buildRecordObjectMatchers(updatedDefaultRecord));
 
             expect(publishedUpdatedRecord, "should have the same id").toHaveProperty("id", publishedRecord.id);
             expect(publishedUpdatedRecord, "should have the updated title").toHaveProperty("metadata.title", "Updated Title");
+        });
+
+        test('Should create and publish a new version with linked files from previous version and a new id', async ({ recordsApiData }) => {
+            const defaultRecord = {
+                ...recordsApiData["defaultRecord"],
+                files: {
+                    enabled: true,
+                },
+            } as DefaultRecord;
+
+            // Publish initial version with an uploaded file.
+            const { createdRecord, recordObjectMatchers } = await createDraftRecord(defaultRecord, true);
+            await uploadFileWithLocalTransfer(createdRecord, testFiles[0]);
+            const firstPublishedVersion = await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
+
+            // Capture files from first published version.
+            const firstVersionFilesResponse = await apiContext.get(firstPublishedVersion.links.files);
+            expect(firstVersionFilesResponse.status()).toBe(200);
+            const firstVersionFiles = await firstVersionFilesResponse.json() as RecordFilesListResponse;
+            expect(firstVersionFiles.entries.length, 'first version should have uploaded files').toBeGreaterThan(0);
+
+            // Create new draft version.
+            const createVersionResponse = await apiContext.post(firstPublishedVersion.links.versions);
+            expect(createVersionResponse.status()).toBe(201);
+            const newDraftVersion = await createVersionResponse.json() as ApiRecordResponse;
+
+            const firstVersionIndex = (firstPublishedVersion as { versions?: { index?: number } }).versions?.index;
+            const newDraftVersionIndex = (newDraftVersion as { versions?: { index?: number } }).versions?.index;
+            const firstParentId = (firstPublishedVersion as { parent?: { id?: string } }).parent?.id;
+            const newDraftParentId = (newDraftVersion as { parent?: { id?: string } }).parent?.id;
+
+            expect(newDraftVersion.id, 'new draft version should have a different id').not.toBe(firstPublishedVersion.id);
+            expect(newDraftVersion, 'new version should be returned as draft').toEqual(expect.objectContaining({
+                is_published: false,
+                is_draft: true,
+                links: expect.objectContaining({
+                    self: expect.any(String),
+                    files: expect.any(String),
+                    publish: expect.any(String),
+                }),
+            }));
+            expect(newDraftVersion, 'new draft version should not carry publication_date in metadata').not.toHaveProperty('metadata.publication_date');
+            expect(newDraftVersion, 'new draft version should not carry metadata.version').not.toHaveProperty('metadata.version');
+            expect(firstVersionIndex, 'first published version should provide versions.index').toBeDefined();
+            expect(newDraftVersionIndex, 'new draft version should provide versions.index').toBeDefined();
+            expect(newDraftVersionIndex, 'new draft version should increment versions.index by 1').toBe((firstVersionIndex as number) + 1);
+            expect(firstParentId, 'first version should include parent.id').toBeDefined();
+            expect(newDraftParentId, 'new version should include parent.id').toBeDefined();
+            expect(newDraftParentId, 'new version should be linked to same parent.id as previous version').toBe(firstParentId);
+
+            // New version draft starts without files.
+            const beforeImportFilesResponse = await apiContext.get(newDraftVersion.links.files);
+            expect(beforeImportFilesResponse.status()).toBe(200);
+            const beforeImportFiles = await beforeImportFilesResponse.json() as RecordFilesListResponse;
+            expect(beforeImportFiles.entries).toHaveLength(0);
+
+            // Link all files from previous version.
+            const filesImportResponse = await apiContext.post(`${newDraftVersion.links.self}/actions/files-import`);
+            expect(filesImportResponse.status()).toBe(201);
+            const importedDraftFiles = await filesImportResponse.json() as RecordFilesListResponse;
+
+            expect(importedDraftFiles.entries.length, 'draft should contain linked files after import').toBe(firstVersionFiles.entries.length);
+            expect(importedDraftFiles.entries, 'linked draft should contain the file from previous version').toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    key: testFiles[0].key,
+                    status: 'completed',
+                }),
+            ]));
+
+            // Update metadata in the new draft version to include compulsory publication_date field
+            const updateMetadataResponse = await apiContext.put(newDraftVersion.links.self, {
+                data: {
+                    ...newDraftVersion,
+                    metadata: {
+                        ...newDraftVersion.metadata,
+                        publication_date: "2026-01-01",
+                    },
+                },
+            });
+            expect(updateMetadataResponse.status()).toBe(200);
+
+            // Publish new version.
+            const publishNewVersionResponse = await apiContext.post(newDraftVersion.links.publish);
+            expect(publishNewVersionResponse.status()).toBe(202);
+            const secondPublishedVersion = await publishNewVersionResponse.json() as ApiRecordResponse;
+            const secondPublishedParentId = (secondPublishedVersion as { parent?: { id?: string } }).parent?.id;
+
+            expect(secondPublishedVersion.id, 'published new version should keep new id').toBe(newDraftVersion.id);
+            expect(secondPublishedVersion.id, 'published new version id should differ from previous version id').not.toBe(firstPublishedVersion.id);
+            expect(secondPublishedVersion, 'new version should be published').toEqual(expect.objectContaining({
+                status: 'published',
+                is_published: true,
+                is_draft: false,
+            }));
+            expect(secondPublishedParentId, 'published new version should keep same parent.id').toBe(firstParentId);
+
+            // Verify linked files are present in the newly published version.
+            const secondVersionFilesResponse = await apiContext.get(secondPublishedVersion.links.files);
+            expect(secondVersionFilesResponse.status()).toBe(200);
+            const secondVersionFiles = await secondVersionFilesResponse.json() as RecordFilesListResponse;
+
+            expect(secondVersionFiles.entries.length).toBe(firstVersionFiles.entries.length);
+
+            const firstVersionFile = firstVersionFiles.entries.find((entry) => entry.key === testFiles[0].key);
+            const secondVersionFile = secondVersionFiles.entries.find((entry) => entry.key === testFiles[0].key);
+
+            expect(firstVersionFile, `expected file ${testFiles[0].key} in first published version`).toBeDefined();
+            expect(secondVersionFile, `expected linked file ${testFiles[0].key} in second published version`).toBeDefined();
+
+            expect(secondVersionFile, 'linked file metadata should be preserved in new version').toEqual(expect.objectContaining({
+                key: firstVersionFile!.key,
+                checksum: firstVersionFile!.checksum,
+                mimetype: firstVersionFile!.mimetype,
+                size: firstVersionFile!.size,
+                status: 'completed',
+            }));
         });
     });
 };
