@@ -1,7 +1,7 @@
 import { Page } from '@playwright/test';
 import { Locators } from '../locators';
 import { TestConfig } from '../config';
-import { AllPages, BasePage } from '../pages';
+import { AllPages, BasePage, HomePage } from '../pages';
 
 export interface LoginServiceInterface<L extends Locators> {
     isUserLoggedIn: () => Promise<boolean>;
@@ -9,6 +9,7 @@ export interface LoginServiceInterface<L extends Locators> {
         currentPage: S,
         credentials?: { username: string; password: string },
     ): Promise<S>;
+    logout: () => Promise<HomePage<L>>;
 }
 
 export class LocalLoginService<L extends Locators> implements LoginServiceInterface<L> {
@@ -37,5 +38,10 @@ export class LocalLoginService<L extends Locators> implements LoginServiceInterf
         const loginPage = this.availablePages.loginPage;
         await loginPage.openPage({ nextURL: this.page.url() });
         return await loginPage.loginUser(username, password, currentPage);
+    }
+
+    async logout(): Promise<HomePage<L>> {
+        const loginPage = this.availablePages.loginPage;
+        return await loginPage.logout();
     }
 }
