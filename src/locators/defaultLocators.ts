@@ -937,9 +937,17 @@ export const locators = {
 
     bannersSearchResultsRows: 'table > tbody > tr',
 
+    bannersSearchResultsLoader: 'div.ui.active.loader',
+
     bannersSearchResultsPlaceholderText: 'div.ui.placeholder .ui.header:has-text("There are no resources in this category.")',
 
-    searchBannerRow: (message: string) => `table > tbody > tr:has-text("${message}")`,
+    searchBannerRow: (message: string) => `table > tbody > tr:has(td[data-label="Message"]:has-text("${message}"))`,
+
+    searchBannerRowById: (id: string) => `table > tbody > tr:has(td[data-label="Id"] > a:text-is("${id}"))`,
+
+    deleteBannerButton: 'button[aria-label="Delete"]',
+
+    confirmDeleteBannerButton: 'div.ui.modal button.ui.negative.button:has-text("Delete")',
 
 
     createBannerHeader: 'h1:has-text("Create banner")',

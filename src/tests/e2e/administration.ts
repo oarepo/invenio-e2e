@@ -11,10 +11,16 @@ export function administrationPageTests(test: InvenioTest) {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    test.afterEach(async ({ homePage, loginPage }) => {
-      // Log out after each test
-      await homePage.openPage();
-      await homePage.logout();
+    test.afterEach(async ({ homePage, administrationPage, loginPage, services }) => {
+      if (await services.login.isUserLoggedIn()) {
+        // Clean up any banners that might have been created during the tests
+        await administrationPage.openPage();
+        await administrationPage.navigateToBannersSection();
+        await administrationPage.deleteAllBanners();
+        // Log out after each test
+        await homePage.openPage();
+        await homePage.logout();
+      }
     });
 
     test("Access Administration page as admin", async ({ administrationPage }) => {

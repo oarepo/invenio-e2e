@@ -55,16 +55,6 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
   }
 
   /**
-   * Validates that no banners are present in the search results.
-   * Checks for the empty results placeholder text.
-   */
-  async validateNoBannersArePresent() {
-    const searchResults = this.page.locator(this.locators.administrationPage.bannersSearchResultsSection);
-    const emptyResults = searchResults.locator(this.locators.administrationPage.bannersSearchResultsPlaceholderText);
-    await this.expect(emptyResults).toBeVisible();
-  }
-
-  /**
    * Validates that a banner with the specified message is present in the search results.
    * @param message The banner message to search for.
    */
@@ -94,6 +84,16 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
   async clickSubmitCreateBanner() {
     const submitButton = this.page.locator(this.locators.administrationPage.createBannerSubmitButton);
     await submitButton.click();
+  }
+
+  async deleteBannerById(id: string) {
+    const deleteButton = 
+      this.page.locator(this.locators.administrationPage.searchBannerRowById(id))
+      .locator(this.locators.administrationPage.deleteBannerButton);
+    await deleteButton.click();
+    const confirmDeleteButton = this.page.locator(this.locators.administrationPage.confirmDeleteBannerButton);
+    await confirmDeleteButton.click();
+    await this.page.waitForLoadState("networkidle");
   }
 
   // FIELDS ------------------------------------------------------------------------------
@@ -140,9 +140,41 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
     return bannerOnSite.isVisible();
   }
 
+  /**
+   * Verfies that no banners are present in the search results.
+   * Checks for the empty results placeholder text.
+   */
+  async verifyNoBannersArePresent() {
+    const searchResults = this.page.locator(this.locators.administrationPage.bannersSearchResultsSection);
+    const emptyResults = searchResults.locator(this.locators.administrationPage.bannersSearchResultsPlaceholderText);
+    return emptyResults.isVisible({ timeout: 2000 });
+  }
+
   async waitForSubmission() {
     await this.page.waitForLoadState("networkidle");
     await this.expect(this.page.locator(this.locators.administrationPage.bannersSearchResultsSection)).toBeVisible();
     await this.expect(this.page.locator(this.locators.administrationPage.bannersSearchResultsRows).first()).toBeVisible();
+  }
+
+  // FLOWS ------------------------------------------------------------------------------
+
+  async deleteAllBanners() {
+    const searchResults = this.page.locator(this.locators.administrationPage.bannersSearchResultsSection);
+    let hasBanners = !(await this.verifyNoBannersArePresent()) && await searchResults.locator(this.locators.administrationPage.bannersSearchResultsRows).count() > 0;
+    while (hasBanners) {
+      const bannerRow = searchResults.locator(this.locators.administrationPage.bannersSearchResultsRows).first();
+      const bannerId = await bannerRow.locator('td[data-label="Id"] > a').innerText();
+      await this.deleteBannerById(bannerId);
+      await searchResults.locator(this.locators.administrationPage.bannersSearchResultsLoader).waitFor({ state: "hidden" });
+      hasBanners = !(await this.verifyNoBannersArePresent()) && await searchResults.locator(this.locators.administrationPage.bannersSearchResultsRows).count() > 0;
+    }
+  }
+
+  // HELPERS ----------------------------------------------------------------------------
+
+  async getBannerIdByMessage(message: string) {
+    const bannerRow = this.page.locator(this.locators.administrationPage.searchBannerRow(message));
+    const bannerId = await bannerRow.locator('td[data-label="Id"] > a').innerText();
+    return bannerId;
   }
 }
