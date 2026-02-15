@@ -41,6 +41,9 @@ export class LocalLoginService<L extends Locators> implements LoginServiceInterf
     }
 
     async logout(): Promise<HomePage<L>> {
+        if (!(await this.isUserLoggedIn())) {
+            return this.availablePages.homePage;
+        }
         const loginPage = this.availablePages.loginPage;
         return await loginPage.logout();
     }
