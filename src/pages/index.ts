@@ -9,6 +9,7 @@ import { NewCommunityPage } from './newCommunityPage';
 import { DepositPage } from './depositPage';
 import { PreviewPage } from './previewPage';
 import { RecordDetailPage } from "./recordDetailPage";
+import { AdministrationPage } from './administrationPage';
 
 /**
  * Re-export the core and specific pages of the application.
@@ -26,6 +27,7 @@ export { CommunitySearchPage } from './communitySearchPage';
 export { MyDashboardPage } from './myDashboardPage';
 export { NewCommunityPage } from './newCommunityPage';
 export { RecordDetailPage } from "./recordDetailPage";
+export { AdministrationPage } from "./administrationPage";
 
 import { Locators } from '../locators';
 
@@ -45,6 +47,7 @@ export interface AllPages<L extends Locators = Locators> {
     depositPage: DepositPage<L>;
     previewPage: PreviewPage<L>;
     recordDetailPage: RecordDetailPage<L>;
+    administrationPage: AdministrationPage<L>;
 }
 
 export type AllPagesKeys = Extract<keyof AllPages, string>;

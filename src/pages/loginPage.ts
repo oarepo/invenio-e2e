@@ -1,5 +1,6 @@
 import { Locators } from "../locators";
 import { BasePage } from "./basePage";
+import { HomePage } from "./homePage";
 
 /**
  * Class representing the Invenio Login Page.
@@ -93,7 +94,7 @@ export class LoginPage<T extends Locators = Locators> extends BasePage<T> {
   /**
    * Logs out the currently authenticated user via the header profile menu.
    */
-  async logout(): Promise<void> {
+  async logout(): Promise<HomePage<T>> {
     const profileButton = this.page.locator(
       this.locators.header.userProfileDropdownButton
     );
@@ -105,5 +106,7 @@ export class LoginPage<T extends Locators = Locators> extends BasePage<T> {
     await logoutItem.click();
 
     await this.page.waitForLoadState("networkidle");
+    await this.availablePages.homePage.validatePageLoaded();
+    return this.availablePages.homePage;
   }
 }

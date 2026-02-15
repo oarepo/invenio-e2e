@@ -97,6 +97,20 @@ export class BasePage<
   }
 
   /**
+   * Logs out the current user and verifies the logout was successful.
+   * @returns A promise that resolves to the HomePage instance after logout.
+   */
+  async logout(): Promise<HomePage<L>> {
+    const loginService = this.services.login;
+    const homePage = await loginService.logout();
+    this.expect(
+      await loginService.isUserLoggedIn(), 
+      "User should be logged out after logout flow."
+    ).toBe(false);
+    return homePage;
+  }
+
+  /**
    * Returns trimmed text content of the first element matching the selector.
    * Useful as a small helper for assertions and comparisons.
    * @param selector Locator selector string.
