@@ -52,6 +52,34 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
     await this.page.click(this.locators.communityDetailPage.privilegesTab);
   }
 
+  async navigateToFirstRecord(): Promise<void> {
+    await this.page
+      .locator(this.locators.communityDetailPage.firstRecordLink)
+      .first()
+      .click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async navigateToRequestsSection(): Promise<void> {
+    await this.page.locator(this.locators.communityDetailPage.requestsTab).click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async navigateToReviewPolicy(): Promise<void> {
+    await this.page.click(this.locators.communityDetailPage.reviewPolicyTab);
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async navigateToPages(): Promise<void> {
+    await this.page.click(this.locators.communityDetailPage.pagesTab);
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async navigateToClosedRequests(): Promise<void> {
+    await this.page.click(this.locators.communityDetailPage.closedRequestsButton);
+    await this.page.waitForLoadState("networkidle");
+  }
+
   // FIELDS ------------------------------------------------------------
 
   /**
@@ -128,6 +156,119 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
       .locator(this.locators.communityDetailPage.headerCommunityName)
       .textContent();
     return text?.trim() ?? "";
+  }
+
+  async openInvitationsTab(): Promise<void> {
+    await this.page.locator(this.locators.communityDetailPage.invitationsTab).click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async inviteMember(
+    email: string,
+    role: "Reader" | "Curator" | "Manager" | "Owner"
+  ): Promise<void> {
+    await this.clickInviteButton();
+
+    const input = this.page.locator(
+      this.locators.communityDetailPage.memberDropdownInput
+    );
+    await input.waitFor({ state: "visible", timeout: 15000 });
+    await input.fill(email);
+
+    const suggestion = this.page.locator(
+      this.locators.communityDetailPage.memberSuggestion(email)
+    );
+    await suggestion.waitFor({ state: "visible", timeout: 15000 });
+    await suggestion.click();
+
+    const roleDropdown = this.page.locator(
+      this.locators.communityDetailPage.roleDropdown
+    );
+    if (await roleDropdown.isVisible().catch(() => false)) {
+      await roleDropdown.click();
+      await this.page
+        .locator(this.locators.communityDetailPage.memberRoleOption(role))
+        .click();
+    }
+
+    await this.clickInviteButtonConfirmation();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async isInvitationPresent(email: string): Promise<boolean> {
+    return (
+      (await this.page
+        .locator(this.locators.communityDetailPage.invitationRowByEmail(email))
+        .count()) > 0
+    );
+  }
+
+  async isYouLabelPresent(): Promise<boolean> {
+    return await this.page
+      .locator(this.locators.communityDetailPage.youLabel)
+      .isVisible();
+  }
+
+  async leaveCommunity(): Promise<void> {
+    await this.page.locator(this.locators.communityDetailPage.leaveButton).click();
+    const confirm = this.page.locator(
+      this.locators.communityDetailPage.leaveConfirmButton
+    );
+    await confirm.waitFor({ state: "visible", timeout: 15000 });
+    await confirm.click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async isLeaveCommunityMessageVisible(): Promise<boolean> {
+    return await this.page
+      .locator(this.locators.communityDetailPage.leaveCommunityMessage)
+      .isVisible();
+  }
+
+  async isMemberPresent(email: string): Promise<boolean> {
+    return (
+      (await this.page
+        .locator(this.locators.communityDetailPage.memberRowByEmail(email))
+        .count()) > 0
+    );
+  }
+
+  async removeMemberByEmail(email: string): Promise<void> {
+    const row = this.page.locator(
+      this.locators.communityDetailPage.memberRowByEmail(email)
+    );
+    if ((await row.count()) === 0) return;
+
+    const removeBtn = this.page.locator(
+      this.locators.communityDetailPage.memberRemoveButtonInRow(email)
+    );
+    await removeBtn.click();
+
+    const confirm = this.page.locator(
+      this.locators.communityDetailPage.removeConfirmButton
+    );
+    await confirm.waitFor({ state: "visible", timeout: 15000 });
+    await confirm.click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async setMemberRole(
+    email: string,
+    role: "Reader" | "Curator" | "Manager" | "Owner"
+  ): Promise<void> {
+    const dropdown = this.page.locator(
+      this.locators.communityDetailPage.memberRoleDropdownInRow(email)
+    );
+    await dropdown.waitFor({ state: "visible", timeout: 15000 });
+    await dropdown.click();
+
+    const option = this.page.locator(
+      this.locators.communityDetailPage.memberRoleOption(role)
+    );
+    await option.waitFor({ state: "visible", timeout: 15000 });
+    await option.click();
+
+    await this.page.waitForLoadState("networkidle");
   }
 
   // BUTTONS -----------------------------------------------------------
@@ -264,6 +405,54 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
     return (await label.count()) > 0;
   }
 
+  // ACTIONS -----------------------------------------------------------
+
+  async acceptAndPublishFirstRequest(): Promise<void> {
+    await this.page.click(this.locators.communityDetailPage.acceptAndPublishButton);
+    await this.page
+      .locator(this.locators.communityDetailPage.acceptAndPublishConfirmButton)
+      .click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async selectSubmissionReviewPolicyByIndex(index: number): Promise<void> {
+    await this.page
+      .locator(this.locators.communityDetailPage.submissionReviewPolicyRadio(index))
+      .click();
+  }
+
+  async setMyMemberVisibility(visibility: "Public" | "Hidden"): Promise<void> {
+    const dropdown = this.page.locator(
+      this.locators.communityDetailPage.myVisibilityDropdown
+    );
+    await dropdown.waitFor({ state: "visible", timeout: 15000 });
+    await dropdown.click();
+    await this.page.getByRole("option", { name: visibility }).click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async isCurrentUserListed(): Promise<boolean> {
+    return (
+      (await this.page
+        .locator(this.locators.communityDetailPage.memberListRowWithYouLabel)
+        .count()) > 0
+    );
+  }
+
+  async toggleFilterCheckbox(label: string): Promise<void> {
+    await this.page
+      .locator(this.locators.communityDetailPage.filterCheckbox(label))
+      .click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async toggleViewAllVersions(): Promise<void> {
+    await this.page
+      .locator(this.locators.communityDetailPage.viewAllVersionsSlider)
+      .click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
   // VERIFICATION ------------------------------------------------------
 
   /**
@@ -300,5 +489,60 @@ export class CommunityDetailPage<T extends Locators = Locators> extends BasePage
       this.locators.communityDetailPage.recordDateTagLabel
     );
     await expect(label.first()).toBeVisible();
+  }
+
+  async hasMemberRole(email: string, role: string): Promise<boolean> {
+    const row = this.page.locator(
+      this.locators.communityDetailPage.memberRowByEmail(email)
+    );
+    const txt = (await row.textContent()) ?? "";
+    return txt.includes(role);
+  }
+
+  async hasAnyClosedRequest(): Promise<boolean> {
+    return (
+      (await this.page
+        .locator(this.locators.communityDetailPage.closedRequestsResults)
+        .count()) > 0
+    );
+  }
+
+  async getCurationPolicyText(): Promise<string> {
+    return (
+      (
+        await this.page
+          .locator(this.locators.communityDetailPage.curationPolicyText)
+          .textContent()
+      )?.trim() ?? ""
+    );
+  }
+
+  async getAboutText(): Promise<string> {
+    return (
+      (
+        await this.page
+          .locator(this.locators.communityDetailPage.aboutText)
+          .textContent()
+      )?.trim() ?? ""
+    );
+  }
+
+  /**
+   * Verifies that no records are visible in the community listing.
+   * Used after logout when restricted records should not be listed.
+   */
+  async verifyRestrictedRecordNotPresent(): Promise<boolean> {
+    const noMsg = this.page.locator(
+      this.locators.communityDetailPage.communityNoRecordsMessage
+    );
+    if (await noMsg.isVisible().catch(() => false)) return true;
+
+    const items = this.page.locator(
+      this.locators.communityDetailPage.communityRecordsListItems
+    );
+    const count = await items.count();
+
+    // If nothing is listed, consider it "not present"
+    return count === 0;
   }
 }

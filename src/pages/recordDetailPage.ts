@@ -49,7 +49,9 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
    * @returns Selected style label.
    */
   async getSelectedStyle(): Promise<string> {
-    const locator = this.page.locator(this.locators.recordDetailPage.citationSelectedStyle);
+    const locator = this.page.locator(
+      this.locators.recordDetailPage.citationSelectedStyle
+    );
     await locator.waitFor({ state: "visible", timeout: 10000 });
     return (await locator.innerText()).trim();
   }
@@ -64,6 +66,15 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
     await btn.waitFor({ state: "visible", timeout: 10000 });
     await btn.click();
     await this.page.waitForLoadState("networkidle");
+  }
+
+  async isEditButtonVisible(): Promise<boolean> {
+    const btn = this.page.locator(this.locators.recordDetailPage.editButton);
+    try {
+      return await btn.isVisible();
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -89,7 +100,9 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
    * Opens the "Export selection" dropdown (Export section).
    */
   async clickExportSelection(): Promise<void> {
-    const dropdown = this.page.locator(this.locators.recordDetailPage.exportSelectionDropdown);
+    const dropdown = this.page.locator(
+      this.locators.recordDetailPage.exportSelectionDropdown
+    );
     await dropdown.waitFor({ state: "visible", timeout: 10000 });
     await dropdown.click();
   }
@@ -101,7 +114,9 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
   async selectFileFormat(format: string): Promise<void> {
     await this.clickExportSelection();
 
-    const option = this.page.locator(this.locators.recordDetailPage.exportFormatOption(format));
+    const option = this.page.locator(
+      this.locators.recordDetailPage.exportFormatOption(format)
+    );
     await option.waitFor({ state: "visible", timeout: 10000 });
     await option.click();
   }
@@ -155,13 +170,79 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
     await dropdown.waitFor({ state: "visible", timeout: 10000 });
     await dropdown.click();
 
-    const option = this.page.locator(this.locators.recordDetailPage.citationStyleOption(style));
+    const option = this.page.locator(
+      this.locators.recordDetailPage.citationStyleOption(style)
+    );
     await option.waitFor({ state: "visible", timeout: 10000 });
     await option.click();
 
     // Verify selection is shown
-    const selected = this.page.locator(this.locators.recordDetailPage.citationSelectedStyle);
+    const selected = this.page.locator(
+      this.locators.recordDetailPage.citationSelectedStyle
+    );
     await this.expect(selected).toHaveText(new RegExp(`^${style}$`));
+  }
+
+  /**
+   * Opens the Share dialog from the record management panel.
+   */
+  async openShareDialog(): Promise<void> {
+    const btn = this.page.locator(this.locators.recordDetailPage.shareButton);
+    await btn.waitFor({ state: "visible", timeout: 10000 });
+    await btn.click();
+  }
+
+  /**
+   * Opens the "Add people" section inside the Share dialog.
+   */
+  async openAddPeople(): Promise<void> {
+    const btn = this.page.locator(this.locators.recordDetailPage.addPeopleButton);
+    await btn.waitFor({ state: "visible", timeout: 10000 });
+    await btn.click();
+  }
+
+  /**
+   * Adds a user into the Share dialog by email (type into input and pick suggestion).
+   * @param email
+   */
+  async addUserToShare(email: string): Promise<void> {
+    const input = this.page.locator(this.locators.recordDetailPage.shareUserInput);
+    await input.waitFor({ state: "visible", timeout: 10000 });
+
+    await input.fill(email);
+
+    const suggestion = this.page.locator(
+      this.locators.recordDetailPage.shareUserSuggestion(email)
+    );
+
+    await suggestion.waitFor({ state: "visible", timeout: 10000 });
+    await suggestion.click();
+  }
+
+  /**
+   * Sets the share permission radio option in the "Add people" panel.
+   * Keep it string-based, do not use numeric indexes (less flaky).
+   * @param permission Permission label (e.g. "Can view", "Can edit").
+   */
+  async setSharePermission(permission: "Can view" | "Can edit"): Promise<void> {
+    const radio = this.page.locator(
+      this.locators.recordDetailPage.sharePermissionRadio(permission)
+    );
+    await radio.waitFor({ state: "visible", timeout: 10000 });
+    await radio.click();
+  }
+
+  /**
+   * Confirms adding the selected user into the share list (clicks "Add" button).
+   */
+  async confirmShareAdd(): Promise<void> {
+    const btn = this.page.locator(this.locators.recordDetailPage.shareAddButton);
+    await btn.waitFor({ state: "visible", timeout: 10000 });
+    await this.expect(btn).toBeEnabled();
+    await btn.click();
+
+    // Optional: wait for the share list to update
+    await this.page.waitForLoadState("networkidle");
   }
 
   // VERIFICATION ------------------------------------------------------------------------
@@ -171,7 +252,9 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
    * @returns True if Version v2 is present, otherwise false.
    */
   async isVersionV2Present(): Promise<boolean> {
-    const locator = this.page.locator(this.locators.recordDetailPage.versionV2ActiveLabel);
+    const locator = this.page.locator(
+      this.locators.recordDetailPage.versionV2ActiveLabel
+    );
     return (await locator.count()) > 0;
   }
 
@@ -180,7 +263,9 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
    * @returns True if Version v1 label is present, otherwise false.
    */
   async isVersionV1Present(): Promise<boolean> {
-    const locator = this.page.locator(this.locators.recordDetailPage.versionV1HeaderLabel);
+    const locator = this.page.locator(
+      this.locators.recordDetailPage.versionV1HeaderLabel
+    );
     return (await locator.count()) > 0;
   }
 
@@ -188,7 +273,9 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
    * Checks whether Embargoed label is visible.
    */
   async isEmbargoedLabelPresent(): Promise<boolean> {
-    return await this.page.locator(this.locators.recordDetailPage.embargoedLabel).isVisible();
+    return await this.page
+      .locator(this.locators.recordDetailPage.embargoedLabel)
+      .isVisible();
   }
 
   /**
@@ -218,7 +305,9 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
    * Checks whether record access status section is visible.
    */
   async isRecordAccessStatusSectionPresent(): Promise<boolean> {
-    const locator = this.page.locator(this.locators.recordDetailPage.recordAccessStatusSection);
+    const locator = this.page.locator(
+      this.locators.recordDetailPage.recordAccessStatusSection
+    );
     try {
       await locator.waitFor({ state: "visible", timeout: 5000 });
       return true;
@@ -232,7 +321,9 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
    * @param timeoutMs Timeout in ms (default 10s).
    */
   async checkRestrictedMessagePresence(timeoutMs: number = 10000): Promise<boolean> {
-    const locator = this.page.locator(this.locators.recordDetailPage.restrictedFilesMessage);
+    const locator = this.page.locator(
+      this.locators.recordDetailPage.restrictedFilesMessage
+    );
     try {
       await locator.waitFor({ state: "visible", timeout: timeoutMs });
       return true;
@@ -245,14 +336,18 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
    * Checks whether the preview container (accordion panel) is visible.
    */
   async isPreviewContainerVisible(): Promise<boolean> {
-    return await this.page.locator(this.locators.recordDetailPage.filesPreviewContainer).isVisible();
+    return await this.page
+      .locator(this.locators.recordDetailPage.filesPreviewContainer)
+      .isVisible();
   }
 
   /**
    * Checks whether the preview iframe exists inside the preview container.
    */
   async isPreviewIframeInsideContainer(): Promise<boolean> {
-    return await this.page.locator(this.locators.recordDetailPage.filesPreviewIframe).isVisible();
+    return await this.page
+      .locator(this.locators.recordDetailPage.filesPreviewIframe)
+      .isVisible();
   }
 
   /**
@@ -262,5 +357,60 @@ export class RecordDetailPage<T extends Locators = Locators> extends BasePage<T>
    */
   validateCitationFormat(citation: string, regex: RegExp): boolean {
     return regex.test(citation);
+  }
+
+  /**
+   * Checks whether the given email appears in the user suggestions list.
+   * @param email
+   */
+  async isUserSuggested(email: string): Promise<boolean> {
+    const suggestion = this.page.locator(
+      this.locators.recordDetailPage.shareUserSuggestion(email)
+    );
+    return (await suggestion.count()) > 0;
+  }
+
+  /**
+   * Checks whether the given email is present in the share list (after adding).
+   * @param email
+   */
+  async isUserInShareList(email: string): Promise<boolean> {
+    const row = this.page.locator(
+      this.locators.recordDetailPage.shareRowByEmail(email)
+    );
+    return (await row.count()) > 0;
+  }
+
+  /**
+   * Checks whether a given user row contains the expected permission label.
+   * @param email User email.
+   * @param permission Permission label (e.g. "Can edit").
+   */
+  async isPermissionPresent(
+    email: string,
+    permission: "Can view" | "Can edit"
+  ): Promise<boolean> {
+    const cell = this.page.locator(
+      this.locators.recordDetailPage.sharePermissionByEmail(email)
+    );
+    try {
+      await cell.waitFor({ state: "visible", timeout: 10000 });
+      const text = (await cell.textContent())?.trim() ?? "";
+      return text.includes(permission);
+    } catch {
+      return false;
+    }
+  }
+
+  async isManagementMenuVisible(): Promise<boolean> {
+    return await this.page
+      .locator(this.locators.communityDetailPage.recordManagementMenu)
+      .isVisible();
+  }
+
+  async isSubmittedForReviewLabelVisible(): Promise<boolean> {
+    return await this.page
+      .locator(this.locators.recordDetailPage.submittedForReviewLabel)
+      .isVisible();
   }
 }

@@ -106,4 +106,26 @@ export class LoginPage<T extends Locators = Locators> extends BasePage<T> {
 
     await this.page.waitForLoadState("networkidle");
   }
+
+  /**
+   * Logs in using explicit credentials (useful for switching user within a test).
+   */
+  async loginAs(username: string, password: string): Promise<void> {
+    // Ensure we are on login page (safe if logout redirects elsewhere)
+    await this.openPage();
+
+    await this.fillUsernameField(username);
+    await this.fillPasswordField(password);
+
+    const submitButton = this.page.locator(this.locators.loginPage.submitButton);
+    await submitButton.click();
+
+    await this.page.waitForLoadState("networkidle");
+
+    // Basic assertion that we're logged in (header profile menu should be visible)
+    const profileButton = this.page.locator(
+      this.locators.header.userProfileDropdownButton
+    );
+    await profileButton.waitFor({ state: "visible", timeout: 15000 });
+  }
 }
