@@ -8,7 +8,7 @@ import { expect } from '@playwright/test';
 export function homepageTests(test: InvenioTest) {
 
     test.describe('Homepage Tests', () => {
-        test.beforeEach(async ({ homePage }) => {
+        test.beforeEach(async ({ homePage, loginPage }) => {
             await homePage.openPage();
         });
 
