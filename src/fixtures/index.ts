@@ -17,6 +17,7 @@ import {
   MyDashboardPage,
   NewCommunityPage,
   RecordDetailPage,
+  AdministrationPage,
 } from "../pages";
 import {
   I18nExpected,
@@ -80,6 +81,8 @@ const _test = base.extend<{
     depositPage: DepositPage;
     previewPage: PreviewPage;
     recordDetailPage: RecordDetailPage;
+    administrationPage: AdministrationPage;
+
     uploadHelper: FileUploadHelper;
 }>({
   // locators are used to find elements on the page and they are separated
@@ -251,21 +254,22 @@ const _test = base.extend<{
         await use(createApiContext);
     },
 
-  // pages provide a set of methods to interact with a UI page, abstracting low-level
-  // Playwright API calls. They are registered in the availablePages registry
-  // so that they can be easily accessed from other pages and tests.
-  ...registerPage("homePage", HomePage),
-  ...registerPage("searchPage", SearchPage),
-  ...registerPage("depositPage", DepositPage),
-  ...registerPage("previewPage", PreviewPage),
-  ...registerPage("loginPage", LoginPage),
-  ...registerPage("communitiesPage", CommunitiesPage),
-  ...registerPage("communityDetailPage", CommunityDetailPage),
-  ...registerPage("communitySearchPage", CommunitySearchPage),
-  ...registerPage("myDashboardPage", MyDashboardPage),
-  ...registerPage("newCommunityPage", NewCommunityPage),
-  ...registerPage("recordDetailPage", RecordDetailPage),
-});
+    // pages provide a set of methods to interact with a UI page, abstracting low-level
+    // Playwright API calls. They are registered in the availablePages registry
+    // so that they can be easily accessed from other pages and tests.
+    ...registerPage('homePage', HomePage),
+    ...registerPage('searchPage', SearchPage),
+    ...registerPage('depositPage', DepositPage),
+    ...registerPage('previewPage', PreviewPage),
+    ...registerPage("loginPage", LoginPage),
+    ...registerPage("communitiesPage", CommunitiesPage),
+    ...registerPage("communityDetailPage", CommunityDetailPage),
+    ...registerPage("communitySearchPage", CommunitySearchPage),
+    ...registerPage("myDashboardPage", MyDashboardPage),
+    ...registerPage("newCommunityPage", NewCommunityPage),
+    ...registerPage("recordDetailPage", RecordDetailPage),
+    ...registerPage("administrationPage", AdministrationPage),
+})
 
 type _invenio_base_test = typeof _test;
 
