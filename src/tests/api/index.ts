@@ -1,3 +1,3 @@
-export { setupApiTesting } from './apiSetup';
+export { authenticateUserForApiTesting, apiTestingCleanup } from './apiSetup';
 
 export { recordsApiTests } from './records';

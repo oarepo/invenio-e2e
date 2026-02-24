@@ -1,6 +1,8 @@
 /* eslint-disable no-empty-pattern */
-import { Expect, test as base, expect as playwrightExpect } from "@playwright/test";
-import type { TestDetails } from "@playwright/test";
+import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
+import type { TestDetails, APIRequestContext } from '@playwright/test';
+
+import { readFile } from 'fs/promises';
 
 import {
   AllPages,
@@ -65,18 +67,20 @@ const _test = base.extend<{
 
   expect: Expect<I18nExpected>;
 
-  homePage: HomePage;
-  searchPage: SearchPage;
-  loginPage: LoginPage;
-  communitiesPage: CommunitiesPage;
-  communityDetailPage: CommunityDetailPage;
-  communitySearchPage: CommunitySearchPage;
-  myDashboardPage: MyDashboardPage;
-  newCommunityPage: NewCommunityPage;
-  depositPage: DepositPage;
-  previewPage: PreviewPage;
-  recordDetailPage: RecordDetailPage;
-  uploadHelper: FileUploadHelper;
+    createApiContext: (authFilePath: string) => Promise<APIRequestContext>;
+
+    homePage: HomePage;
+    searchPage: SearchPage;
+    loginPage: LoginPage;
+    communitiesPage: CommunitiesPage;
+    communityDetailPage: CommunityDetailPage;
+    communitySearchPage: CommunitySearchPage;
+    myDashboardPage: MyDashboardPage;
+    newCommunityPage: NewCommunityPage;
+    depositPage: DepositPage;
+    previewPage: PreviewPage;
+    recordDetailPage: RecordDetailPage;
+    uploadHelper: FileUploadHelper;
 }>({
   // locators are used to find elements on the page and they are separated
   // from the page classes so that they can be easily overwritten in tests
@@ -232,10 +236,20 @@ const _test = base.extend<{
     await use(i18nService.extendExpect(playwrightExpect));
   },
 
-  uploadHelper: async ({ page }, use) => {
-    const helper = new FileUploadHelper(page);
-    await use(helper);
-  },
+    createApiContext: async ({ playwright }, use) => {
+        const createApiContext = async (authFilePath: string) => {
+            const authFile = JSON.parse(await readFile(authFilePath, 'utf-8')) as Awaited<ReturnType<APIRequestContext['storageState']>>;
+            const apiContext = await playwright.request.newContext({
+                extraHTTPHeaders: {
+                    'X-CSRFToken': authFile.cookies.find(cookie => cookie.name === 'csrftoken')?.value || '',
+                    'Referer': testConfig.baseURL,
+                },
+                storageState: authFile,
+            });
+            return apiContext;
+        };
+        await use(createApiContext);
+    },
 
   // pages provide a set of methods to interact with a UI page, abstracting low-level
   // Playwright API calls. They are registered in the availablePages registry
