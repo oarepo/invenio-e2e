@@ -4,7 +4,7 @@ import type { TestDetails, APIRequestContext } from '@playwright/test';
 
 import { readFile } from 'fs/promises';
 
-import { AllPages, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage, RecordDetailPage, } from '../pages';
+import { AllPages, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage, RecordDetailPage, AdministrationPage, } from '../pages';
 import {
     I18nExpected, I18nService, LocalLoginService, Services, Translations, FormService,
 } from '../services';
@@ -60,6 +60,8 @@ const _test = base.extend<{
     depositPage: DepositPage;
     previewPage: PreviewPage;
     recordDetailPage: RecordDetailPage;
+    administrationPage: AdministrationPage;
+
     uploadHelper: FileUploadHelper;
 }>({
     // locators are used to find elements on the page and they are separated
@@ -228,7 +230,7 @@ const _test = base.extend<{
     ...registerPage("myDashboardPage", MyDashboardPage),
     ...registerPage("newCommunityPage", NewCommunityPage),
     ...registerPage("recordDetailPage", RecordDetailPage),
-
+    ...registerPage("administrationPage", AdministrationPage),
 })
 
 type _invenio_base_test = typeof _test;
