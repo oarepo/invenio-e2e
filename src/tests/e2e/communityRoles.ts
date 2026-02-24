@@ -83,7 +83,8 @@ async function runRoleScenario(args: {
 
 export function communityRolesTests(test: InvenioTest) {
   test.describe("Communities – Roles", () => {
-    test.beforeEach(async ({ homePage }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    test.beforeEach(async ({ homePage, loginPage }) => {
       await homePage.openPage();
       await homePage.login();
     });

@@ -3,6 +3,7 @@ import { expect } from "@playwright/test";
 
 export function recordAccessTests(test: InvenioTest) {
   test.describe("Records – Access control", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     test.beforeEach(async ({ homePage, loginPage }) => {
       await homePage.openPage();
       await homePage.login();

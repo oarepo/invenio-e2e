@@ -67,22 +67,22 @@ const _test = base.extend<{
 
   expect: Expect<I18nExpected>;
 
-    createApiContext: (authFilePath: string) => Promise<APIRequestContext>;
+  createApiContext: (authFilePath: string) => Promise<APIRequestContext>;
 
-    homePage: HomePage;
-    searchPage: SearchPage;
-    loginPage: LoginPage;
-    communitiesPage: CommunitiesPage;
-    communityDetailPage: CommunityDetailPage;
-    communitySearchPage: CommunitySearchPage;
-    myDashboardPage: MyDashboardPage;
-    newCommunityPage: NewCommunityPage;
-    depositPage: DepositPage;
-    previewPage: PreviewPage;
-    recordDetailPage: RecordDetailPage;
-    administrationPage: AdministrationPage;
+  homePage: HomePage;
+  searchPage: SearchPage;
+  loginPage: LoginPage;
+  communitiesPage: CommunitiesPage;
+  communityDetailPage: CommunityDetailPage;
+  communitySearchPage: CommunitySearchPage;
+  myDashboardPage: MyDashboardPage;
+  newCommunityPage: NewCommunityPage;
+  depositPage: DepositPage;
+  previewPage: PreviewPage;
+  recordDetailPage: RecordDetailPage;
+  administrationPage: AdministrationPage;
 
-    uploadHelper: FileUploadHelper;
+  uploadHelper: FileUploadHelper;
 }>({
   // locators are used to find elements on the page and they are separated
   // from the page classes so that they can be easily overwritten in tests
@@ -101,8 +101,8 @@ const _test = base.extend<{
   translations: async ({}, use) => {
     let translations: Translations = {};
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports -- we cannot use import here because "@collected-translations" alias is registered when Playwright is run inside an external/tested repository
       const translationsFile =
+        // eslint-disable-next-line @typescript-eslint/no-require-imports -- we cannot use import here because "@collected-translations" alias is registered when Playwright is run inside an external/tested repository
         require("@collected-translations/translations.json") as Translations;
       translations = translationsFile;
     } catch {
@@ -238,36 +238,36 @@ const _test = base.extend<{
     await use(i18nService.extendExpect(playwrightExpect));
   },
 
-    createApiContext: async ({ playwright }, use) => {
-        const createApiContext = async (authFilePath: string) => {
-            const authFile = JSON.parse(await readFile(authFilePath, 'utf-8')) as Awaited<ReturnType<APIRequestContext['storageState']>>;
-            const apiContext = await playwright.request.newContext({
-                extraHTTPHeaders: {
-                    'X-CSRFToken': authFile.cookies.find(cookie => cookie.name === 'csrftoken')?.value || '',
-                    'Referer': testConfig.baseURL,
-                },
-                storageState: authFile,
-            });
-            return apiContext;
-        };
-        await use(createApiContext);
-    },
+  createApiContext: async ({ playwright }, use) => {
+      const createApiContext = async (authFilePath: string) => {
+          const authFile = JSON.parse(await readFile(authFilePath, 'utf-8')) as Awaited<ReturnType<APIRequestContext['storageState']>>;
+          const apiContext = await playwright.request.newContext({
+              extraHTTPHeaders: {
+                  'X-CSRFToken': authFile.cookies.find(cookie => cookie.name === 'csrftoken')?.value || '',
+                  'Referer': testConfig.baseURL,
+              },
+              storageState: authFile,
+          });
+          return apiContext;
+      };
+      await use(createApiContext);
+  },
 
-    // pages provide a set of methods to interact with a UI page, abstracting low-level
-    // Playwright API calls. They are registered in the availablePages registry
-    // so that they can be easily accessed from other pages and tests.
-    ...registerPage('homePage', HomePage),
-    ...registerPage('searchPage', SearchPage),
-    ...registerPage('depositPage', DepositPage),
-    ...registerPage('previewPage', PreviewPage),
-    ...registerPage("loginPage", LoginPage),
-    ...registerPage("communitiesPage", CommunitiesPage),
-    ...registerPage("communityDetailPage", CommunityDetailPage),
-    ...registerPage("communitySearchPage", CommunitySearchPage),
-    ...registerPage("myDashboardPage", MyDashboardPage),
-    ...registerPage("newCommunityPage", NewCommunityPage),
-    ...registerPage("recordDetailPage", RecordDetailPage),
-    ...registerPage("administrationPage", AdministrationPage),
+  // pages provide a set of methods to interact with a UI page, abstracting low-level
+  // Playwright API calls. They are registered in the availablePages registry
+  // so that they can be easily accessed from other pages and tests.
+  ...registerPage('homePage', HomePage),
+  ...registerPage('searchPage', SearchPage),
+  ...registerPage('depositPage', DepositPage),
+  ...registerPage('previewPage', PreviewPage),
+  ...registerPage("loginPage", LoginPage),
+  ...registerPage("communitiesPage", CommunitiesPage),
+  ...registerPage("communityDetailPage", CommunityDetailPage),
+  ...registerPage("communitySearchPage", CommunitySearchPage),
+  ...registerPage("myDashboardPage", MyDashboardPage),
+  ...registerPage("newCommunityPage", NewCommunityPage),
+  ...registerPage("recordDetailPage", RecordDetailPage),
+  ...registerPage("administrationPage", AdministrationPage),
 })
 
 type _invenio_base_test = typeof _test;
