@@ -3,7 +3,8 @@ import { expect } from "@playwright/test";
 
 export function newCommunityTests(test: InvenioTest) {
   test.describe("Communities – New Community", () => {
-    test.beforeEach(async ({ homePage, loginPage }) => { // eslint-disable-line
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    test.beforeEach(async ({ homePage, loginPage }) => {
       await homePage.openPage();
       await homePage.login();
     });
@@ -32,6 +33,8 @@ export function newCommunityTests(test: InvenioTest) {
       // Verify the new community is first in the list
       await communitiesPage.verifyCommunityName(communityName, 0);
     });
+
+    //-----------------------------------------------------------------------------------
 
     test("Communities - Search", async ({
       homePage,
@@ -66,6 +69,8 @@ export function newCommunityTests(test: InvenioTest) {
       expect(isOldestSelected).toBeTruthy();
     });
 
+    //-----------------------------------------------------------------------------------
+
     test("Community Visibility - Public", async ({
       homePage,
       communitiesPage,
@@ -92,6 +97,8 @@ export function newCommunityTests(test: InvenioTest) {
       await communitiesPage.navigateToFirstCommunity();
       await communityDetailPage.verifyDateTag();
     });
+
+    //-----------------------------------------------------------------------------------
 
     test("Community Visibility - Restricted", async ({
       homePage,
@@ -128,6 +135,8 @@ export function newCommunityTests(test: InvenioTest) {
       expect(communityHeaderNameAfterLogout).not.toBe(firstCommunityHeaderName);
     });
 
+    //-----------------------------------------------------------------------------------
+
     test("Edit community", async ({
       homePage,
       communitiesPage,
@@ -145,6 +154,8 @@ export function newCommunityTests(test: InvenioTest) {
       // Verify the name was successfully updated
       await communityDetailPage.verifyUpdatedCommunityName(editedCommunityName);
     });
+
+    //-----------------------------------------------------------------------------------
 
     test("Delete community", async ({
       homePage,
@@ -176,6 +187,8 @@ export function newCommunityTests(test: InvenioTest) {
       await homePage.goToCommunitiesPage();
       await communitiesPage.verifyCommunityNotPresent(editedCommunityName);
     });
+
+    //-----------------------------------------------------------------------------------
 
     test("Search - In the Community", async ({
       homePage,

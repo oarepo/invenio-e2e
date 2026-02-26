@@ -8,7 +8,8 @@ import { expect } from '@playwright/test';
 export function homepageTests(test: InvenioTest) {
 
     test.describe('Homepage Tests', () => {
-        test.beforeEach(async ({ homePage }) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        test.beforeEach(async ({ homePage, loginPage }) => {
             await homePage.openPage();
         });
 

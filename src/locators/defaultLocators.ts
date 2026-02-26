@@ -213,6 +213,23 @@ export const locators = {
     /** Selector for the "Back to edit" button. */
     backToEditButton: 'button:has-text("Back to edit")',
 
+    communitySelectButton: 'button:has-text("Select a community")',
+    myCommunitiesTab: 'a.item:has-text("My communities")',
+    communitySelectRowButton: (name: string) =>
+      `tr:has(td:has-text("${name}")) button:has-text("Select")`,
+
+    // Community selection modal
+    communityModal: '[role="dialog"]:has-text("Select a community")',
+    communityModalMyCommunitiesTab: '[role="dialog"] a.item:has-text("My communities")',
+    communityModalSelectButtonInRow: (name: string) =>
+      `[role="dialog"] tr:has(td:has-text("${name}")) button:has-text("Select")`,
+
+    submitForReviewButton: 'button:has-text("Submit for review")',
+    acceptAccessToRecordCheckbox: 'label:has-text("I accept giving access") input',
+    acceptPublishRecordCheckbox: 'label:has-text("I accept publishing") input',
+    submitForReviewConfirmButton: 'button:has-text("Submit record for review")',
+    submittedStatusLabel: 'div.ui.label:has-text("Submitted")',
+
     /**
      * Returns a selector for a toast notification containing given text.
      * @param text Text contained in the toast message.
@@ -242,6 +259,9 @@ export const locators = {
 
     /** Dropdown for "Full record" access level (Restricted/Public). */
     fullRecordAccessDropdown: '[aria-label="Full record access"]',
+
+    /** Dropdown for "Files access" level (Restricted/Public). */
+    filesAccessDropdown: '[aria-label="Files access"], [data-testid="files-access"]',
 
     /** "Apply an embargo" checkbox (record access). */
     embargoCheckbox: 'label:has-text("Apply an embargo")',
@@ -403,6 +423,8 @@ export const locators = {
 
     /** Header element showing the community name after creation. */
     communityNameHeader: 'a.ui.small.header[href^="/communities/"]',
+
+    communityCardByName: (name: string) => `a.ui.fluid.card:has-text("${name}")`,
   },
 
   // ------------------------ COMMUNITIES PAGE ------------------------
@@ -550,6 +572,8 @@ export const locators = {
     /**  Selector for the date tag label displayed on community records. */
     recordDateTagLabel: "div.ui.small.horizontal.label.primary",
 
+    firstRecordLink: "a.truncate-lines-2",
+
     // Fields ----------------------------------
 
     /** Input field for the community name */
@@ -599,6 +623,43 @@ export const locators = {
     visibilityDropdown:
       '//div[@aria-label="Visibility Hidden" or @aria-label="Visibility Public"]',
 
+    invitationsTab: 'a.item:has-text("Invitations")',
+    memberDropdownInput: 'div.field:has-text("Member") input.search',
+    memberSuggestion: (email: string) => `div.visible.menu .item:has-text("${email}")`,
+
+    invitationRowByEmail: (email: string) => `tr:has(td:has-text("${email}"))`,
+
+    memberRowByEmail: (email: string) =>
+      `tr.community-member-item:has-text("${email}")`,
+
+    memberRemoveButtonInRow: (email: string) =>
+      `tr.community-member-item:has-text("${email}") button:has-text("Remove")`,
+
+    memberRoleDropdownInRow: (email: string) =>
+      `tr.community-member-item:has-text("${email}") div[role="listbox"]`,
+
+    memberRoleOption: (role: string) => `div[role="option"]:has-text("${role}")`,
+
+    // Filters (re-using accessStatusCheckbox for resource types too)
+    filterCheckbox: (label: string) =>
+      `(//input[@aria-label="${label}"]/ancestor::div[contains(@class,"checkbox")])[2]`,
+
+    // Requests / moderation
+    requestsTab: 'a.item:has-text("Requests")',
+    acceptAndPublishConfirmButton:
+      'button.ui.positive.button:has-text("Accept and publish")',
+    closedRequestsResults: 'div.item:has-text("Closed")',
+
+    // Review policy
+    submissionReviewPolicyRadio: (index: number) =>
+      `(//div[@id="pages-tab-panel"]//div[contains(@class,"radio checkbox")])[${index}]`,
+
+    communityRecordsListItems:
+      '[data-testid="records-search-result"], .relaxed.divided.items .item, .ui.items .item',
+
+    communityNoRecordsMessage:
+      "text=/No records found|No results found|Nothing found|No results/i",
+
     // Buttons ----------------------------------
 
     /** Button to save changes */
@@ -635,6 +696,9 @@ export const locators = {
 
     /** Slider to view all record versions */
     viewAllVersionsSlider: 'label:text("View all versions")',
+
+    leaveConfirmButton: 'button.ui.negative.button:has-text("Leave")',
+    removeConfirmButton: 'button.ui.negative.button:has-text("Remove")',
 
     // Verification ----------------------------------
 
@@ -679,6 +743,11 @@ export const locators = {
 
     /** Generic number label element */
     numberLabel: '//div[@class="ui label"]',
+
+    // Member visibility (community members list)
+    myVisibilityDropdown: 'div[aria-label^="Visibility"]',
+    memberListRowWithYouLabel:
+      'tr.community-member-item:has(div.ui.tiny.label.primary:has-text("You"))',
   },
 
   // ------------------------ MY DASHBOARD PAGE ------------------------
@@ -767,20 +836,27 @@ export const locators = {
    * @property {string} recordTitle - Selector for the record title heading.
    * @property {string} citationText - Selector for the citation text container.
    * @property {string} citationSelectedStyle - Selector for the selected citation style label.
+   * @property {string} shareUserInput - Input for selecting a user to share with.
+   * @property {(email: string) => string} shareUserSuggestion - Autocomplete suggestion entry.
    *
    * Buttons:
    * @property {string} editButton - Selector for the "Edit" button.
    * @property {string} newVersionButton - Selector for the "New version" button.
    * @property {string} shareButton - Selector for the "Share" button.
+   * @property {string} shareAddButton - Confirms adding a user in Share dialog.
    * @property {string} exportSelectionDropdown - Selector for the "Export selection" dropdown trigger.
    * @property {string} exportButton - Selector for the "Export" button that triggers download.
    * @property {string} downloadAllButton - Selector for the "Download all" button (archive link).
    * @property {string} previewButton - Selector for the file "Preview" action link.
    * @property {string} downloadButton - Selector for the file "Download" action link.
+   * @property {string} addPeopleButton - Opens "Add people" section in Share dialog.
    *
    * Dropdowns / Dynamic locators:
    * @property {(style: string) => string} citationStyleOption - Returns selector for a citation style option.
    * @property {(format: string) => string} exportFormatOption - Returns selector for an export format option.
+   * @property {(permission: "Can view" | "Can edit") => string} sharePermissionRadio - Returns selector for permission radio option in Share dialog.
+   * @property {(email: string) => string} shareRowByEmail - Returns selector for a share table row for the given email.
+   * @property {(email: string) => string} sharePermissionByEmail - Returns selector for the permission cell for the given email row.
    *
    * Navigation:
    * @property {string} versionV1Link - Selector for the "Version v1" link in Versions section.
@@ -809,6 +885,12 @@ export const locators = {
     /** Selector for the selected citation style label (Citation dropdown). */
     citationSelectedStyle: ".ui.selection.dropdown.citation-dropdown .divider.text",
 
+    /** Input for selecting a user to share with (Share modal). */
+    shareUserInput: 'input[placeholder*="User"], input[aria-label*="User"]',
+
+    // Suggestion row - tune this based on actual markup in your instance
+    shareUserSuggestion: (email: string) => `text=${email}`,
+
     // Buttons ----------------------------------
 
     /** Selector for the "Edit" button in the record management panel. */
@@ -819,6 +901,12 @@ export const locators = {
 
     /** Selector for the "Share" button in the record management panel. */
     shareButton: 'role=button[name="Share"]',
+
+    /** Opens "Add people" section in Share dialog. */
+    addPeopleButton: 'role=button[name="Add people"]',
+
+    /** Confirms adding user to share list (Share modal). */
+    shareAddButton: 'role=button[name="Add"]',
 
     /** Selector for the export selection dropdown trigger. */
     exportSelectionDropdown: '//div[@aria-label="Export selection"]',
@@ -834,6 +922,8 @@ export const locators = {
 
     /** Selector for the file "Download" action link (non-preview download link). */
     downloadButton: '//span/a[@role="button"][not(contains(@class,"preview"))]',
+
+    submittedForReviewLabel: 'div.ui.label:has-text("Submitted")',
 
     // Dropdowns / Dynamic locators ----------------------------------
 
@@ -851,6 +941,27 @@ export const locators = {
      */
     exportFormatOption: (format: string) =>
       `//div[@aria-label="Export selection"]//span[contains(@class,"text") and normalize-space()="${format}"]`,
+
+    /**
+     * Returns selector for share permission radio option in Share dialog.
+     * @param permission Permission label ("Can view" | "Can edit").
+     */
+    sharePermissionRadio: (permission: "Can view" | "Can edit") =>
+      `label:has-text("${permission}")`,
+
+    /**
+     * Returns selector for a share access row containing the given email.
+     * @param email User email.
+     */
+    shareRowByEmail: (email: string) => `tr:has-text("${email}")`,
+
+    /**
+     * Returns selector for permission cell in the share row for the given email.
+     * Assumes permission is displayed somewhere in the same row.
+     * @param email User email.
+     */
+    sharePermissionByEmail: (email: string) =>
+      `tr:has-text("${email}") td:has-text("Can")`,
 
     // Navigation ----------------------------------
 

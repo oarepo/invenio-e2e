@@ -12,11 +12,9 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
   /**
    * Navigate to the "Communities" section from the dashboard.
    */
-  async navigateToCommunities() {
+  async navigateToCommunities(): Promise<void> {
     await this.page.locator(this.locators.myDashboardPage.communitiesLink).click();
-    await this.page.waitForSelector(this.locators.communitiesPage.pageTitle, {
-      state: "visible",
-    });
+    await this.page.waitForLoadState("networkidle");
   }
 
   /**
@@ -36,18 +34,17 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
   /**
    * Opens the first community card in the dashboard.
    */
-  async navigateToFirstCommunity() {
+  async navigateToFirstCommunity(): Promise<void> {
     await this.page.locator(this.locators.myDashboardPage.firstCommunityCard).click();
-    await this.page.waitForSelector(this.locators.myDashboardPage.recordsTab, {
-      state: "visible",
-    });
+    await this.page.waitForLoadState("networkidle");
   }
 
   /**
    * Navigate to the "Requests" section of the dashboard.
    */
-  async navigateToRequests() {
+  async navigateToRequests(): Promise<void> {
     await this.page.locator(this.locators.myDashboardPage.requestsLink).click();
+    await this.page.waitForLoadState("networkidle");
   }
 
   // BUTTONS ---------------------------------------------------------------------------
@@ -56,7 +53,9 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    * Clicks the edit button for the first record in the dashboard.
    */
   async clickEditButton() {
-    await this.page.locator(this.locators.myDashboardPage.editFirstRecordButton).click();
+    await this.page
+      .locator(this.locators.myDashboardPage.editFirstRecordButton)
+      .click();
   }
 
   /**
@@ -82,7 +81,9 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    */
   async isDeclineButtonPresent(index = 0): Promise<boolean> {
     return (
-      (await this.page.locator(this.locators.myDashboardPage.declineButton(index)).count()) > 0
+      (await this.page
+        .locator(this.locators.myDashboardPage.declineButton(index))
+        .count()) > 0
     );
   }
 
@@ -105,6 +106,18 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    */
   async clickVersionsToggle() {
     await this.page.locator(this.locators.myDashboardPage.versionsToggle).click();
+  }
+
+  async acceptRequestAtIndex(index: number): Promise<void> {
+    await this.page.locator(this.locators.myDashboardPage.acceptButton(index)).click();
+    await this.page.locator(this.locators.myDashboardPage.acceptConfirmButton).click();
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async declineRequestAtIndex(index: number): Promise<void> {
+    await this.page.locator(this.locators.myDashboardPage.declineButton(index)).click();
+    await this.page.locator(this.locators.myDashboardPage.declineConfirmButton).click();
+    await this.page.waitForLoadState("networkidle");
   }
 
   // VERIFICATIONS -----------------------------------------------------------------------
@@ -132,10 +145,13 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    */
   async isNewVersionDraftLabelPresent(): Promise<boolean> {
     try {
-      await this.page.waitForSelector(this.locators.myDashboardPage.newVersionDraftLabel, {
-        state: "visible",
-        timeout: 5000,
-      });
+      await this.page.waitForSelector(
+        this.locators.myDashboardPage.newVersionDraftLabel,
+        {
+          state: "visible",
+          timeout: 5000,
+        }
+      );
       return true;
     } catch {
       return false;
@@ -148,7 +164,33 @@ export class MyDashboardPage<T extends Locators = Locators> extends BasePage<T> 
    * @returns True if matching record is found, false otherwise.
    */
   async isRecordTitleMatching(title: string): Promise<boolean> {
-    const recordTitleLocator = this.page.locator(this.locators.myDashboardPage.recordTitle(title));
+    const recordTitleLocator = this.page.locator(
+      this.locators.myDashboardPage.recordTitle(title)
+    );
     return (await recordTitleLocator.count()) > 0;
+  }
+
+  async isAnyRecordVisible(): Promise<boolean> {
+    return (
+      (await this.page
+        .locator(this.locators.myDashboardPage.firstRecordDetail)
+        .count()) > 0
+    );
+  }
+
+  async getFirstRecordTitle(): Promise<string> {
+    const first = this.page
+      .locator(this.locators.myDashboardPage.firstRecordDetail)
+      .first();
+    const txt = await first.textContent();
+    return txt?.trim() ?? "";
+  }
+
+  async isRecordTitleAbsent(title: string): Promise<boolean> {
+    return (
+      (await this.page
+        .locator(this.locators.myDashboardPage.recordTitle(title))
+        .count()) === 0
+    );
   }
 }
