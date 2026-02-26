@@ -4,6 +4,26 @@ import type { TestDetails, APIRequestContext } from '@playwright/test';
 
 import { readFile } from 'fs/promises';
 
+import { AllPages, HomePage, LoginPage, SearchPage, DepositPage, PreviewPage, CommunitiesPage, CommunityDetailPage, CommunitySearchPage, MyDashboardPage, NewCommunityPage, RecordDetailPage, AdministrationPage, } from '../pages';
+import {
+    I18nExpected, I18nService, LocalLoginService, Services, Translations, FormService,
+} from '../services';
+
+import { defaultDepositionData, DepositionData } from './depositionData';
+import { defaultCommunityData, CommunityData } from './communityData';
+import { defaultRecordsApiData, RecordsApiData } from './api';
+
+import type { TestConfig } from '../config';
+import type { Locators } from '../locators';
+import { testConfig } from '../config';
+import { locators } from '../locators';
+import { registerPage } from './utils';
+import { FileUploadHelper } from '../helpers/fileUploadHelper';
+
+export { registerPage } from './utils';
+export type { DepositionData, FormData } from './depositionData';
+export type { CommunityData, CommunityDataRecord } from './communityData';
+
 import {
   AllPages,
   HomePage,
@@ -67,6 +87,8 @@ const _test = base.extend<{
   roleUsers: RoleUsers;
 
   expect: Expect<I18nExpected>;
+
+    createApiContext: (authFilePath: string) => Promise<APIRequestContext>;
 
     createApiContext: (authFilePath: string) => Promise<APIRequestContext>;
 
@@ -238,6 +260,21 @@ const _test = base.extend<{
     // TODO: find a type safe way to extend the expect multiple times
     await use(i18nService.extendExpect(playwrightExpect));
   },
+
+    createApiContext: async ({ playwright }, use) => {
+        const createApiContext = async (authFilePath: string) => {
+            const authFile = JSON.parse(await readFile(authFilePath, 'utf-8')) as Awaited<ReturnType<APIRequestContext['storageState']>>;
+            const apiContext = await playwright.request.newContext({
+                extraHTTPHeaders: {
+                    'X-CSRFToken': authFile.cookies.find(cookie => cookie.name === 'csrftoken')?.value || '',
+                    'Referer': testConfig.baseURL,
+                },
+                storageState: authFile,
+            });
+            return apiContext;
+        };
+        await use(createApiContext);
+    },
 
     createApiContext: async ({ playwright }, use) => {
         const createApiContext = async (authFilePath: string) => {
