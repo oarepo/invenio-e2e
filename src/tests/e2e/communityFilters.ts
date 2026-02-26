@@ -3,6 +3,7 @@ import { expect } from "@playwright/test";
 
 export function communityFiltersTests(test: InvenioTest) {
   test.describe("Community records – Filters", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     test.beforeEach(async ({ homePage, loginPage }) => {
       await homePage.openPage();
       await homePage.login();

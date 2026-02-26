@@ -102,8 +102,8 @@ const _test = base.extend<{
   translations: async ({}, use) => {
     let translations: Translations = {};
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports -- we cannot use import here because "@collected-translations" alias is registered when Playwright is run inside an external/tested repository
       const translationsFile =
+        // eslint-disable-next-line @typescript-eslint/no-require-imports -- we cannot use import here because "@collected-translations" alias is registered when Playwright is run inside an external/tested repository
         require("@collected-translations/translations.json") as Translations;
       translations = translationsFile;
     } catch {

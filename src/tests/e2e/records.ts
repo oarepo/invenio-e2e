@@ -3,6 +3,7 @@ import { expect } from "@playwright/test";
 
 export function recordLandingPageTests(test: InvenioTest) {
   test.describe("Record Landing Page", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     test.beforeEach(async ({ homePage, loginPage }) => {
       await homePage.openPage();
       await homePage.login();
