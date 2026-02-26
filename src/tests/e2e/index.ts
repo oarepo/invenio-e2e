@@ -12,3 +12,4 @@ export { communitySettingsTests } from "./communitySettings";
 export { communityMemberVisibilityTests } from "./communityMemberVisibility";
 export { communityFiltersTests } from "./communityFilters";
 export { recordAccessTests } from "./recordAccess";
+export { administrationPageTests } from './administration';

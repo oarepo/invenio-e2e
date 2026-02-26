@@ -9,13 +9,12 @@ export type { InvenioTest } from './fixtures';
 export { locators, Locators, updateLocators } from "./locators";
 
 // pages
-export { HomePage, SearchPage, BasePage, LoginPage, DepositPage } from "./pages";
-export type { AllPages } from "./pages";
+export * from "./pages";
 
 // tests
-export { loginTests, homepageTests, depositionTests } from './tests/e2e';
+export * from './tests/e2e';
 
-export { setupApiTesting, recordsApiTests } from "./tests/api";
+export { authenticateUserForApiTesting, apiTestingCleanup, recordsApiTests } from "./tests/api";
 
 export { i18nValidationTests } from "./tests/i18n/validation.spec";
 export { i18nPOTTests } from "./tests/i18n/pot.spec";
