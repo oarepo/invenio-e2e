@@ -128,8 +128,13 @@ playwright-report
 
 .history/
 
+# Python virtual environments
+.venv/
+venv/
+
 # translation files
 translations/
 
 playwright/.auth
 todo.md
+*.save

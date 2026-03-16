@@ -8,10 +8,8 @@
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
     "prettier:fix": "prettier --write \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
-    "collect-translations": "invenio-e2e-collect-translations",
-    "collect-translations:validate": "invenio-e2e-collect-translations --validate",
-    "generate-pot": "invenio-e2e-generate-pot",
-    "i18n:validate": "npm run generate-pot && npm run collect-translations:validate"
+    "build-translations": "invenio-e2e-build-translations",
+    "validate-translations": "invenio-e2e-validate-translations"
   },
   "keywords": [],
   "author": "",
