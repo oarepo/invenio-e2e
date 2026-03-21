@@ -1,14 +1,14 @@
-import 'module-alias/register';
-import { appConfig } from '@inveniosoftware/invenio-e2e';
-import { defineConfig, devices } from '@playwright/test';
+import "module-alias/register";
+import { appConfig } from "@inveniosoftware/invenio-e2e";
+import { defineConfig, devices } from "@playwright/test";
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests',
+  testDir: "./tests",
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
@@ -27,7 +27,7 @@ export default defineConfig({
     // ...(appConfig.qase
     //   ? [
     //       [
-    //         "playwright-qase-reporter",
+    //         'playwright-qase-reporter',
     //         {
     //           apiToken: appConfig.qase.apiToken,
     //           projectCode: appConfig.qase.projectCode,
@@ -49,13 +49,13 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: "on-first-retry",
 
     /* Collect screenshot when retrying the failed test. */
     screenshot: "on",
 
     /* Collect video when retrying the failed test. */
-    video: 'retain-on-failure',
+    video: "retain-on-failure",
 
     // headless: process.env.CI ? true : false, // CI vs local
 
@@ -67,9 +67,9 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'chromium',
+      name: "chromium",
       testIgnore: /api\/.*/,
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices["Desktop Chrome"] },
     },
     // {
     //   name: 'firefox',
@@ -83,22 +83,22 @@ export default defineConfig({
 
     /* API Testing */
     {
-      name: 'API Testing Setup',
+      name: "API Testing Setup",
       testMatch: /api\/.*\.setup\.ts$/,
-      teardown: 'API Testing Cleanup',
+      teardown: "API Testing Cleanup",
     },
     {
-      name: 'API Testing Cleanup',
+      name: "API Testing Cleanup",
       testMatch: /api\/.*\.teardown\.ts$/,
     },
     {
-      name: 'API',
+      name: "API",
       testMatch: /api\/.*\.spec.ts/,
       use: {
-        ...devices['Desktop Chrome'],
+        ...devices["Desktop Chrome"],
       },
       retries: 3,
-      dependencies: ['API Testing Setup'],
+      dependencies: ["API Testing Setup"],
     },
     /* Test against mobile viewports. */
     // {
