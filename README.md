@@ -9,6 +9,9 @@
 
 ## How to Try It Out
 
+> [!NOTE]
+> **Latest update:** tested against [invenio-dev-latest master branch](https://github.com/Samk13/invenio-dev-latest) at commit [#005a90c1346ce8acad78277f7811d09940ce9b29](https://github.com/Samk13/invenio-dev-latest/commit/005a90c1346ce8acad78277f7811d09940ce9b29)
+
 ### Directory Structure
 
 At the beginning, you have just your repository:
