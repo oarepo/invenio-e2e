@@ -1,9 +1,9 @@
-export { homepageTests } from './homepage';
-export { loginTests } from './login';
-export { depositionTests } from './deposition';
-export { newCommunityTests } from './communities';
-export { recordLandingPageTests } from './records';
-export { administrationPageTests } from './administration';
+export { homepageTests } from "./homepage";
+export { loginTests } from "./login";
+export { depositionTests } from "./deposition";
+export { newCommunityTests } from "./communities";
+export { recordLandingPageTests } from "./records";
+export { administrationPageTests } from "./administration";
 export { communityMembersTests } from "./communityMembers";
 export { communityRolesTests } from "./communityRoles";
 export { recordsCrudTests } from "./recordsCrud";

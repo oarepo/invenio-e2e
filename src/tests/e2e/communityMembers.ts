@@ -1,5 +1,6 @@
-import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
+
+import { InvenioTest } from "../../fixtures";
 
 export function communityMembersTests(test: InvenioTest) {
   test.describe("Communities – Members & Invitations", () => {
@@ -20,7 +21,8 @@ export function communityMembersTests(test: InvenioTest) {
       await loginPage.logout();
 
       const curatorEmail = process.env.INVENIO_CURATOR_EMAIL ?? "curator@example.com";
-      const curatorPassword = process.env.INVENIO_CURATOR_PASSWORD ?? "curator-password";
+      const curatorPassword =
+        process.env.INVENIO_CURATOR_PASSWORD ?? "curator-password";
       await loginPage.loginAs(curatorEmail, curatorPassword);
 
       // Go to Requests in My dashboard and accept the first invitation
@@ -47,7 +49,8 @@ export function communityMembersTests(test: InvenioTest) {
       await loginPage.logout();
 
       const curatorEmail = process.env.INVENIO_CURATOR_EMAIL ?? "curator@example.com";
-      const curatorPassword = process.env.INVENIO_CURATOR_PASSWORD ?? "curator-password";
+      const curatorPassword =
+        process.env.INVENIO_CURATOR_PASSWORD ?? "curator-password";
       await loginPage.loginAs(curatorEmail, curatorPassword);
 
       // Decline all requests until "All done!" appears
@@ -96,7 +99,8 @@ export function communityMembersTests(test: InvenioTest) {
       await loginPage.logout();
 
       const curatorEmail = process.env.INVENIO_CURATOR_EMAIL ?? "curator@example.com";
-      const curatorPassword = process.env.INVENIO_CURATOR_PASSWORD ?? "curator-password";
+      const curatorPassword =
+        process.env.INVENIO_CURATOR_PASSWORD ?? "curator-password";
       await loginPage.loginAs(curatorEmail, curatorPassword);
 
       // Accept invitation first (otherwise leaving might not be available)
@@ -139,7 +143,9 @@ export function communityMembersTests(test: InvenioTest) {
       await communityDetailPage.navigateToSettingsSection();
       await communityDetailPage.navigateToMembersSection();
 
-      expect(await communityDetailPage.isMemberPresent(memberEmailToRemove)).toBeFalsy();
+      expect(
+        await communityDetailPage.isMemberPresent(memberEmailToRemove)
+      ).toBeFalsy();
     });
   });
 }

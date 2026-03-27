@@ -1,4 +1,5 @@
 import { expect } from "@playwright/test";
+
 import { Locators } from "../locators";
 import { BasePage } from "./basePage";
 

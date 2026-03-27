@@ -1,5 +1,6 @@
-import * as dotenv from "dotenv";
 import path from "path";
+
+import * as dotenv from "dotenv";
 
 export interface QaseReporterConfig {
   apiToken: string;
@@ -51,7 +52,9 @@ export const appConfig = {
   dataFolderPath: process.env.DATA_FOLDER_PATH || "data",
   logXhrRequests: process.env.LOG_XHR === "true",
   // S3_DEFAULT_BLOCK_SIZE=5MB by default; change in invenio.cfg
-  s3DefaultBlockSize: process.env.S3_DEFAULT_BLOCK_SIZE ? parseInt(process.env.S3_DEFAULT_BLOCK_SIZE) : 5 * 1024 * 1024,
+  s3DefaultBlockSize: process.env.S3_DEFAULT_BLOCK_SIZE
+    ? parseInt(process.env.S3_DEFAULT_BLOCK_SIZE)
+    : 5 * 1024 * 1024,
   qase: {
     apiToken: process.env.QASE_TESTOPS_API_TOKEN || "",
     projectCode: process.env.QASE_TESTOPS_PROJECT || "",

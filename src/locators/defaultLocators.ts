@@ -1032,7 +1032,7 @@ export const locators = {
     dashboardHeader: 'h1:text-matches("Welcome to .+ Administration", "i")',
 
     // Banners section ----------------------------------
-    
+
     /** Link to the Banners section in the administration sidebar. */
     bannersSectionLink: 'a.item:has-text("Banners")',
 
@@ -1044,35 +1044,39 @@ export const locators = {
 
     bannersSearchContainer: "div#invenio-search-config",
 
-    bannersSearchResultsSection: 'div#invenio-search-config section[aria-label="Search results"]',
+    bannersSearchResultsSection:
+      'div#invenio-search-config section[aria-label="Search results"]',
 
-    bannersSearchResultsRows: 'table > tbody > tr',
+    bannersSearchResultsRows: "table > tbody > tr",
 
-    bannersSearchResultsLoader: 'div.ui.active.loader',
+    bannersSearchResultsLoader: "div.ui.active.loader",
 
-    bannersSearchResultsPlaceholderText: 'div.ui.placeholder .ui.header:has-text("There are no resources in this category.")',
+    bannersSearchResultsPlaceholderText:
+      'div.ui.placeholder .ui.header:has-text("There are no resources in this category.")',
 
-    searchBannerRow: (message: string) => `table > tbody > tr:has(td[data-label="Message"]:has-text("${message}"))`,
+    searchBannerRow: (message: string) =>
+      `table > tbody > tr:has(td[data-label="Message"]:has-text("${message}"))`,
 
-    searchBannerRowById: (id: string) => `table > tbody > tr:has(td[data-label="Id"] > a:text-is("${id}"))`,
+    searchBannerRowById: (id: string) =>
+      `table > tbody > tr:has(td[data-label="Id"] > a:text-is("${id}"))`,
 
     deleteBannerButton: 'button[aria-label="Delete"]',
 
-    confirmDeleteBannerButton: 'div.ui.modal button.ui.negative.button:has-text("Delete")',
-
+    confirmDeleteBannerButton:
+      'div.ui.modal button.ui.negative.button:has-text("Delete")',
 
     createBannerHeader: 'h1:has-text("Create banner")',
 
-    createBannerForm: 'form#admin-form',
+    createBannerForm: "form#admin-form",
 
     createBannerMessageInput: 'div#message iframe[title="Rich Text Area"]',
 
-    createBannerUrlPathInput: 'input#url_path',
+    createBannerUrlPathInput: "input#url_path",
 
     createBannerSubmitButton: 'button[type="submit"][form="admin-form"]',
 
-    
-    findBannerOnSite: (message: string) => `header.theme.header > div.ui.message.inv-banner > div.ui.container > :has-text("${message}")`,
+    findBannerOnSite: (message: string) =>
+      `header.theme.header > div.ui.message.inv-banner > div.ui.container > :has-text("${message}")`,
   },
 
   // ---------------------------- FOOTER ----------------------------

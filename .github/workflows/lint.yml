@@ -20,5 +20,5 @@ jobs:
       - name: Run ESLint
         run: pnpm run lint
 
-      # - name: Run Prettier
-      #   run: pnpm run prettier
+      - name: Run Prettier
+        run: pnpm run prettier

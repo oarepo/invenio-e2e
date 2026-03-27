@@ -1,5 +1,6 @@
-import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
+
+import { InvenioTest } from "../../fixtures";
 
 export function communitySettingsTests(test: InvenioTest) {
   test.describe("Communities – Settings", () => {
@@ -67,7 +68,9 @@ export function communitySettingsTests(test: InvenioTest) {
 
       // Verify saved values on public sections
       await communityDetailPage.navigateToCurationPolicySection();
-      expect(await communityDetailPage.getCurationPolicyText()).toContain(curationPolicyText);
+      expect(await communityDetailPage.getCurationPolicyText()).toContain(
+        curationPolicyText
+      );
 
       await communityDetailPage.navigateToAboutSection();
       expect(await communityDetailPage.getAboutText()).toContain(aboutText);

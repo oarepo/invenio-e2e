@@ -1,14 +1,15 @@
+import path from "path";
+
+import { Locator, expect } from "@playwright/test";
+
+import { appConfig } from "../config";
+import { getCurrentDateFormatted } from "../fixtures/utils";
 import { Locators } from "../locators";
+import { ExpectedTexts } from "../locators/expectedTexts";
+import { ExpectedError as ErrorWithLocation } from "../services/form";
+import type { FileObject } from "../types";
 import { BasePage } from "./basePage";
 import { PreviewPage } from "./previewPage";
-import { expect, Locator } from "@playwright/test";
-import { ExpectedTexts } from "../locators/expectedTexts";
-import { getCurrentDateFormatted } from "../fixtures/utils";
-import { ExpectedError as ErrorWithLocation } from "../services/form";
-import path from "path";
-import { appConfig } from "../config";
-
-import type { FileObject } from "../types";
 
 /**
  * Represents the Deposit page in the application.
@@ -16,7 +17,6 @@ import type { FileObject } from "../types";
  */
 
 export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
-  
   // NAVIGATION ------------------------------------------------------------------------
 
   /**
@@ -163,9 +163,7 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
    * Upload a file and confirm by clicking the "Upload" button in Uppy.
    * @param file Name of the file to upload
    */
-  async uploadFileAndConfirm(
-    file: string | FileObject,
-  ): Promise<void> {
+  async uploadFileAndConfirm(file: string | FileObject): Promise<void> {
     await this.uploadFile(file);
     const filename = typeof file === "string" ? file : file.name;
 

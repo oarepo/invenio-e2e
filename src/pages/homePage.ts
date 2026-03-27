@@ -1,7 +1,7 @@
 import { Locators } from "../locators";
-import { SearchPage } from "./searchPage";
 import { BasePage } from "./basePage";
 import { DepositPage } from "./depositPage";
+import { SearchPage } from "./searchPage";
 
 /**
  * Represents the Home Page.

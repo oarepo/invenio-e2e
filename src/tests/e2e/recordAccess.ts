@@ -1,5 +1,6 @@
-import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
+
+import { InvenioTest } from "../../fixtures";
 
 export function recordAccessTests(test: InvenioTest) {
   test.describe("Records – Access control", () => {

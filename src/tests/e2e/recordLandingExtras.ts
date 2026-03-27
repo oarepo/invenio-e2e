@@ -1,5 +1,6 @@
-import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
+
+import { InvenioTest } from "../../fixtures";
 
 export function recordLandingExtrasTests(test: InvenioTest) {
   test.describe("Record Landing Page – Extras", () => {

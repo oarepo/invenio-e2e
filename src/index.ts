@@ -1,12 +1,12 @@
 // config
-export { testConfig, appConfig, TestConfig, AppConfig } from './config'
+export { testConfig, appConfig, TestConfig, AppConfig } from "./config";
 
 // types
-export * from './types';
+export * from "./types";
 
 // test runner
-export { test, registerPage } from './fixtures';
-export type { InvenioTest } from './fixtures';
+export { test, registerPage } from "./fixtures";
+export type { InvenioTest } from "./fixtures";
 
 // default locators
 export { locators, Locators, updateLocators } from "./locators";
@@ -15,7 +15,10 @@ export { locators, Locators, updateLocators } from "./locators";
 export * from "./pages";
 
 // tests
-export * from './tests/e2e';
+export * from "./tests/e2e";
 
-export { authenticateUserForApiTesting, apiTestingCleanup, recordsApiTests } from "./tests/api";
-
+export {
+  authenticateUserForApiTesting,
+  apiTestingCleanup,
+  recordsApiTests,
+} from "./tests/api";

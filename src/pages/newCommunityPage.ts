@@ -1,6 +1,7 @@
-import { BasePage } from "./basePage";
-import { Locators } from "../locators";
 import { expect } from "@playwright/test";
+
+import { Locators } from "../locators";
+import { BasePage } from "./basePage";
 
 /**
  * Class representing the New Community creation page.
@@ -9,10 +10,7 @@ import { expect } from "@playwright/test";
  */
 
 export class NewCommunityPage<T extends Locators = Locators> extends BasePage<T> {
-  
   // NAVIGATION --------------------------------------------------------------------------
-
-
 
   // FIELDS ------------------------------------------------------------------------------
 
@@ -82,7 +80,6 @@ export class NewCommunityPage<T extends Locators = Locators> extends BasePage<T>
   getCommunityName() {
     return this.page.locator(this.locators.newCommunityPage.communityNameHeader);
   }
-
 
   async verifyCommunityName(expectedName: string, index: number = 0): Promise<void> {
     const communityNameElement = this.page

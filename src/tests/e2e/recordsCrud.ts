@@ -1,5 +1,6 @@
-import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
+
+import { InvenioTest } from "../../fixtures";
 
 export function recordsCrudTests(test: InvenioTest) {
   test.describe("Records – CRUD", () => {
@@ -74,7 +75,11 @@ export function recordsCrudTests(test: InvenioTest) {
 
     //-----------------------------------------------------------------------------------
 
-    test("Delete Record", async ({ myDashboardPage, recordDetailPage, depositPage }) => {
+    test("Delete Record", async ({
+      myDashboardPage,
+      recordDetailPage,
+      depositPage,
+    }) => {
       // Navigate to dashboard and open first record
       await myDashboardPage.navigateToMyDashboard();
 

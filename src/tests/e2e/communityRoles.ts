@@ -1,13 +1,13 @@
-import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
-import type { RoleUsers } from "../../fixtures";
 
+import { InvenioTest } from "../../fixtures";
+import type { RoleUsers } from "../../fixtures";
 import type {
+  CommunitiesPage,
+  CommunityDetailPage,
   HomePage,
   LoginPage,
   MyDashboardPage,
-  CommunitiesPage,
-  CommunityDetailPage,
   RecordDetailPage,
 } from "../../pages";
 

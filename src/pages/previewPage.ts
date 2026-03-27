@@ -1,7 +1,8 @@
+import { expect } from "@playwright/test";
+
 import { Locators } from "../locators";
 import { FileObject } from "../types";
 import { BasePage } from "./basePage";
-import { expect } from "@playwright/test";
 
 /**
  * Class representing a preview / record detail page.
@@ -17,7 +18,9 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
   async validatePageLoaded(): Promise<void> {
     await super.validatePageLoaded();
     // check that the record title element is visible - these checks can be extended
-    await expect(this.page.locator(this.locators.uploadPage.recordTitleHeader)).toBeVisible();
+    await expect(
+      this.page.locator(this.locators.uploadPage.recordTitleHeader)
+    ).toBeVisible();
   }
 
   // VERIFICATIONS ---------------------------------------------------------------------
@@ -26,7 +29,9 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
    * Verifies the informational message shown when a draft is being previewed.
    */
   async verifySaveDraftPreview(): Promise<void> {
-    const successMessage = this.page.locator(this.locators.previewPage.saveDraftInfoMessage);
+    const successMessage = this.page.locator(
+      this.locators.previewPage.saveDraftInfoMessage
+    );
     await expect(successMessage).toHaveText(
       "Preview You are previewing a new record that has not yet been published."
     );
@@ -39,7 +44,9 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     const successMessage = this.page.locator(
       this.locators.previewPage.saveDraftVersionsInfoMessage
     );
-    await expect(successMessage).toHaveText("PreviewOnly published versions are displayed.");
+    await expect(successMessage).toHaveText(
+      "PreviewOnly published versions are displayed."
+    );
   }
 
   /**
@@ -68,7 +75,9 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     const expectedValue = typeof expected === "string" ? expected : expected.name;
 
     if (actualValue !== expectedValue) {
-      throw new Error(`Expected Creator "${expectedValue}", but found "${actualValue}"`);
+      throw new Error(
+        `Expected Creator "${expectedValue}", but found "${actualValue}"`
+      );
     }
 
     console.log(`Verified Creator: ${actualValue}`);
@@ -103,7 +112,9 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     await locator.waitFor({ state: "visible", timeout: 10000 });
     const actualValue = (await locator.textContent())?.trim();
     if (actualValue !== expectedValue) {
-      throw new Error(`Expected Resource type "${expectedValue}", but found "${actualValue}"`);
+      throw new Error(
+        `Expected Resource type "${expectedValue}", but found "${actualValue}"`
+      );
     } else {
       console.log(`Verified Resource type: ${actualValue}`);
     }
@@ -118,7 +129,9 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
     const actualValue = (await locator.textContent())?.trim();
 
     if (actualValue !== expectedValue) {
-      throw new Error(`Expected description "${expectedValue}", but got "${actualValue}"`);
+      throw new Error(
+        `Expected description "${expectedValue}", but got "${actualValue}"`
+      );
     }
 
     console.log(`Description verified: ${actualValue}`);
@@ -136,7 +149,9 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const [field, value] = data;
       if (!field) {
-        throw new Error(`verifyData: expected [field, value], but got ${JSON.stringify(data)}`);
+        throw new Error(
+          `verifyData: expected [field, value], but got ${JSON.stringify(data)}`
+        );
       }
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -167,7 +182,9 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
    * @returns The description text of the record.
    */
   async getRecordDescription(): Promise<string> {
-    return await this.page.locator(this.locators.previewPage.recordDescription).innerText();
+    return await this.page
+      .locator(this.locators.previewPage.recordDescription)
+      .innerText();
   }
 
   /**
@@ -175,7 +192,9 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
    * @returns The title text of the record.
    */
   async getRecordTitle(): Promise<string> {
-    return await this.page.locator(this.locators.uploadPage.recordTitleHeader).innerText();
+    return await this.page
+      .locator(this.locators.uploadPage.recordTitleHeader)
+      .innerText();
   }
 
   /**

@@ -1,5 +1,5 @@
-import { BasePage } from "./basePage";
 import { Locators } from "../locators";
+import { BasePage } from "./basePage";
 
 /**
  * Page object representing the Administration page and its related functionality.
@@ -24,10 +24,14 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
    * Clicks the banners section link and waits for the section to load.
    */
   async navigateToBannersSection() {
-    const bannersSectionLink = this.page.locator(this.locators.administrationPage.bannersSectionLink);
+    const bannersSectionLink = this.page.locator(
+      this.locators.administrationPage.bannersSectionLink
+    );
     await bannersSectionLink.click();
     await this.page.waitForLoadState("networkidle");
-    const bannersSectionHeader = this.page.locator(this.locators.administrationPage.bannersSectionHeader);
+    const bannersSectionHeader = this.page.locator(
+      this.locators.administrationPage.bannersSectionHeader
+    );
     await this.expect(bannersSectionHeader).toBeVisible();
   }
 
@@ -36,10 +40,14 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
    * Clicks the create banner button and waits for the creation form to load.
    */
   async navigateToBannersCreation() {
-    const createBannerButton = this.page.locator(this.locators.administrationPage.createBannerLink);
+    const createBannerButton = this.page.locator(
+      this.locators.administrationPage.createBannerLink
+    );
     await createBannerButton.click();
     await this.page.waitForLoadState("networkidle");
-    const bannerCreationHeader = this.page.locator(this.locators.administrationPage.createBannerHeader);
+    const bannerCreationHeader = this.page.locator(
+      this.locators.administrationPage.createBannerHeader
+    );
     await this.expect(bannerCreationHeader).toBeVisible();
   }
 
@@ -50,8 +58,12 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
    */
   async validatePageLoaded() {
     await super.validatePageLoaded();
-    const administrationBody = await this.page.waitForSelector(this.locators.administrationPage.administrationBody);
-    await administrationBody.waitForSelector(this.locators.administrationPage.dashboardHeader);
+    const administrationBody = await this.page.waitForSelector(
+      this.locators.administrationPage.administrationBody
+    );
+    await administrationBody.waitForSelector(
+      this.locators.administrationPage.dashboardHeader
+    );
   }
 
   /**
@@ -82,16 +94,20 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
    * Clicks the submit button to create a new banner.
    */
   async clickSubmitCreateBanner() {
-    const submitButton = this.page.locator(this.locators.administrationPage.createBannerSubmitButton);
+    const submitButton = this.page.locator(
+      this.locators.administrationPage.createBannerSubmitButton
+    );
     await submitButton.click();
   }
 
   async deleteBannerById(id: string) {
-    const deleteButton = 
-      this.page.locator(this.locators.administrationPage.searchBannerRowById(id))
+    const deleteButton = this.page
+      .locator(this.locators.administrationPage.searchBannerRowById(id))
       .locator(this.locators.administrationPage.deleteBannerButton);
     await deleteButton.click();
-    const confirmDeleteButton = this.page.locator(this.locators.administrationPage.confirmDeleteBannerButton);
+    const confirmDeleteButton = this.page.locator(
+      this.locators.administrationPage.confirmDeleteBannerButton
+    );
     await confirmDeleteButton.click();
     await this.page.waitForLoadState("networkidle");
   }
@@ -103,7 +119,9 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
    * @param message The message text to enter in the banner message field.
    */
   async fillBannerMessage(message: string) {
-    const messageFieldIframe = this.page.locator(this.locators.administrationPage.createBannerMessageInput);
+    const messageFieldIframe = this.page.locator(
+      this.locators.administrationPage.createBannerMessageInput
+    );
     const messageTextArea = messageFieldIframe.contentFrame().locator("body#tinymce");
     await messageTextArea.fill(message);
   }
@@ -113,7 +131,9 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
    * @param urlPath The URL path where the banner should be displayed.
    */
   async fillBannerUrlPath(urlPath: string) {
-    const urlPathField = this.page.locator(this.locators.administrationPage.createBannerUrlPathInput);
+    const urlPathField = this.page.locator(
+      this.locators.administrationPage.createBannerUrlPathInput
+    );
     await urlPathField.fill(urlPath);
   }
 
@@ -125,8 +145,12 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
    * @returns A promise that resolves to true if the banner is visible, false otherwise.
    */
   async isBannerInSearchTable(message: string) {
-    const searchResults = this.page.locator(this.locators.administrationPage.bannersSearchResultsSection);
-    const bannerRow = searchResults.locator(this.locators.administrationPage.searchBannerRow(message));
+    const searchResults = this.page.locator(
+      this.locators.administrationPage.bannersSearchResultsSection
+    );
+    const bannerRow = searchResults.locator(
+      this.locators.administrationPage.searchBannerRow(message)
+    );
     return bannerRow.isVisible();
   }
 
@@ -136,7 +160,9 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
    * @returns A promise that resolves to true if the banner is visible on the site, false otherwise.
    */
   async isBannerPresentOnSite(message: string) {
-    const bannerOnSite = this.page.locator(this.locators.administrationPage.findBannerOnSite(message));
+    const bannerOnSite = this.page.locator(
+      this.locators.administrationPage.findBannerOnSite(message)
+    );
     return bannerOnSite.isVisible();
   }
 
@@ -145,35 +171,61 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
    * Checks for the empty results placeholder text.
    */
   async verifyNoBannersArePresent() {
-    const searchResults = this.page.locator(this.locators.administrationPage.bannersSearchResultsSection);
-    const emptyResults = searchResults.locator(this.locators.administrationPage.bannersSearchResultsPlaceholderText);
+    const searchResults = this.page.locator(
+      this.locators.administrationPage.bannersSearchResultsSection
+    );
+    const emptyResults = searchResults.locator(
+      this.locators.administrationPage.bannersSearchResultsPlaceholderText
+    );
     return emptyResults.isVisible({ timeout: 2000 });
   }
 
   async waitForSubmission() {
     await this.page.waitForLoadState("networkidle");
-    await this.expect(this.page.locator(this.locators.administrationPage.bannersSearchResultsSection)).toBeVisible();
-    await this.expect(this.page.locator(this.locators.administrationPage.bannersSearchResultsRows).first()).toBeVisible();
+    await this.expect(
+      this.page.locator(this.locators.administrationPage.bannersSearchResultsSection)
+    ).toBeVisible();
+    await this.expect(
+      this.page
+        .locator(this.locators.administrationPage.bannersSearchResultsRows)
+        .first()
+    ).toBeVisible();
   }
 
   // FLOWS ------------------------------------------------------------------------------
 
   async deleteAllBanners() {
-    const searchResults = this.page.locator(this.locators.administrationPage.bannersSearchResultsSection);
-    let hasBanners = !(await this.verifyNoBannersArePresent()) && await searchResults.locator(this.locators.administrationPage.bannersSearchResultsRows).count() > 0;
+    const searchResults = this.page.locator(
+      this.locators.administrationPage.bannersSearchResultsSection
+    );
+    let hasBanners =
+      !(await this.verifyNoBannersArePresent()) &&
+      (await searchResults
+        .locator(this.locators.administrationPage.bannersSearchResultsRows)
+        .count()) > 0;
     while (hasBanners) {
-      const bannerRow = searchResults.locator(this.locators.administrationPage.bannersSearchResultsRows).first();
+      const bannerRow = searchResults
+        .locator(this.locators.administrationPage.bannersSearchResultsRows)
+        .first();
       const bannerId = await bannerRow.locator('td[data-label="Id"] > a').innerText();
       await this.deleteBannerById(bannerId);
-      await searchResults.locator(this.locators.administrationPage.bannersSearchResultsLoader).waitFor({ state: "hidden" });
-      hasBanners = !(await this.verifyNoBannersArePresent()) && await searchResults.locator(this.locators.administrationPage.bannersSearchResultsRows).count() > 0;
+      await searchResults
+        .locator(this.locators.administrationPage.bannersSearchResultsLoader)
+        .waitFor({ state: "hidden" });
+      hasBanners =
+        !(await this.verifyNoBannersArePresent()) &&
+        (await searchResults
+          .locator(this.locators.administrationPage.bannersSearchResultsRows)
+          .count()) > 0;
     }
   }
 
   // HELPERS ----------------------------------------------------------------------------
 
   async getBannerIdByMessage(message: string) {
-    const bannerRow = this.page.locator(this.locators.administrationPage.searchBannerRow(message));
+    const bannerRow = this.page.locator(
+      this.locators.administrationPage.searchBannerRow(message)
+    );
     const bannerId = await bannerRow.locator('td[data-label="Id"] > a').innerText();
     return bannerId;
   }

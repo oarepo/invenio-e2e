@@ -1,8 +1,9 @@
-import { test as setup } from "../../fixtures";
+import fs from "fs";
+
 import { expect } from "@playwright/test";
 import type { Cookie } from "@playwright/test";
 
-import fs from "fs";
+import { test as setup } from "../../fixtures";
 import { LoginPage } from "../../pages";
 
 /**
