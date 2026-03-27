@@ -8,6 +8,8 @@ import { ExpectedError as ErrorWithLocation } from "../services/form";
 import path from "path";
 import { appConfig } from "../config";
 
+import type { FileObject } from "../types";
+
 /**
  * Represents the Deposit page in the application.
  * Provides methods to interact with fields, buttons, and verify system messages.
@@ -24,6 +26,72 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     await this.page.goto("/");
     await this.page.waitForLoadState("networkidle");
     await this.validatePageLoaded();
+  }
+
+  /**
+   * Opens the "Select a community" modal.
+   */
+  async openCommunitySelector(): Promise<void> {
+    const btn = this.page.locator(this.locators.uploadPage.communitySelectButton);
+    await btn.waitFor({ state: "visible", timeout: 15000 });
+    await btn.click();
+  }
+
+  /**
+   * Switches to "My communities" tab inside the community selector.
+   */
+  async selectMyCommunitiesTab(): Promise<void> {
+    const tab = this.page.locator(this.locators.uploadPage.myCommunitiesTab);
+    await tab.waitFor({ state: "visible", timeout: 15000 });
+    await tab.click();
+  }
+
+  /**
+   * Selects a community by name in the modal table.
+   */
+  async selectCommunityByName(name: string): Promise<void> {
+    const btn = this.page.locator(
+      this.locators.uploadPage.communitySelectRowButton(name)
+    );
+    await btn.waitFor({ state: "visible", timeout: 15000 });
+    await btn.click();
+  }
+
+  /**
+   * Submits the record for community review and confirms required checkboxes.
+   */
+  async submitForReview(): Promise<void> {
+    const submit = this.page.locator(this.locators.uploadPage.submitForReviewButton);
+    await submit.waitFor({ state: "visible", timeout: 15000 });
+    await submit.click();
+
+    // Check confirmation checkboxes if present
+    const accessCb = this.page.locator(
+      this.locators.uploadPage.acceptAccessToRecordCheckbox
+    );
+    const publishCb = this.page.locator(
+      this.locators.uploadPage.acceptPublishRecordCheckbox
+    );
+
+    if (await accessCb.isVisible().catch(() => false))
+      await accessCb.check({ force: true });
+    if (await publishCb.isVisible().catch(() => false))
+      await publishCb.check({ force: true });
+
+    const confirm = this.page.locator(
+      this.locators.uploadPage.submitForReviewConfirmButton
+    );
+    await confirm.waitFor({ state: "visible", timeout: 15000 });
+    await confirm.click();
+  }
+
+  /**
+   * Verifies the "Submitted" status label is visible on the record page.
+   */
+  async isSubmittedStatusVisible(): Promise<boolean> {
+    return await this.page
+      .locator(this.locators.uploadPage.submittedStatusLabel)
+      .isVisible();
   }
 
   // VALIDATION -------------------------------------------------------------------------
@@ -71,16 +139,21 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   }
 
   /**
-   * Upload a specific file from the UploadFiles folder.
-   * @param filename Name of the file to upload
+   * Uploads a file to the form. Can handle both file names (string) and file objects (buffer).
+   * @param file Name of the file to upload or an object containing file details and buffer.
    */
-  async uploadFile(filename: string) {
+  async uploadFile(file: string | FileObject): Promise<void> {
+    if (typeof file !== "string") {
+      await this.page.setInputFiles('input[type="file"]', file);
+      console.log(`[BasePage] Uploading file from buffer: ${file.name}`);
+      return;
+    }
     const filePath = path.join(
       __dirname,
       "..",
       appConfig.dataFolderPath,
       "UploadFiles",
-      filename
+      file
     );
     await this.page.setInputFiles('input[type="file"]', filePath);
     console.log(`[BasePage] Uploading file: ${filePath}`);
@@ -88,10 +161,13 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Upload a file and confirm by clicking the "Upload" button in Uppy.
-   * @param filename Name of the file to upload
+   * @param file Name of the file to upload
    */
-  async uploadFileAndConfirm(filename: string) {
-    await this.uploadFile(filename);
+  async uploadFileAndConfirm(
+    file: string | FileObject,
+  ): Promise<void> {
+    await this.uploadFile(file);
+    const filename = typeof file === "string" ? file : file.name;
 
     const uploadBtn = this.page.locator(this.locators.uploadPage.uploadFilesButton);
     await expect(uploadBtn).toBeEnabled({ timeout: 10000 });
@@ -151,6 +227,21 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
    */
   async fillCreatorGivenName(name: string): Promise<void> {
     await this.page.locator(this.locators.uploadPage.givenNameField).fill(name);
+  }
+
+  /**
+   * Sets the access level for files (files-only access).
+   */
+  async setFilesOnlyAccess(level: "Restricted" | "Public"): Promise<void> {
+    const dropdown = this.page.locator(this.locators.uploadPage.filesAccessDropdown);
+    await dropdown.waitFor({ state: "visible", timeout: 15000 });
+    await dropdown.click();
+
+    const option = this.page.locator(".visible.menu .item", { hasText: level });
+    await option.waitFor({ state: "visible", timeout: 10000 });
+    await option.click();
+
+    await this.page.waitForLoadState("networkidle");
   }
 
   /*
@@ -512,6 +603,36 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
     const field = this.page.locator(this.locators.uploadPage.embargoReasonField);
     await field.waitFor({ state: "visible" });
     await field.fill(text);
+  }
+
+  async hasValidationErrors(): Promise<boolean> {
+    return (
+      (await this.page
+        .locator("div.ui.error.message, .ui.pointing.red.basic.label")
+        .count()) > 0
+    );
+  }
+
+  async confirmPublicationIfPresent(): Promise<void> {
+    const confirmBtn = this.page.locator(
+      'button.ui.primary.button:has-text("Publish")'
+    );
+    if (await confirmBtn.isVisible().catch(() => false)) {
+      await confirmBtn.click();
+      await this.page.waitForLoadState("networkidle");
+    }
+  }
+
+  async deleteRecord(): Promise<void> {
+    const deleteBtn = this.page.locator('button.ui.negative.button:has-text("Delete")');
+    await deleteBtn.waitFor({ state: "visible", timeout: 15000 });
+    await deleteBtn.click();
+
+    const confirm = this.page.locator('button.ui.negative.button:has-text("Delete")');
+    await confirm.waitFor({ state: "visible", timeout: 15000 });
+    await confirm.click();
+
+    await this.page.waitForLoadState("networkidle");
   }
 
   // WAITS --------------------------------------------------------------------------------

@@ -1,8 +1,9 @@
 import { ExpectedError } from "../services/form";
+import { FileObject } from "../types";
 
 export interface FormData {
     data: Array<[string, unknown]>;
-    files: string[];
+    files: (string | FileObject)[];
     errors: Array<ExpectedError>;
 }
 

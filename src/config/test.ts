@@ -8,6 +8,8 @@ export const testConfig = {
     adminPassword: appConfig.adminPassword,
     baseURL: appConfig.baseURL,
     dataFolderPath: appConfig.dataFolderPath,
+    s3DefaultBlockSize: appConfig.s3DefaultBlockSize,
+    logXhrRequests: appConfig.logXhrRequests,
 };
 
 export type TestConfig = typeof testConfig;
