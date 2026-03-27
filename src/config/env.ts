@@ -23,6 +23,7 @@ dotenv.config({ path: path.resolve(__dirname, `../.env.${ENV}`) });
  * @property userEmail - Login email for authentication in the tested application.
  * @property userPassword - Login password for authentication in the tested application.
  * @property authUserFilePath - Path (relative to project root) to the file where the authenticated user state is stored.
+ * @property logXhrRequests - Enable logging of XHR and fetch requests/responses. Set LOG_XHR=true to enable.
  * @property adminEmail - Login email for admin authentication in the tested application (for tests that require admin privileges).
  * @property adminPassword - Login password for admin authentication in the tested application (for tests that require admin privileges).
  * @property authAdminFilePath - Path (relative to project root) to the file where the authenticated admin state is stored.
@@ -48,8 +49,9 @@ export const appConfig = {
   adminPassword: process.env.INVENIO_ADMIN_PASSWORD || "123456",
   authAdminFilePath: process.env.AUTH_ADMIN_FILE_PATH || "playwright/.auth/admin.json",
   dataFolderPath: process.env.DATA_FOLDER_PATH || "data",
+  logXhrRequests: process.env.LOG_XHR === "true",
   // S3_DEFAULT_BLOCK_SIZE=5MB by default; change in invenio.cfg
-  s3DefaultBlockSize:  process.env.S3_DEFAULT_BLOCK_SIZE ? parseInt(process.env.S3_DEFAULT_BLOCK_SIZE) : 5 * 1024 * 1024,
+  s3DefaultBlockSize: process.env.S3_DEFAULT_BLOCK_SIZE ? parseInt(process.env.S3_DEFAULT_BLOCK_SIZE) : 5 * 1024 * 1024,
   qase: {
     apiToken: process.env.QASE_TESTOPS_API_TOKEN || "",
     projectCode: process.env.QASE_TESTOPS_PROJECT || "",

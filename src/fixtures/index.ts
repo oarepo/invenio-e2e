@@ -43,6 +43,22 @@ export { registerPage } from "./utils";
 export type { DepositionData, FormData } from "./depositionData";
 export type { CommunityData, CommunityDataRecord } from "./communityData";
 export type { RoleUsers, RoleUser } from "./roleUsers";
+/**
+ * Helper function to format JSON for logging.
+ * If the JSON is longer than 100 lines, it will show the first 50 and last 50 lines with ellipsis.
+ */
+function formatJsonForLogging(jsonData: unknown): string {
+  const formatted = JSON.stringify(jsonData, null, 2);
+  const lines = formatted.split('\n');
+
+  if (lines.length > 100) {
+    const firstLines = lines.slice(0, 50).join('\n');
+    const lastLines = lines.slice(-50).join('\n');
+    return `${firstLines}\n... (${lines.length - 100} lines omitted) ...\n${lastLines}`;
+  }
+
+  return formatted;
+}
 
 const _test = base.extend<{
   config: TestConfig;
@@ -98,7 +114,7 @@ const _test = base.extend<{
   initialLocale: undefined,
 
   // translations loaded from pre-compiled file
-  translations: async ({}, use) => {
+  translations: async ({ }, use) => {
     let translations: Translations = {};
     try {
       const translationsFile =
@@ -108,10 +124,10 @@ const _test = base.extend<{
     } catch {
       throw new Error(
         "Pre-compiled translations not found. Please generate translations first:\n\n" +
-          "run: npm run collect-translations\n" +
-          "or specify packages: npm run collect-translations invenio-app-rdm repository-tugraz\n" +
-          "then rebuild: npm run build\n\n" +
-          "this will create src/translations/translations.json with actual translations from your Invenio packages.\n"
+        "run: npm run collect-translations\n" +
+        "or specify packages: npm run collect-translations invenio-app-rdm repository-tugraz\n" +
+        "then rebuild: npm run build\n\n" +
+        "this will create src/translations/translations.json with actual translations from your Invenio packages.\n"
       );
     }
     await use(translations);
@@ -170,6 +186,53 @@ const _test = base.extend<{
     await use(originalContext);
   },
 
+  // page fixture with optional XHR/Fetch request/response logging
+  page: async ({ page, config }, use) => {
+    if (config.logXhrRequests) {
+      // Log requests
+      page.on('request', request => {
+        if (request.resourceType() === 'xhr' || request.resourceType() === 'fetch') {
+          console.log('➡️', request.method(), request.url());
+          console.log('Headers:', request.headers());
+
+          const postData = request.postData();
+          if (postData) {
+            try {
+              const jsonData = JSON.parse(postData); // eslint-disable-line
+              console.log('Request payload (JSON):', formatJsonForLogging(jsonData));
+            } catch {
+              // Not JSON, skip logging
+            }
+          }
+        }
+      });
+
+      // Log responses
+      page.on('response', async (response) => {
+        if (response.request().resourceType() === 'xhr' || response.request().resourceType() === 'fetch') {
+          console.log('⬅️', response.status(), response.url());
+          console.log('Response headers:', response.headers());
+
+          try {
+            const body = await response.text();
+            if (body) {
+              try {
+                const jsonData = JSON.parse(body); // eslint-disable-line
+                console.log('Response payload (JSON):', formatJsonForLogging(jsonData));
+              } catch {
+                // Not JSON, skip logging
+              }
+            }
+          } catch {
+            // Unable to get response body, skip
+          }
+        }
+      });
+    }
+
+    await use(page);
+  },
+
   i18nService: async (
     {
       page,
@@ -205,19 +268,19 @@ const _test = base.extend<{
     await use(true);
   },
 
-  communityData: async ({}, use) => {
+  communityData: async ({ }, use) => {
     await use(defaultCommunityData);
   },
 
-  depositionData: async ({}, use) => {
+  depositionData: async ({ }, use) => {
     await use(defaultDepositionData);
   },
 
-  recordsApiData: async ({}, use) => {
+  recordsApiData: async ({ }, use) => {
     await use(defaultRecordsApiData);
   },
 
-  roleUsers: async ({}, use) => {
+  roleUsers: async ({ }, use) => {
     await use(defaultRoleUsers);
   },
 
@@ -239,18 +302,18 @@ const _test = base.extend<{
   },
 
   createApiContext: async ({ playwright }, use) => {
-      const createApiContext = async (authFilePath: string) => {
-          const authFile = JSON.parse(await readFile(authFilePath, 'utf-8')) as Awaited<ReturnType<APIRequestContext['storageState']>>;
-          const apiContext = await playwright.request.newContext({
-              extraHTTPHeaders: {
-                  'X-CSRFToken': authFile.cookies.find(cookie => cookie.name === 'csrftoken')?.value || '',
-                  'Referer': testConfig.baseURL,
-              },
-              storageState: authFile,
-          });
-          return apiContext;
-      };
-      await use(createApiContext);
+    const createApiContext = async (authFilePath: string) => {
+      const authFile = JSON.parse(await readFile(authFilePath, 'utf-8')) as Awaited<ReturnType<APIRequestContext['storageState']>>;
+      const apiContext = await playwright.request.newContext({
+        extraHTTPHeaders: {
+          'X-CSRFToken': authFile.cookies.find(cookie => cookie.name === 'csrftoken')?.value || '',
+          'Referer': testConfig.baseURL,
+        },
+        storageState: authFile,
+      });
+      return apiContext;
+    };
+    await use(createApiContext);
   },
 
   // pages provide a set of methods to interact with a UI page, abstracting low-level
@@ -311,13 +374,13 @@ export const test: InvenioTest = new Proxy(_test as InvenioTest, {
             return target.describe.skip(
               title,
               details as TestDetails,
-              callback || (() => {})
+              callback || (() => { })
             );
           } else {
             return target.describe(
               title,
               details as TestDetails,
-              callback || (() => {})
+              callback || (() => { })
             );
           }
         };
