@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { FileObject, testConfig } from "../..";
 import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
 
@@ -68,6 +69,33 @@ export function depositionTests(test: InvenioTest) {
 
       const expectedFile = depositionData["recordWithFile"].files[0];
       await previewPage.verifyUploadedFile(expectedFile);
+    });
+
+    test("Test multipart upload", async ({
+      homePage,
+      previewPage,
+      formService,
+      depositionData,
+    }) => {
+      const depositPage = await homePage.selectNewUpload();
+      const formDataWithLargeFile = {
+        ...depositionData["recordWithFile"],
+        files: [
+          {
+            name: "largeFile.txt",
+            mimeType: "text/plain",
+            buffer: Buffer.alloc(testConfig.s3DefaultBlockSize + Math.ceil(testConfig.s3DefaultBlockSize / 10), "a"),
+          } as FileObject,
+        ],
+      };
+      const { filledData } = await formService.fillForm(depositPage, formDataWithLargeFile);
+
+      const expectedFile = formDataWithLargeFile.files[0].name;
+      // Verify the file name is in the filled data
+      const uploadedFiles = filledData
+        .flat()
+        .filter((item) => typeof item === "string");
+      expect(uploadedFiles).toContain(expectedFile);
     });
 
     //------------------------------------------------------------------------------------------------------

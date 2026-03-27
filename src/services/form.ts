@@ -2,6 +2,8 @@ import { TestConfig } from "../config";
 import { BasePage, DepositPage } from "../pages";
 import { FormData } from "../fixtures/depositionData";
 
+import type { FileObject } from "../types";
+
 export interface ExpectedError {
     message: string | RegExp;
     field?: string; // Optional field name associated with the error
@@ -48,7 +50,7 @@ export interface FormServiceInterface {
      * Upload a specific file from UploadFiles folder.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    uploadFiles: (page: BasePage, fileNames: string[]) => Promise<{ page: BasePage; filledData: any[][] }>;
+    uploadFiles: (page: BasePage, fileNames: string[] | FileObject[]) => Promise<{ page: BasePage; filledData: any[][] }>;
 }
 
 export class FormService implements FormServiceInterface {
@@ -153,11 +155,12 @@ export class FormService implements FormServiceInterface {
     /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    async uploadFiles(page: BasePage, fileNames: string[]): Promise<{ page: BasePage; filledData: any[][] }> {
+    async uploadFiles(page: BasePage, files: (string | FileObject)[]): Promise<{ page: BasePage; filledData: any[][] }> {
         const filledData: any[][] = [];
 
-        for (const fileName of fileNames) {
-            await (page as DepositPage).uploadFileAndConfirm(fileName);
+        for (const file of files) {
+            await (page as DepositPage).uploadFileAndConfirm(file);
+            const fileName = typeof file === "string" ? file : file.name;
             filledData.push(["uploadedFile", fileName]);
         }
 

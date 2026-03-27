@@ -1,6 +1,9 @@
 // config
 export { testConfig, appConfig, TestConfig, AppConfig } from './config'
 
+// types
+export * from './types';
+
 // test runner
 export { test, registerPage } from './fixtures';
 export type { InvenioTest } from './fixtures';

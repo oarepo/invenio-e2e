@@ -8,6 +8,8 @@ import { ExpectedError as ErrorWithLocation } from "../services/form";
 import path from "path";
 import { appConfig } from "../config";
 
+import type { FileObject } from "../types";
+
 /**
  * Represents the Deposit page in the application.
  * Provides methods to interact with fields, buttons, and verify system messages.
@@ -71,16 +73,21 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
   }
 
   /**
-   * Upload a specific file from the UploadFiles folder.
-   * @param filename Name of the file to upload
+   * Uploads a file to the form. Can handle both file names (string) and file objects (buffer).
+   * @param file Name of the file to upload or an object containing file details and buffer.
    */
-  async uploadFile(filename: string) {
+  async uploadFile(file: string | FileObject): Promise<void> {
+    if (typeof file !== "string") {
+      await this.page.setInputFiles('input[type="file"]', file);
+      console.log(`[BasePage] Uploading file from buffer: ${file.name}`);
+      return;
+    }
     const filePath = path.join(
       __dirname,
       "..",
       appConfig.dataFolderPath,
       "UploadFiles",
-      filename
+      file
     );
     await this.page.setInputFiles('input[type="file"]', filePath);
     console.log(`[BasePage] Uploading file: ${filePath}`);
@@ -88,10 +95,13 @@ export class DepositPage<T extends Locators = Locators> extends BasePage<T> {
 
   /**
    * Upload a file and confirm by clicking the "Upload" button in Uppy.
-   * @param filename Name of the file to upload
+   * @param file Name of the file to upload
    */
-  async uploadFileAndConfirm(filename: string) {
-    await this.uploadFile(filename);
+  async uploadFileAndConfirm(
+    file: string | FileObject,
+  ): Promise<void> {
+    await this.uploadFile(file);
+    const filename = typeof file === "string" ? file : file.name;
 
     const uploadBtn = this.page.locator(this.locators.uploadPage.uploadFilesButton);
     await expect(uploadBtn).toBeEnabled({ timeout: 10000 });

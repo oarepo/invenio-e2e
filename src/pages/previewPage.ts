@@ -1,4 +1,5 @@
 import { Locators } from "../locators";
+import { FileObject } from "../types";
 import { BasePage } from "./basePage";
 import { expect } from "@playwright/test";
 
@@ -42,12 +43,13 @@ export class PreviewPage<T extends Locators = Locators> extends BasePage<T> {
   }
 
   /**
-   * Verifies that an uploaded file with the given filename is visible in the preview page.
-   * @param filename The expected filename of the uploaded file.
+   * Verifies that the uploaded file is visible in the preview page.
+   * @param file The file to verify, either as a string (filename) or a FileObject.
    */
-  async verifyUploadedFile(filename: string): Promise<void> {
+  async verifyUploadedFile(file: string | FileObject): Promise<void> {
     await this.waitForUploadedFilesTable();
 
+    const filename = typeof file === "string" ? file : file.name;
     const uploaded = this.page.locator(this.locators.uploadPage.uploadedFile(filename));
 
     await expect(uploaded).toBeVisible({ timeout: 10000 });
