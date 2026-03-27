@@ -1,5 +1,23 @@
+import type { APIRequestContext, TestDetails } from "@playwright/test";
+import {
+  AdministrationPage,
+  AllPages,
+  CommunitiesPage,
+  CommunityDetailPage,
+  CommunitySearchPage,
+  DepositPage,
+  HomePage,
+  LoginPage,
+  MyDashboardPage,
+  NewCommunityPage,
+  PreviewPage,
+  RecordDetailPage,
+  SearchPage,
+} from "../pages";
+import { CommunityData, defaultCommunityData } from "./communityData";
+import { DepositionData, defaultDepositionData } from "./depositionData";
 /* eslint-disable no-empty-pattern */
-import { Expect, test as base, expect as playwrightExpect } from '@playwright/test';
+import { Expect, test as base, expect as playwrightExpect } from "@playwright/test";
 import type { TestDetails, APIRequestContext } from '@playwright/test';
 
 import { readFile } from 'fs/promises';
@@ -27,17 +45,16 @@ import {
   FormService,
 } from "../services";
 
-import { defaultDepositionData, DepositionData } from "./depositionData";
-import { defaultCommunityData, CommunityData } from "./communityData";
-import { defaultRecordsApiData, RecordsApiData } from "./api";
+import { RecordsApiData, defaultRecordsApiData } from "./api";
 import { defaultRoleUsers, RoleUsers } from "./roleUsers";
 
-import type { TestConfig } from "../config";
-import type { Locators } from "../locators";
-import { testConfig } from "../config";
-import { locators } from "../locators";
-import { registerPage } from "./utils";
 import { FileUploadHelper } from "../helpers/fileUploadHelper";
+import type { Locators } from "../locators";
+import type { TestConfig } from "../config";
+import { locators } from "../locators";
+import { readFile } from "fs/promises";
+import { registerPage } from "./utils";
+import { testConfig } from "../config";
 
 export { registerPage } from "./utils";
 export type { DepositionData, FormData } from "./depositionData";
@@ -301,13 +318,21 @@ const _test = base.extend<{
     await use(i18nService.extendExpect(playwrightExpect));
   },
 
+  uploadHelper: async ({ page }, use) => {
+    const helper = new FileUploadHelper(page);
+    await use(helper);
+  },
+
   createApiContext: async ({ playwright }, use) => {
     const createApiContext = async (authFilePath: string) => {
-      const authFile = JSON.parse(await readFile(authFilePath, 'utf-8')) as Awaited<ReturnType<APIRequestContext['storageState']>>;
+      const authFile = JSON.parse(await readFile(authFilePath, "utf-8")) as Awaited<
+        ReturnType<APIRequestContext["storageState"]>
+      >;
       const apiContext = await playwright.request.newContext({
         extraHTTPHeaders: {
-          'X-CSRFToken': authFile.cookies.find(cookie => cookie.name === 'csrftoken')?.value || '',
-          'Referer': testConfig.baseURL,
+          "X-CSRFToken":
+            authFile.cookies.find((cookie) => cookie.name === "csrftoken")?.value || "",
+          "Referer": testConfig.baseURL,
         },
         storageState: authFile,
       });
@@ -319,10 +344,10 @@ const _test = base.extend<{
   // pages provide a set of methods to interact with a UI page, abstracting low-level
   // Playwright API calls. They are registered in the availablePages registry
   // so that they can be easily accessed from other pages and tests.
-  ...registerPage('homePage', HomePage),
-  ...registerPage('searchPage', SearchPage),
-  ...registerPage('depositPage', DepositPage),
-  ...registerPage('previewPage', PreviewPage),
+  ...registerPage("homePage", HomePage),
+  ...registerPage("searchPage", SearchPage),
+  ...registerPage("depositPage", DepositPage),
+  ...registerPage("previewPage", PreviewPage),
   ...registerPage("loginPage", LoginPage),
   ...registerPage("communitiesPage", CommunitiesPage),
   ...registerPage("communityDetailPage", CommunityDetailPage),
@@ -331,7 +356,7 @@ const _test = base.extend<{
   ...registerPage("newCommunityPage", NewCommunityPage),
   ...registerPage("recordDetailPage", RecordDetailPage),
   ...registerPage("administrationPage", AdministrationPage),
-})
+});
 
 type _invenio_base_test = typeof _test;
 
@@ -374,13 +399,13 @@ export const test: InvenioTest = new Proxy(_test as InvenioTest, {
             return target.describe.skip(
               title,
               details as TestDetails,
-              callback || (() => { })
+              callback || (() => {})
             );
           } else {
             return target.describe(
               title,
               details as TestDetails,
-              callback || (() => { })
+              callback || (() => {})
             );
           }
         };

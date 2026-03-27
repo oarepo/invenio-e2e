@@ -11,14 +11,12 @@
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
     "prettier:fix": "prettier --write \"{src,tests,scripts}/**/*.{ts,js,json,md}\"",
-    "collect-translations": "node scripts/collect-translations.js",
-    "collect-translations:validate": "node scripts/collect-translations.js --validate",
-    "generate-pot": "node scripts/generate-pot.js",
-    "i18n:validate": "npm run generate-pot && npm run collect-translations:validate"
+    "build-translations": "node scripts/build-translations.js",
+    "validate-translations": "node scripts/validate-translations.js"
   },
   "bin": {
-    "invenio-e2e-collect-translations": "scripts/collect-translations.js",
-    "invenio-e2e-generate-pot": "scripts/generate-pot.js"
+    "invenio-e2e-build-translations": "scripts/build-translations.js",
+    "invenio-e2e-validate-translations": "scripts/validate-translations.js"
   },
   "keywords": [],
   "author": "",

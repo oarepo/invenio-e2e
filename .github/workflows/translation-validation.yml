@@ -1,10 +1,13 @@
+# Periodic translation validation against upstream Invenio packages.
+# Requires invenio-i18n >= 3.5.0 in the Python environment.
+
 name: Translation Validation
 
 on:
   push:
-    branches: [main, master, i18n_service_clean]
+    branches: [main, master, i18n-service-wrapper]
   pull_request:
-    branches: [main, master, i18n_service_clean]
+    branches: [main, master, i18n-service-wrapper]
   workflow_dispatch:
     inputs:
       packages:
@@ -43,22 +46,21 @@ jobs:
         run: |
           source $HOME/.cargo/env
           uv venv --python ${{ matrix.python-version }}
-          uv pip install babel invenio-i18n
-          # Install packages 
+          uv pip install "invenio-i18n>=3.5.0"
           uv pip install -e ./invenio-app-rdm
           uv pip install -e ./invenio-rdm-records
 
-      - name: Generate POT file
+      - name: Collect translations
         env:
-          VENV_PATH: ${{ github.workspace }}/.venv
-          I18N_OUTPUT_DIR: src/translations
-        run: pnpm run generate-pot
+          I18N_OUTPUT_DIR: translations
+          PYTHON: .venv/bin/python
+        run: pnpm run build-translations -- -l de
 
-      - name: Collect translations with validation
+      - name: Validate translations
         env:
-          INVENIO_PACKAGES_DIR: ${{ github.workspace }}
-          I18N_OUTPUT_DIR: src/translations
-        run: pnpm run collect-translations:validate
+          I18N_OUTPUT_DIR: translations
+          PYTHON: .venv/bin/python
+        run: pnpm run validate-translations
 
       - name: Upload validation reports
         uses: actions/upload-artifact@v4
@@ -66,6 +68,5 @@ jobs:
         with:
           name: translation-reports-${{ matrix.python-version }}
           path: |
-            src/translations/validation-report.json
-            src/translations/messages.pot
+            translations/validation-report.json
           retention-days: 30

@@ -1,5 +1,5 @@
-# This CI tests if the *.pot file generation works which includes that new msgids will be added to the pot file. 
-# Further it will test translation collection from InvenioRDM packages and validate the collected translations.
+# CI for i18n: translation collection and validation
+# Requires invenio-i18n >= 3.5.0 in the Python environment.
 
 name: i18n-ci
 
@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.13"]
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -35,39 +35,25 @@ jobs:
         run: |
           source $HOME/.cargo/env
           uv venv --python ${{ matrix.python-version }}
-          uv pip install babel invenio-i18n
-          # Install packages 
+          uv pip install "invenio-i18n>=3.5.0"
           uv pip install -e ./invenio-app-rdm
           uv pip install -e ./invenio-rdm-records
 
-      - name: Generate POT file
+      - name: Collect translations
         env:
-          VENV_PATH: ${{ github.workspace }}/.venv
-          I18N_OUTPUT_DIR: src/translations
-          INVENIO_PACKAGES_DIR: ${{ github.workspace }}
-        run: pnpm run generate-pot
+          I18N_OUTPUT_DIR: translations
+          PYTHON: .venv/bin/python
+        run: pnpm run build-translations -- -l de
 
-      - name: Check POT file generation
-        run: |
-          git add -f src/translations/messages.pot
-          git diff --exit-code -- src/translations/messages.pot || {
-            echo "POT file has changed - source strings may have been modified"
-            exit 1
-          }
-          echo "POT file is up to date"
-
-      - name: Collect translations + validate
+      - name: Validate translations
         env:
-          INVENIO_PACKAGES_DIR: ${{ github.workspace }}
-          I18N_OUTPUT_DIR: src/translations
-        run: pnpm run collect-translations:validate
+          I18N_OUTPUT_DIR: translations
+          PYTHON: .venv/bin/python
+        run: pnpm run validate-translations
 
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: i18n-reports
-          path: |
-            src/translations/messages.pot
-            src/translations/translations.json
-            src/translations/validation-report.json
+          path: translations/
