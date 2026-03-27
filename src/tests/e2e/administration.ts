@@ -1,5 +1,6 @@
-import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
+
+import { InvenioTest } from "../../fixtures";
 
 export function administrationPageTests(test: InvenioTest) {
   test.describe("Administration Page Tests", () => {
@@ -7,7 +8,10 @@ export function administrationPageTests(test: InvenioTest) {
     test.beforeEach(async ({ homePage, config, loginPage }) => {
       // Open application and log in as admin (to access the administration page)
       await homePage.openPage();
-      await homePage.login({ username: config.adminEmail, password: config.adminPassword });
+      await homePage.login({
+        username: config.adminEmail,
+        password: config.adminPassword,
+      });
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -27,17 +31,26 @@ export function administrationPageTests(test: InvenioTest) {
       await administrationPage.openPage();
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    test("Accessing Administration page as anonym should fail", async ({ homePage, loginPage, page, locators }) => {
+    test("Accessing Administration page as anonym should fail", async ({
+      homePage,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      loginPage,
+      page,
+      locators,
+    }) => {
       // Log out admin
       await homePage.logout();
       // Try to access administration page as anonymous user
       await page.goto("/administration");
       await page.waitForLoadState("networkidle");
-      await expect(page.locator(locators.global.permisionRequiredMessage)).toBeVisible();
+      await expect(
+        page.locator(locators.global.permisionRequiredMessage)
+      ).toBeVisible();
     });
 
-    test("Create a new banner and validate it appears in the list and on site", async ({ administrationPage }) => {
+    test("Create a new banner and validate it appears in the list and on site", async ({
+      administrationPage,
+    }) => {
       const bannerMessage = `E2E banner ${Date.now()}`;
       const bannerUrlPath = "/search";
 
@@ -52,7 +65,7 @@ export function administrationPageTests(test: InvenioTest) {
       await administrationPage.validateBannerIsPresent(bannerMessage);
       await administrationPage.validateBannerPresentOnSite(
         bannerMessage,
-        bannerUrlPath,
+        bannerUrlPath
       );
     });
   });

@@ -1,26 +1,29 @@
-import { InvenioTest } from '../../fixtures';
-import { expect } from '@playwright/test';
+import { expect } from "@playwright/test";
+
+import { InvenioTest } from "../../fixtures";
 
 /**
  * Runs a set of tests for the homepage.
  * @param test The InvenioTest instance to use for the tests.
  */
 export function homepageTests(test: InvenioTest) {
-
-    test.describe('Homepage Tests', () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        test.beforeEach(async ({ homePage, loginPage }) => {
-            await homePage.openPage();
-        });
-
-        // using the "runner" instead of "test" directly will run the test only if it is not skipped
-        test('Should display the homepage logo', async ({ homePage }) => {
-            await homePage.expectLogoVisible();
-        });
-
-        test('Should navigate to search page from homepage', async ({ homePage, searchPage }) => {
-            await homePage.fillSearchField('example query');
-            expect(await homePage.submitSearch()).toBe(searchPage);
-        });
+  test.describe("Homepage Tests", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    test.beforeEach(async ({ homePage, loginPage }) => {
+      await homePage.openPage();
     });
-};
+
+    // using the "runner" instead of "test" directly will run the test only if it is not skipped
+    test("Should display the homepage logo", async ({ homePage }) => {
+      await homePage.expectLogoVisible();
+    });
+
+    test("Should navigate to search page from homepage", async ({
+      homePage,
+      searchPage,
+    }) => {
+      await homePage.fillSearchField("example query");
+      expect(await homePage.submitSearch()).toBe(searchPage);
+    });
+  });
+}

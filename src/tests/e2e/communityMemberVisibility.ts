@@ -1,5 +1,6 @@
-import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
+
+import { InvenioTest } from "../../fixtures";
 
 export function communityMemberVisibilityTests(test: InvenioTest) {
   test.describe("Communities – Member visibility", () => {

@@ -1,76 +1,59 @@
+import { readFile } from "fs/promises";
+
 import type { APIRequestContext, TestDetails } from "@playwright/test";
-import {
-  AdministrationPage,
-  AllPages,
-  CommunitiesPage,
-  CommunityDetailPage,
-  CommunitySearchPage,
-  DepositPage,
-  HomePage,
-  LoginPage,
-  MyDashboardPage,
-  NewCommunityPage,
-  PreviewPage,
-  RecordDetailPage,
-  SearchPage,
-} from "../pages";
-import { CommunityData, defaultCommunityData } from "./communityData";
-import { DepositionData, defaultDepositionData } from "./depositionData";
 /* eslint-disable no-empty-pattern */
 import { Expect, test as base, expect as playwrightExpect } from "@playwright/test";
-import type { TestDetails, APIRequestContext } from '@playwright/test';
 
-import { readFile } from 'fs/promises';
+import type { TestConfig } from "../config";
+import { testConfig } from "../config";
+import { FileUploadHelper } from "../helpers/fileUploadHelper";
+import type { Locators } from "../locators";
+import { locators } from "../locators";
 import {
+  AdministrationPage,
   AllPages,
-  HomePage,
-  LoginPage,
-  SearchPage,
-  DepositPage,
-  PreviewPage,
   CommunitiesPage,
   CommunityDetailPage,
   CommunitySearchPage,
+  DepositPage,
+  HomePage,
+  LoginPage,
   MyDashboardPage,
   NewCommunityPage,
+  PreviewPage,
   RecordDetailPage,
-  AdministrationPage,
+  SearchPage,
 } from "../pages";
 import {
+  FormService,
   I18nExpected,
   I18nService,
   LocalLoginService,
   Services,
   Translations,
-  FormService,
 } from "../services";
-
 import { RecordsApiData, defaultRecordsApiData } from "./api";
-import { defaultRoleUsers, RoleUsers } from "./roleUsers";
-
-import { FileUploadHelper } from "../helpers/fileUploadHelper";
-import type { Locators } from "../locators";
-import type { TestConfig } from "../config";
-import { locators } from "../locators";
-import { readFile } from "fs/promises";
+import { CommunityData, defaultCommunityData } from "./communityData";
+import { DepositionData, defaultDepositionData } from "./depositionData";
+import { RoleUsers, defaultRoleUsers } from "./roleUsers";
 import { registerPage } from "./utils";
-import { testConfig } from "../config";
 
 export { registerPage } from "./utils";
 export type { DepositionData, FormData } from "./depositionData";
 export type { CommunityData, CommunityDataRecord } from "./communityData";
 export type { RoleUsers, RoleUser } from "./roleUsers";
+
 /**
  * Helper function to format JSON for logging.
  * If the JSON is longer than 100 lines, it will show the first 50 and last 50 lines with ellipsis.
  */
 function formatJsonForLogging(jsonData: unknown): string {
   const formatted = JSON.stringify(jsonData, null, 2);
-  const lines = formatted.split('\n');
+  const lines = formatted.split("\n");
 
   if (lines.length > 100) {
-    const firstLines = lines.slice(0, 50).join('\n');
-    const lastLines = lines.slice(-50).join('\n');
+    const firstLines = lines.slice(0, 50).join("\n");
+    const lastLines = lines.slice(-50).join("\n");
     return `${firstLines}\n... (${lines.length - 100} lines omitted) ...\n${lastLines}`;
   }
 
@@ -131,7 +114,7 @@ const _test = base.extend<{
   initialLocale: undefined,
 
   // translations loaded from pre-compiled file
-  translations: async ({ }, use) => {
+  translations: async ({}, use) => {
     let translations: Translations = {};
     try {
       const translationsFile =
@@ -141,10 +124,10 @@ const _test = base.extend<{
     } catch {
       throw new Error(
         "Pre-compiled translations not found. Please generate translations first:\n\n" +
-        "run: npm run collect-translations\n" +
-        "or specify packages: npm run collect-translations invenio-app-rdm repository-tugraz\n" +
-        "then rebuild: npm run build\n\n" +
-        "this will create src/translations/translations.json with actual translations from your Invenio packages.\n"
+          "run: npm run collect-translations\n" +
+          "or specify packages: npm run collect-translations invenio-app-rdm repository-tugraz\n" +
+          "then rebuild: npm run build\n\n" +
+          "this will create src/translations/translations.json with actual translations from your Invenio packages.\n"
       );
     }
     await use(translations);
@@ -207,16 +190,16 @@ const _test = base.extend<{
   page: async ({ page, config }, use) => {
     if (config.logXhrRequests) {
       // Log requests
-      page.on('request', request => {
-        if (request.resourceType() === 'xhr' || request.resourceType() === 'fetch') {
-          console.log('➡️', request.method(), request.url());
-          console.log('Headers:', request.headers());
+      page.on("request", (request) => {
+        if (request.resourceType() === "xhr" || request.resourceType() === "fetch") {
+          console.log("➡️", request.method(), request.url());
+          console.log("Headers:", request.headers());
 
           const postData = request.postData();
           if (postData) {
             try {
               const jsonData = JSON.parse(postData); // eslint-disable-line
-              console.log('Request payload (JSON):', formatJsonForLogging(jsonData));
+              console.log("Request payload (JSON):", formatJsonForLogging(jsonData));
             } catch {
               // Not JSON, skip logging
             }
@@ -225,17 +208,20 @@ const _test = base.extend<{
       });
 
       // Log responses
-      page.on('response', async (response) => {
-        if (response.request().resourceType() === 'xhr' || response.request().resourceType() === 'fetch') {
-          console.log('⬅️', response.status(), response.url());
-          console.log('Response headers:', response.headers());
+      page.on("response", async (response) => {
+        if (
+          response.request().resourceType() === "xhr" ||
+          response.request().resourceType() === "fetch"
+        ) {
+          console.log("⬅️", response.status(), response.url());
+          console.log("Response headers:", response.headers());
 
           try {
             const body = await response.text();
             if (body) {
               try {
                 const jsonData = JSON.parse(body); // eslint-disable-line
-                console.log('Response payload (JSON):', formatJsonForLogging(jsonData));
+                console.log("Response payload (JSON):", formatJsonForLogging(jsonData));
               } catch {
                 // Not JSON, skip logging
               }
@@ -285,19 +271,19 @@ const _test = base.extend<{
     await use(true);
   },
 
-  communityData: async ({ }, use) => {
+  communityData: async ({}, use) => {
     await use(defaultCommunityData);
   },
 
-  depositionData: async ({ }, use) => {
+  depositionData: async ({}, use) => {
     await use(defaultDepositionData);
   },
 
-  recordsApiData: async ({ }, use) => {
+  recordsApiData: async ({}, use) => {
     await use(defaultRecordsApiData);
   },
 
-  roleUsers: async ({ }, use) => {
+  roleUsers: async ({}, use) => {
     await use(defaultRoleUsers);
   },
 

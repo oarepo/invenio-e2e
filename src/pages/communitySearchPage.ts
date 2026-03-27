@@ -17,7 +17,9 @@ export class CommunitySearchPage<T extends Locators = Locators> extends BasePage
     const dropdown = this.page.locator(this.locators.communitySearchPage.sortDropdown);
     await dropdown.click();
 
-    const optionLocator = this.page.locator(this.locators.communitySearchPage.sortOption(option));
+    const optionLocator = this.page.locator(
+      this.locators.communitySearchPage.sortOption(option)
+    );
     await optionLocator.waitFor({ state: "visible" });
     await optionLocator.click();
   }

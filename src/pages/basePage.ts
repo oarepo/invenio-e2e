@@ -1,8 +1,9 @@
 import { Expect, Page } from "@playwright/test";
-import { I18nExpected, Services } from "../services";
+
 import { AllPages } from ".";
-import { HomePage } from "./homePage";
 import { Locators } from "../locators";
+import { I18nExpected, Services } from "../services";
+import { HomePage } from "./homePage";
 
 /**
  * Abstract class representing a base page with common functionality for all pages.
@@ -104,7 +105,7 @@ export class BasePage<
     const loginService = this.services.login;
     const homePage = await loginService.logout();
     this.expect(
-      await loginService.isUserLoggedIn(), 
+      await loginService.isUserLoggedIn(),
       "User should be logged out after logout flow."
     ).toBe(false);
     return homePage;

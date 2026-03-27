@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { expect } from "@playwright/test";
+
 import { FileObject, testConfig } from "../..";
 import { InvenioTest } from "../../fixtures";
-import { expect } from "@playwright/test";
 
 export function depositionTests(test: InvenioTest) {
   test.describe("Deposition Tests", () => {
@@ -84,11 +85,18 @@ export function depositionTests(test: InvenioTest) {
           {
             name: "largeFile.txt",
             mimeType: "text/plain",
-            buffer: Buffer.alloc(testConfig.s3DefaultBlockSize + Math.ceil(testConfig.s3DefaultBlockSize / 10), "a"),
+            buffer: Buffer.alloc(
+              testConfig.s3DefaultBlockSize +
+                Math.ceil(testConfig.s3DefaultBlockSize / 10),
+              "a"
+            ),
           } as FileObject,
         ],
       };
-      const { filledData } = await formService.fillForm(depositPage, formDataWithLargeFile);
+      const { filledData } = await formService.fillForm(
+        depositPage,
+        formDataWithLargeFile
+      );
 
       const expectedFile = formDataWithLargeFile.files[0].name;
       // Verify the file name is in the filled data
@@ -142,7 +150,7 @@ export function depositionTests(test: InvenioTest) {
       const dp = await homePage.selectNewUpload();
 
       // Fill minimum required metadata
-      await depositPage.fillTitle('Embargo record ${Date.now()}');
+      await depositPage.fillTitle("Embargo record ${Date.now()}");
       await depositPage.addCreator({ familyName: "Tester", givenName: "Embargo" });
 
       // Resource type is usually required
@@ -157,7 +165,7 @@ export function depositionTests(test: InvenioTest) {
       // Enable embargo and fill embargo fields
       await depositPage.enableEmbargo(true);
       await depositPage.setEmbargoUntilDateRelative({ days: 7 }); // e.g. +7 days
-      await depositPage.fillEmbargoReason('Automated embargo reason ${Date.now()}');
+      await depositPage.fillEmbargoReason("Automated embargo reason ${Date.now()}");
 
       // Publish the record and confirm
       await depositPage.clickPublish();

@@ -1,5 +1,5 @@
-import { BasePage } from "./basePage";
 import { Locators } from "../locators";
+import { BasePage } from "./basePage";
 
 /**
  * Class representing the user Dashboard page.

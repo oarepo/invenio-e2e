@@ -1,5 +1,6 @@
-import { InvenioTest } from "../../fixtures";
 import { expect } from "@playwright/test";
+
+import { InvenioTest } from "../../fixtures";
 
 export function communityFiltersTests(test: InvenioTest) {
   test.describe("Community records – Filters", () => {
@@ -9,7 +10,11 @@ export function communityFiltersTests(test: InvenioTest) {
       await homePage.login();
     });
 
-    test("Filter - Access status", async ({ homePage, communitiesPage, communityDetailPage }) => {
+    test("Filter - Access status", async ({
+      homePage,
+      communitiesPage,
+      communityDetailPage,
+    }) => {
       await homePage.goToCommunitiesPage();
       await communitiesPage.navigateToFirstCommunity();
 
@@ -28,7 +33,11 @@ export function communityFiltersTests(test: InvenioTest) {
 
     //-----------------------------------------------------------------------------------
 
-    test("Filter - Resource types", async ({ homePage, communitiesPage, communityDetailPage }) => {
+    test("Filter - Resource types", async ({
+      homePage,
+      communitiesPage,
+      communityDetailPage,
+    }) => {
       await homePage.goToCommunitiesPage();
       await communitiesPage.navigateToFirstCommunity();
 

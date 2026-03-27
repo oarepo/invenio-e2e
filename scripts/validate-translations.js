@@ -31,7 +31,9 @@ function main() {
   try {
     execSync(cmd, { stdio: "inherit", encoding: "utf8" });
   } catch {
-    console.error(`Translation validation failed (python: ${PYTHON}). See output above for details.`);
+    console.error(
+      `Translation validation failed (python: ${PYTHON}). See output above for details.`
+    );
     process.exit(1);
   }
 }

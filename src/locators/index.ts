@@ -1,8 +1,8 @@
- 
-import { locators } from './defaultLocators';
-import { merge } from 'ts-deepmerge';
+import { merge } from "ts-deepmerge";
 
-export { locators } from './defaultLocators';
+import { locators } from "./defaultLocators";
+
+export { locators } from "./defaultLocators";
 
 /**
  * Type definition for the locators object.
@@ -47,15 +47,16 @@ type UseLocators<L> = (r: L & Locators) => Promise<void>;
  * }
  * ```
  * @param locators the new locators to be merged with the existing ones.
- * @returns A function that takes the original locators and 
- * merges them with the new ones, to be used in the test 
+ * @returns A function that takes the original locators and
+ * merges them with the new ones, to be used in the test
  * fixture definition.
  */
-export function updateLocators<T extends Record<string, unknown>>(locators: T): (
-    (params: { locators: Locators }, use: UseLocators<T & Locators>) => Promise<void>) {
-    return async ({ locators: origLocators }, use) => {
-        // NOTE: https://github.com/voodoocreation/ts-deepmerge/issues/30: When working with generic declared types/interfaces
-        // TODO: Create a type-safe interfaces like ILocatorsObject
-        await use(merge(origLocators, locators as object) as T & Locators);
-    };
+export function updateLocators<T extends Record<string, unknown>>(
+  locators: T
+): (params: { locators: Locators }, use: UseLocators<T & Locators>) => Promise<void> {
+  return async ({ locators: origLocators }, use) => {
+    // NOTE: https://github.com/voodoocreation/ts-deepmerge/issues/30: When working with generic declared types/interfaces
+    // TODO: Create a type-safe interfaces like ILocatorsObject
+    await use(merge(origLocators, locators as object) as T & Locators);
+  };
 }

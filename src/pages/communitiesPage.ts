@@ -1,6 +1,7 @@
+import { expect } from "@playwright/test";
+
 import { Locators } from "../locators";
 import { BasePage } from "./basePage";
-import { expect } from "@playwright/test";
 
 /**
  * CommunitiesPage represents the Communities section of the application.
@@ -153,10 +154,8 @@ export class CommunitiesPage<T extends Locators = Locators> extends BasePage<T> 
    * Returns the visible name of the first community in the list.
    * Useful for comparisons between logged-in and logged-out state.
    */
-    async getFirstCommunityNameText(): Promise<string> {
-    return await this.getFirstText(
-      this.locators.communitiesPage.communityNameLink
-    );
+  async getFirstCommunityNameText(): Promise<string> {
+    return await this.getFirstText(this.locators.communitiesPage.communityNameLink);
   }
 
   /**

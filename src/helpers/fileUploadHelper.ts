@@ -1,7 +1,12 @@
+import * as fs from "fs";
+// A Node.js module for working with files and directories (reading, writing, deleting files, etc.).
+import * as path from "path";
+
 import { Page } from "@playwright/test";
+
 import { appConfig } from "../config";
-import * as fs from "fs"; // A Node.js module for working with files and directories (reading, writing, deleting files, etc.).
-import * as path from "path"; // A Node.js module for working with file and directory paths, allowing dynamic and absolute path creation.
+
+// A Node.js module for working with file and directory paths, allowing dynamic and absolute path creation.
 
 /**
  * This helper class provides utility functions to manage file uploads during Playwright tests.
@@ -17,7 +22,12 @@ export class FileUploadHelper {
 
   constructor(private page: Page) {
     // Define the path for the UploadFiles folder inside the 'data' directory dynamically
-    this.uploadFolderPath = path.resolve(__dirname, "..", appConfig.dataFolderPath, "UploadFiles");
+    this.uploadFolderPath = path.resolve(
+      __dirname,
+      "..",
+      appConfig.dataFolderPath,
+      "UploadFiles"
+    );
     console.log("Looking for upload files in:", this.uploadFolderPath);
 
     // Ensure the UploadFiles directory exists
@@ -50,9 +60,7 @@ export class FileUploadHelper {
     console.log(`Uploading file: ${filePath}`);
 
     // Click confirmation 'Upload' button
-    const uploadButton = this.page.locator(
-      'button.uppy-StatusBar-actionBtn--upload'
-    );
+    const uploadButton = this.page.locator("button.uppy-StatusBar-actionBtn--upload");
     await uploadButton.waitFor({ state: "visible" });
     await uploadButton.click();
     console.log("Confirmed file upload by clicking the button.");
