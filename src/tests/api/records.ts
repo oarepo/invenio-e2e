@@ -603,547 +603,565 @@ export function recordsApiTests(
     );
   };
 
-  test.describe("API Record Tests", () => {
-    test("Should return list of records with correct structure", async () => {
-      const response = await userApiContext.get(recordsApiPath);
-      expect(response.status()).toBe(200);
-      expect(await response.json()).toEqual(
-        expect.objectContaining({
-          hits: expect.objectContaining({
-            total: expect.any(Number),
-            hits: expect.arrayContaining([
-              expect.objectContaining({
-                id: expect.any(String),
-                metadata: expect.any(Object),
-                created: expect.any(String),
-                updated: expect.any(String),
-              }),
-            ]),
-          }),
-        })
-      );
-    });
-
-    test("Should create and publish a new metadata-only record", async ({
-      recordsApiData,
-    }) => {
-      const defaultRecord = recordsApiData["defaultRecord"] as unknown as DefaultRecord;
-      const { createdRecord, recordObjectMatchers } =
-        await createDraftRecord(defaultRecord);
-      await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
-    });
-
-    test("Should create and publish a new record with local file upload transfer", async ({
-      recordsApiData,
-    }) => {
-      const defaultRecord = {
-        ...recordsApiData["defaultRecord"],
-        files: {
-          enabled: true,
-        },
-      } as DefaultRecord;
-
-      const { createdRecord, recordObjectMatchers } = await createDraftRecord(
-        defaultRecord,
-        true
-      );
-      await uploadFileWithLocalTransfer(createdRecord, testFiles[0]);
-      await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
-    });
-
-    test("Should create and publish a new record with fetch file upload transfer", async ({
-      recordsApiData,
-    }) => {
-      const defaultRecord = {
-        ...recordsApiData["defaultRecord"],
-        files: {
-          enabled: true,
-        },
-      } as DefaultRecord;
-
-      const { createdRecord, recordObjectMatchers } = await createDraftRecord(
-        defaultRecord,
-        true
-      );
-      await uploadFileWithFetchTransfer(createdRecord, testFiles[1]);
-      await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
-    });
-
-    test("Should create and publish a new record with multipart file upload transfer (single part)", async ({
-      recordsApiData,
-    }) => {
-      const defaultRecord = {
-        ...recordsApiData["defaultRecord"],
-        files: {
-          enabled: true,
-        },
-      } as DefaultRecord;
-
-      const { createdRecord, recordObjectMatchers } = await createDraftRecord(
-        defaultRecord,
-        true
-      );
-      await uploadFileWithMultipartTransfer(createdRecord, testFiles[2], 1);
-      await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
-    });
-
-    test("Should create and publish a new record with multipart file upload transfer (two parts)", async ({
-      recordsApiData,
-    }) => {
-      const defaultRecord = {
-        ...recordsApiData["defaultRecord"],
-        files: {
-          enabled: true,
-        },
-      } as DefaultRecord;
-
-      const { createdRecord, recordObjectMatchers } = await createDraftRecord(
-        defaultRecord,
-        true
-      );
-
-      // S3_DEFAULT_BLOCK_SIZE=5MB is the minimum by default
-      // Let's allocate S3_DEFAULT_BLOCK_SIZE + 1/10*S3_DEFAULT_BLOCK_SIZE to ensure we can use exactly 2 parts
-      const largeFileBuffer = Buffer.alloc(
-        appConfig.s3DefaultBlockSize + Math.ceil(appConfig.s3DefaultBlockSize / 10),
-        "a"
-      );
-      await uploadFileWithMultipartTransfer(
-        createdRecord,
-        testFiles[3],
-        2,
-        largeFileBuffer
-      );
-      await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
-    });
-
-    test("Should create and publish a new record and then edit metadata successfully", async ({
-      recordsApiData,
-    }) => {
-      const defaultRecord = recordsApiData["defaultRecord"] as unknown as DefaultRecord;
-      const { createdRecord, recordObjectMatchers } =
-        await createDraftRecord(defaultRecord);
-      const publishedRecord = await publishAndVerifyRecord(
-        createdRecord,
-        recordObjectMatchers
-      );
-
-      // First, transition the published record back to draft
-      const publishedToDraftResponse = await userApiContext.post(
-        publishedRecord.links.draft
-      );
-
-      expect(publishedToDraftResponse.status()).toBe(201);
-
-      const updatedDefaultRecord = {
-        ...defaultRecord,
-        metadata: {
-          ...defaultRecord.metadata,
-          title: "Updated Title",
-        },
-      };
-
-      // Then, update the record metadata while in draft state
-      const updateResponse = await userApiContext.put(
-        ((await publishedToDraftResponse.json()) as ApiRecordResponse).links.self,
-        {
-          data: updatedDefaultRecord,
-        }
-      );
-
-      expect(updateResponse.status()).toBe(200);
-
-      const updatedRecord = (await updateResponse.json()) as ApiRecordResponse;
-
-      // Finally, publish the updated record again and verify the changes
-      const publishedUpdatedRecord = await publishAndVerifyRecord(
-        updatedRecord,
-        buildRecordObjectMatchers(updatedDefaultRecord)
-      );
-
-      expect(publishedUpdatedRecord, "should have the same id").toHaveProperty(
-        "id",
-        publishedRecord.id
-      );
-      expect(publishedUpdatedRecord, "should have the updated title").toHaveProperty(
-        "metadata.title",
-        "Updated Title"
-      );
-    });
-
-    test("Should create and publish a new version with linked files from previous version and a new id", async ({
-      recordsApiData,
-    }) => {
-      const defaultRecord = {
-        ...recordsApiData["defaultRecord"],
-        files: {
-          enabled: true,
-        },
-      } as DefaultRecord;
-
-      // Publish initial version with an uploaded file.
-      const { createdRecord, recordObjectMatchers } = await createDraftRecord(
-        defaultRecord,
-        true
-      );
-      await uploadFileWithLocalTransfer(createdRecord, testFiles[0]);
-      const firstPublishedVersion = await publishAndVerifyRecord(
-        createdRecord,
-        recordObjectMatchers
-      );
-
-      // Capture files from first published version.
-      const firstVersionFilesResponse = await userApiContext.get(
-        firstPublishedVersion.links.files
-      );
-      expect(firstVersionFilesResponse.status()).toBe(200);
-      const firstVersionFiles =
-        (await firstVersionFilesResponse.json()) as RecordFilesListResponse;
-      expect(
-        firstVersionFiles.entries.length,
-        "first version should have uploaded files"
-      ).toBeGreaterThan(0);
-
-      // Create new draft version.
-      const createVersionResponse = await userApiContext.post(
-        firstPublishedVersion.links.versions
-      );
-      expect(createVersionResponse.status()).toBe(201);
-      const newDraftVersion = (await createVersionResponse.json()) as ApiRecordResponse;
-
-      const firstVersionIndex = (
-        firstPublishedVersion as { versions?: { index?: number } }
-      ).versions?.index;
-      const newDraftVersionIndex = (
-        newDraftVersion as { versions?: { index?: number } }
-      ).versions?.index;
-      const firstParentId = (firstPublishedVersion as { parent?: { id?: string } })
-        .parent?.id;
-      const newDraftParentId = (newDraftVersion as { parent?: { id?: string } }).parent
-        ?.id;
-
-      expect(
-        newDraftVersion.id,
-        "new draft version should have a different id"
-      ).not.toBe(firstPublishedVersion.id);
-      expect(newDraftVersion, "new version should be returned as draft").toEqual(
-        expect.objectContaining({
-          is_published: false,
-          is_draft: true,
-          links: expect.objectContaining({
-            self: expect.any(String),
-            files: expect.any(String),
-            publish: expect.any(String),
-          }),
-        })
-      );
-      expect(
-        newDraftVersion,
-        "new draft version should not carry publication_date in metadata"
-      ).not.toHaveProperty("metadata.publication_date");
-      expect(
-        newDraftVersion,
-        "new draft version should not carry metadata.version"
-      ).not.toHaveProperty("metadata.version");
-      expect(
-        firstVersionIndex,
-        "first published version should provide versions.index"
-      ).toBeDefined();
-      expect(
-        newDraftVersionIndex,
-        "new draft version should provide versions.index"
-      ).toBeDefined();
-      expect(
-        newDraftVersionIndex,
-        "new draft version should increment versions.index by 1"
-      ).toBe((firstVersionIndex as number) + 1);
-      expect(firstParentId, "first version should include parent.id").toBeDefined();
-      expect(newDraftParentId, "new version should include parent.id").toBeDefined();
-      expect(
-        newDraftParentId,
-        "new version should be linked to same parent.id as previous version"
-      ).toBe(firstParentId);
-
-      // New version draft starts without files.
-      const beforeImportFilesResponse = await userApiContext.get(
-        newDraftVersion.links.files
-      );
-      expect(beforeImportFilesResponse.status()).toBe(200);
-      const beforeImportFiles =
-        (await beforeImportFilesResponse.json()) as RecordFilesListResponse;
-      expect(beforeImportFiles.entries).toHaveLength(0);
-
-      // Link all files from previous version.
-      const filesImportResponse = await userApiContext.post(
-        `${newDraftVersion.links.self}/actions/files-import`
-      );
-      expect(filesImportResponse.status()).toBe(201);
-      const importedDraftFiles =
-        (await filesImportResponse.json()) as RecordFilesListResponse;
-
-      expect(
-        importedDraftFiles.entries.length,
-        "draft should contain linked files after import"
-      ).toBe(firstVersionFiles.entries.length);
-      expect(
-        importedDraftFiles.entries,
-        "linked draft should contain the file from previous version"
-      ).toEqual(
-        expect.arrayContaining([
+  test.describe(
+    "API Record Tests",
+    {
+      tag: "@api",
+    },
+    () => {
+      test("Should return list of records with correct structure", async () => {
+        const response = await userApiContext.get(recordsApiPath);
+        expect(response.status()).toBe(200);
+        expect(await response.json()).toEqual(
           expect.objectContaining({
-            key: testFiles[0].key,
-            status: "completed",
-          }),
-        ])
-      );
-
-      // Update metadata in the new draft version to include compulsory publication_date field
-      const updateMetadataResponse = await userApiContext.put(
-        newDraftVersion.links.self,
-        {
-          data: {
-            ...newDraftVersion,
-            metadata: {
-              ...newDraftVersion.metadata,
-              publication_date: "2026-01-01",
-            },
-          },
-        }
-      );
-      expect(updateMetadataResponse.status()).toBe(200);
-
-      // Publish new version.
-      const publishNewVersionResponse = await userApiContext.post(
-        newDraftVersion.links.publish
-      );
-      expect(publishNewVersionResponse.status()).toBe(202);
-      const secondPublishedVersion =
-        (await publishNewVersionResponse.json()) as ApiRecordResponse;
-      const secondPublishedParentId = (
-        secondPublishedVersion as { parent?: { id?: string } }
-      ).parent?.id;
-
-      expect(
-        secondPublishedVersion.id,
-        "published new version should keep new id"
-      ).toBe(newDraftVersion.id);
-      expect(
-        secondPublishedVersion.id,
-        "published new version id should differ from previous version id"
-      ).not.toBe(firstPublishedVersion.id);
-      expect(secondPublishedVersion, "new version should be published").toEqual(
-        expect.objectContaining({
-          status: "published",
-          is_published: true,
-          is_draft: false,
-        })
-      );
-      expect(
-        secondPublishedParentId,
-        "published new version should keep same parent.id"
-      ).toBe(firstParentId);
-
-      // Verify linked files are present in the newly published version.
-      const secondVersionFilesResponse = await userApiContext.get(
-        secondPublishedVersion.links.files
-      );
-      expect(secondVersionFilesResponse.status()).toBe(200);
-      const secondVersionFiles =
-        (await secondVersionFilesResponse.json()) as RecordFilesListResponse;
-
-      expect(secondVersionFiles.entries.length).toBe(firstVersionFiles.entries.length);
-
-      const firstVersionFile = firstVersionFiles.entries.find(
-        (entry) => entry.key === testFiles[0].key
-      );
-      const secondVersionFile = secondVersionFiles.entries.find(
-        (entry) => entry.key === testFiles[0].key
-      );
-
-      expect(
-        firstVersionFile,
-        `expected file ${testFiles[0].key} in first published version`
-      ).toBeDefined();
-      expect(
-        secondVersionFile,
-        `expected linked file ${testFiles[0].key} in second published version`
-      ).toBeDefined();
-
-      expect(
-        secondVersionFile,
-        "linked file metadata should be preserved in new version"
-      ).toEqual(
-        expect.objectContaining({
-          key: firstVersionFile!.key,
-          checksum: firstVersionFile!.checksum,
-          mimetype: firstVersionFile!.mimetype,
-          size: firstVersionFile!.size,
-          status: "completed",
-        })
-      );
-    });
-
-    test("Should create and publish an embargoed restricted record and keep it hidden from unauthenticated users", async ({
-      recordsApiData,
-      playwright,
-    }) => {
-      const embargoUntil = "2100-10-01";
-      const embargoedRecord = {
-        ...recordsApiData["defaultRecord"],
-        access: {
-          record: "restricted",
-          files: "restricted",
-          embargo: {
-            active: true,
-            until: embargoUntil,
-            reason: "Integration test embargo",
-          },
-        },
-      } as DefaultRecord;
-
-      const { createdRecord, recordObjectMatchers } =
-        await createDraftRecord(embargoedRecord);
-      const publishedEmbargoedRecord = await publishAndVerifyRecord(
-        createdRecord,
-        recordObjectMatchers
-      );
-
-      expect(publishedEmbargoedRecord).toEqual(
-        expect.objectContaining({
-          access: expect.objectContaining({
-            record: "restricted",
-            files: "restricted",
-            embargo: expect.objectContaining({
-              active: true,
-              until: embargoUntil,
+            hits: expect.objectContaining({
+              total: expect.any(Number),
+              hits: expect.arrayContaining([
+                expect.objectContaining({
+                  id: expect.any(String),
+                  metadata: expect.any(Object),
+                  created: expect.any(String),
+                  updated: expect.any(String),
+                }),
+              ]),
             }),
-          }),
-        })
-      );
-
-      const unauthenticatedApiContext = await playwright.request.newContext({
-        baseURL: appConfig.baseURL,
+          })
+        );
       });
 
-      try {
-        // Unauthenticated users should not be able to access the restricted embargoed record directly.
-        const unauthGetRecordResponse = await unauthenticatedApiContext.get(
-          publishedEmbargoedRecord.links.self
-        );
-        expect(
-          unauthGetRecordResponse.status(),
-          "restricted embargoed record should not be visible to unauthenticated users"
-        ).toBe(403);
+      test("Should create and publish a new metadata-only record", async ({
+        recordsApiData,
+      }) => {
+        const defaultRecord = recordsApiData[
+          "defaultRecord"
+        ] as unknown as DefaultRecord;
+        const { createdRecord, recordObjectMatchers } =
+          await createDraftRecord(defaultRecord);
+        await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
+      });
 
-        // Unauthenticated users should not be able to access files of the restricted embargoed record.
-        const unauthGetFilesResponse = await unauthenticatedApiContext.get(
-          publishedEmbargoedRecord.links.files
-        );
-        expect(
-          unauthGetFilesResponse.status(),
-          "files of restricted embargoed record should not be visible to unauthenticated users"
-        ).toBe(403);
+      test("Should create and publish a new record with local file upload transfer", async ({
+        recordsApiData,
+      }) => {
+        const defaultRecord = {
+          ...recordsApiData["defaultRecord"],
+          files: {
+            enabled: true,
+          },
+        } as DefaultRecord;
 
-        // Public search should not reveal this restricted embargoed record.
-        const unauthSearchResponse = await unauthenticatedApiContext.get(
-          recordsApiPath,
+        const { createdRecord, recordObjectMatchers } = await createDraftRecord(
+          defaultRecord,
+          true
+        );
+        await uploadFileWithLocalTransfer(createdRecord, testFiles[0]);
+        await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
+      });
+
+      test("Should create and publish a new record with fetch file upload transfer", async ({
+        recordsApiData,
+      }) => {
+        const defaultRecord = {
+          ...recordsApiData["defaultRecord"],
+          files: {
+            enabled: true,
+          },
+        } as DefaultRecord;
+
+        const { createdRecord, recordObjectMatchers } = await createDraftRecord(
+          defaultRecord,
+          true
+        );
+        await uploadFileWithFetchTransfer(createdRecord, testFiles[1]);
+        await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
+      });
+
+      test("Should create and publish a new record with multipart file upload transfer (single part)", async ({
+        recordsApiData,
+      }) => {
+        const defaultRecord = {
+          ...recordsApiData["defaultRecord"],
+          files: {
+            enabled: true,
+          },
+        } as DefaultRecord;
+
+        const { createdRecord, recordObjectMatchers } = await createDraftRecord(
+          defaultRecord,
+          true
+        );
+        await uploadFileWithMultipartTransfer(createdRecord, testFiles[2], 1);
+        await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
+      });
+
+      test("Should create and publish a new record with multipart file upload transfer (two parts)", async ({
+        recordsApiData,
+      }) => {
+        const defaultRecord = {
+          ...recordsApiData["defaultRecord"],
+          files: {
+            enabled: true,
+          },
+        } as DefaultRecord;
+
+        const { createdRecord, recordObjectMatchers } = await createDraftRecord(
+          defaultRecord,
+          true
+        );
+
+        // S3_DEFAULT_BLOCK_SIZE=5MB is the minimum by default
+        // Let's allocate S3_DEFAULT_BLOCK_SIZE + 1/10*S3_DEFAULT_BLOCK_SIZE to ensure we can use exactly 2 parts
+        const largeFileBuffer = Buffer.alloc(
+          appConfig.s3DefaultBlockSize + Math.ceil(appConfig.s3DefaultBlockSize / 10),
+          "a"
+        );
+        await uploadFileWithMultipartTransfer(
+          createdRecord,
+          testFiles[3],
+          2,
+          largeFileBuffer
+        );
+        await publishAndVerifyRecord(createdRecord, recordObjectMatchers);
+      });
+
+      test("Should create and publish a new record and then edit metadata successfully", async ({
+        recordsApiData,
+      }) => {
+        const defaultRecord = recordsApiData[
+          "defaultRecord"
+        ] as unknown as DefaultRecord;
+        const { createdRecord, recordObjectMatchers } =
+          await createDraftRecord(defaultRecord);
+        const publishedRecord = await publishAndVerifyRecord(
+          createdRecord,
+          recordObjectMatchers
+        );
+
+        // First, transition the published record back to draft
+        const publishedToDraftResponse = await userApiContext.post(
+          publishedRecord.links.draft
+        );
+
+        expect(publishedToDraftResponse.status()).toBe(201);
+
+        const updatedDefaultRecord = {
+          ...defaultRecord,
+          metadata: {
+            ...defaultRecord.metadata,
+            title: "Updated Title",
+          },
+        };
+
+        // Then, update the record metadata while in draft state
+        const updateResponse = await userApiContext.put(
+          ((await publishedToDraftResponse.json()) as ApiRecordResponse).links.self,
           {
-            params: {
-              q: `id:${publishedEmbargoedRecord.id}`,
+            data: updatedDefaultRecord,
+          }
+        );
+
+        expect(updateResponse.status()).toBe(200);
+
+        const updatedRecord = (await updateResponse.json()) as ApiRecordResponse;
+
+        // Finally, publish the updated record again and verify the changes
+        const publishedUpdatedRecord = await publishAndVerifyRecord(
+          updatedRecord,
+          buildRecordObjectMatchers(updatedDefaultRecord)
+        );
+
+        expect(publishedUpdatedRecord, "should have the same id").toHaveProperty(
+          "id",
+          publishedRecord.id
+        );
+        expect(publishedUpdatedRecord, "should have the updated title").toHaveProperty(
+          "metadata.title",
+          "Updated Title"
+        );
+      });
+
+      test("Should create and publish a new version with linked files from previous version and a new id", async ({
+        recordsApiData,
+      }) => {
+        const defaultRecord = {
+          ...recordsApiData["defaultRecord"],
+          files: {
+            enabled: true,
+          },
+        } as DefaultRecord;
+
+        // Publish initial version with an uploaded file.
+        const { createdRecord, recordObjectMatchers } = await createDraftRecord(
+          defaultRecord,
+          true
+        );
+        await uploadFileWithLocalTransfer(createdRecord, testFiles[0]);
+        const firstPublishedVersion = await publishAndVerifyRecord(
+          createdRecord,
+          recordObjectMatchers
+        );
+
+        // Capture files from first published version.
+        const firstVersionFilesResponse = await userApiContext.get(
+          firstPublishedVersion.links.files
+        );
+        expect(firstVersionFilesResponse.status()).toBe(200);
+        const firstVersionFiles =
+          (await firstVersionFilesResponse.json()) as RecordFilesListResponse;
+        expect(
+          firstVersionFiles.entries.length,
+          "first version should have uploaded files"
+        ).toBeGreaterThan(0);
+
+        // Create new draft version.
+        const createVersionResponse = await userApiContext.post(
+          firstPublishedVersion.links.versions
+        );
+        expect(createVersionResponse.status()).toBe(201);
+        const newDraftVersion =
+          (await createVersionResponse.json()) as ApiRecordResponse;
+
+        const firstVersionIndex = (
+          firstPublishedVersion as { versions?: { index?: number } }
+        ).versions?.index;
+        const newDraftVersionIndex = (
+          newDraftVersion as { versions?: { index?: number } }
+        ).versions?.index;
+        const firstParentId = (firstPublishedVersion as { parent?: { id?: string } })
+          .parent?.id;
+        const newDraftParentId = (newDraftVersion as { parent?: { id?: string } })
+          .parent?.id;
+
+        expect(
+          newDraftVersion.id,
+          "new draft version should have a different id"
+        ).not.toBe(firstPublishedVersion.id);
+        expect(newDraftVersion, "new version should be returned as draft").toEqual(
+          expect.objectContaining({
+            is_published: false,
+            is_draft: true,
+            links: expect.objectContaining({
+              self: expect.any(String),
+              files: expect.any(String),
+              publish: expect.any(String),
+            }),
+          })
+        );
+        expect(
+          newDraftVersion,
+          "new draft version should not carry publication_date in metadata"
+        ).not.toHaveProperty("metadata.publication_date");
+        expect(
+          newDraftVersion,
+          "new draft version should not carry metadata.version"
+        ).not.toHaveProperty("metadata.version");
+        expect(
+          firstVersionIndex,
+          "first published version should provide versions.index"
+        ).toBeDefined();
+        expect(
+          newDraftVersionIndex,
+          "new draft version should provide versions.index"
+        ).toBeDefined();
+        expect(
+          newDraftVersionIndex,
+          "new draft version should increment versions.index by 1"
+        ).toBe((firstVersionIndex as number) + 1);
+        expect(firstParentId, "first version should include parent.id").toBeDefined();
+        expect(newDraftParentId, "new version should include parent.id").toBeDefined();
+        expect(
+          newDraftParentId,
+          "new version should be linked to same parent.id as previous version"
+        ).toBe(firstParentId);
+
+        // New version draft starts without files.
+        const beforeImportFilesResponse = await userApiContext.get(
+          newDraftVersion.links.files
+        );
+        expect(beforeImportFilesResponse.status()).toBe(200);
+        const beforeImportFiles =
+          (await beforeImportFilesResponse.json()) as RecordFilesListResponse;
+        expect(beforeImportFiles.entries).toHaveLength(0);
+
+        // Link all files from previous version.
+        const filesImportResponse = await userApiContext.post(
+          `${newDraftVersion.links.self}/actions/files-import`
+        );
+        expect(filesImportResponse.status()).toBe(201);
+        const importedDraftFiles =
+          (await filesImportResponse.json()) as RecordFilesListResponse;
+
+        expect(
+          importedDraftFiles.entries.length,
+          "draft should contain linked files after import"
+        ).toBe(firstVersionFiles.entries.length);
+        expect(
+          importedDraftFiles.entries,
+          "linked draft should contain the file from previous version"
+        ).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              key: testFiles[0].key,
+              status: "completed",
+            }),
+          ])
+        );
+
+        // Update metadata in the new draft version to include compulsory publication_date field
+        const updateMetadataResponse = await userApiContext.put(
+          newDraftVersion.links.self,
+          {
+            data: {
+              ...newDraftVersion,
+              metadata: {
+                ...newDraftVersion.metadata,
+                publication_date: "2026-01-01",
+              },
             },
           }
         );
+        expect(updateMetadataResponse.status()).toBe(200);
+
+        // Publish new version.
+        const publishNewVersionResponse = await userApiContext.post(
+          newDraftVersion.links.publish
+        );
+        expect(publishNewVersionResponse.status()).toBe(202);
+        const secondPublishedVersion =
+          (await publishNewVersionResponse.json()) as ApiRecordResponse;
+        const secondPublishedParentId = (
+          secondPublishedVersion as { parent?: { id?: string } }
+        ).parent?.id;
+
         expect(
-          unauthSearchResponse.status(),
-          "search endpoint should be accessible"
-        ).toBe(200);
-        const searchData = (await unauthSearchResponse.json()) as {
+          secondPublishedVersion.id,
+          "published new version should keep new id"
+        ).toBe(newDraftVersion.id);
+        expect(
+          secondPublishedVersion.id,
+          "published new version id should differ from previous version id"
+        ).not.toBe(firstPublishedVersion.id);
+        expect(secondPublishedVersion, "new version should be published").toEqual(
+          expect.objectContaining({
+            status: "published",
+            is_published: true,
+            is_draft: false,
+          })
+        );
+        expect(
+          secondPublishedParentId,
+          "published new version should keep same parent.id"
+        ).toBe(firstParentId);
+
+        // Verify linked files are present in the newly published version.
+        const secondVersionFilesResponse = await userApiContext.get(
+          secondPublishedVersion.links.files
+        );
+        expect(secondVersionFilesResponse.status()).toBe(200);
+        const secondVersionFiles =
+          (await secondVersionFilesResponse.json()) as RecordFilesListResponse;
+
+        expect(secondVersionFiles.entries.length).toBe(
+          firstVersionFiles.entries.length
+        );
+
+        const firstVersionFile = firstVersionFiles.entries.find(
+          (entry) => entry.key === testFiles[0].key
+        );
+        const secondVersionFile = secondVersionFiles.entries.find(
+          (entry) => entry.key === testFiles[0].key
+        );
+
+        expect(
+          firstVersionFile,
+          `expected file ${testFiles[0].key} in first published version`
+        ).toBeDefined();
+        expect(
+          secondVersionFile,
+          `expected linked file ${testFiles[0].key} in second published version`
+        ).toBeDefined();
+
+        expect(
+          secondVersionFile,
+          "linked file metadata should be preserved in new version"
+        ).toEqual(
+          expect.objectContaining({
+            key: firstVersionFile!.key,
+            checksum: firstVersionFile!.checksum,
+            mimetype: firstVersionFile!.mimetype,
+            size: firstVersionFile!.size,
+            status: "completed",
+          })
+        );
+      });
+
+      test("Should create and publish an embargoed restricted record and keep it hidden from unauthenticated users", async ({
+        recordsApiData,
+        playwright,
+      }) => {
+        const embargoUntil = "2100-10-01";
+        const embargoedRecord = {
+          ...recordsApiData["defaultRecord"],
+          access: {
+            record: "restricted",
+            files: "restricted",
+            embargo: {
+              active: true,
+              until: embargoUntil,
+              reason: "Integration test embargo",
+            },
+          },
+        } as DefaultRecord;
+
+        const { createdRecord, recordObjectMatchers } =
+          await createDraftRecord(embargoedRecord);
+        const publishedEmbargoedRecord = await publishAndVerifyRecord(
+          createdRecord,
+          recordObjectMatchers
+        );
+
+        expect(publishedEmbargoedRecord).toEqual(
+          expect.objectContaining({
+            access: expect.objectContaining({
+              record: "restricted",
+              files: "restricted",
+              embargo: expect.objectContaining({
+                active: true,
+                until: embargoUntil,
+              }),
+            }),
+          })
+        );
+
+        const unauthenticatedApiContext = await playwright.request.newContext({
+          baseURL: appConfig.baseURL,
+        });
+
+        try {
+          // Unauthenticated users should not be able to access the restricted embargoed record directly.
+          const unauthGetRecordResponse = await unauthenticatedApiContext.get(
+            publishedEmbargoedRecord.links.self
+          );
+          expect(
+            unauthGetRecordResponse.status(),
+            "restricted embargoed record should not be visible to unauthenticated users"
+          ).toBe(403);
+
+          // Unauthenticated users should not be able to access files of the restricted embargoed record.
+          const unauthGetFilesResponse = await unauthenticatedApiContext.get(
+            publishedEmbargoedRecord.links.files
+          );
+          expect(
+            unauthGetFilesResponse.status(),
+            "files of restricted embargoed record should not be visible to unauthenticated users"
+          ).toBe(403);
+
+          // Public search should not reveal this restricted embargoed record.
+          const unauthSearchResponse = await unauthenticatedApiContext.get(
+            recordsApiPath,
+            {
+              params: {
+                q: `id:${publishedEmbargoedRecord.id}`,
+              },
+            }
+          );
+          expect(
+            unauthSearchResponse.status(),
+            "search endpoint should be accessible"
+          ).toBe(200);
+          const searchData = (await unauthSearchResponse.json()) as {
+            hits?: { hits?: Array<{ id?: string }> };
+          };
+          const returnedIds = (searchData.hits?.hits ?? []).map((hit) => hit.id);
+          expect(
+            returnedIds,
+            "restricted embargoed record should not appear in unauthenticated search results"
+          ).not.toContain(publishedEmbargoedRecord.id);
+        } finally {
+          await unauthenticatedApiContext.dispose();
+        }
+      });
+
+      test("Should create and publish a new record and then delete it and check tombstone details", async ({
+        recordsApiData,
+      }) => {
+        const defaultRecord = recordsApiData[
+          "defaultRecord"
+        ] as unknown as DefaultRecord;
+        const { createdRecord, recordObjectMatchers } =
+          await createDraftRecord(defaultRecord);
+        const publishedRecord = await publishAndVerifyRecord(
+          createdRecord,
+          recordObjectMatchers
+        );
+
+        const tombstonePayload = {
+          note: "Removed by automated API test",
+        };
+
+        // Delete published record with tombstone metadata (assuming admin permissions are required for deletion).
+        const deleteResponse = await adminApiContext.delete(
+          publishedRecord.links.self,
+          {
+            data: {
+              ...tombstonePayload,
+            },
+          }
+        );
+
+        expect(
+          deleteResponse.status(),
+          "deleting a published record should succeed"
+        ).toBe(204);
+
+        // Verify tombstone is available on deleted record endpoint.
+        const deletedRecordResponse = await userApiContext.get(
+          publishedRecord.links.self
+        );
+        expect(
+          deletedRecordResponse.status(),
+          "deleted record should return a deleted status"
+        ).toBe(410);
+
+        const deletedRecordData = (await deletedRecordResponse.json()) as Record<
+          string,
+          unknown
+        >;
+        expect(
+          deletedRecordData,
+          "deleted record should contain tombstone message"
+        ).toHaveProperty("message", "The record has been deleted.");
+        // TODO: Does not work because server does not create a tombstone.
+        // expect(deletedRecordData).toEqual(expect.objectContaining({
+        //     id: publishedRecord.id,
+        //     tombstone: expect.objectContaining({
+        //         reason: tombstonePayload.reason,
+        //         category: tombstonePayload.category,
+        //         removed_by: expect.objectContaining({
+        //             user: expect.any(Number),
+        //         }),
+        //         timestamp: expect.any(String),
+        //     }),
+        // }));
+
+        // Deleted record should no longer be listed in search.
+        const searchResponse = await userApiContext.get(recordsApiPath, {
+          params: {
+            q: `id:${publishedRecord.id}`,
+            allversions: true,
+          },
+        });
+        expect(searchResponse.status()).toBe(200);
+
+        const searchData = (await searchResponse.json()) as {
           hits?: { hits?: Array<{ id?: string }> };
         };
         const returnedIds = (searchData.hits?.hits ?? []).map((hit) => hit.id);
         expect(
           returnedIds,
-          "restricted embargoed record should not appear in unauthenticated search results"
-        ).not.toContain(publishedEmbargoedRecord.id);
-      } finally {
-        await unauthenticatedApiContext.dispose();
-      }
-    });
-
-    test("Should create and publish a new record and then delete it and check tombstone details", async ({
-      recordsApiData,
-    }) => {
-      const defaultRecord = recordsApiData["defaultRecord"] as unknown as DefaultRecord;
-      const { createdRecord, recordObjectMatchers } =
-        await createDraftRecord(defaultRecord);
-      const publishedRecord = await publishAndVerifyRecord(
-        createdRecord,
-        recordObjectMatchers
-      );
-
-      const tombstonePayload = {
-        note: "Removed by automated API test",
-      };
-
-      // Delete published record with tombstone metadata (assuming admin permissions are required for deletion).
-      const deleteResponse = await adminApiContext.delete(publishedRecord.links.self, {
-        data: {
-          ...tombstonePayload,
-        },
+          "deleted record should not appear in search results"
+        ).not.toContain(publishedRecord.id);
       });
-
-      expect(
-        deleteResponse.status(),
-        "deleting a published record should succeed"
-      ).toBe(204);
-
-      // Verify tombstone is available on deleted record endpoint.
-      const deletedRecordResponse = await userApiContext.get(
-        publishedRecord.links.self
-      );
-      expect(
-        deletedRecordResponse.status(),
-        "deleted record should return a deleted status"
-      ).toBe(410);
-
-      const deletedRecordData = (await deletedRecordResponse.json()) as Record<
-        string,
-        unknown
-      >;
-      expect(
-        deletedRecordData,
-        "deleted record should contain tombstone message"
-      ).toHaveProperty("message", "The record has been deleted.");
-      // TODO: Does not work because server does not create a tombstone.
-      // expect(deletedRecordData).toEqual(expect.objectContaining({
-      //     id: publishedRecord.id,
-      //     tombstone: expect.objectContaining({
-      //         reason: tombstonePayload.reason,
-      //         category: tombstonePayload.category,
-      //         removed_by: expect.objectContaining({
-      //             user: expect.any(Number),
-      //         }),
-      //         timestamp: expect.any(String),
-      //     }),
-      // }));
-
-      // Deleted record should no longer be listed in search.
-      const searchResponse = await userApiContext.get(recordsApiPath, {
-        params: {
-          q: `id:${publishedRecord.id}`,
-          allversions: true,
-        },
-      });
-      expect(searchResponse.status()).toBe(200);
-
-      const searchData = (await searchResponse.json()) as {
-        hits?: { hits?: Array<{ id?: string }> };
-      };
-      const returnedIds = (searchData.hits?.hits ?? []).map((hit) => hit.id);
-      expect(
-        returnedIds,
-        "deleted record should not appear in search results"
-      ).not.toContain(publishedRecord.id);
-    });
-  });
+    }
+  );
 }
