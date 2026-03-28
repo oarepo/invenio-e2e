@@ -67,34 +67,25 @@ parent-directory
 
 5. Configure environment variables (see `src/config/env.ts` for all options):
 
-    You will need a test user that can deposit records in your InvenioRDM instance.
+Setup a test user and admin (and possibly other users) in your InvenioRDM instance with the credentials matching those in your environment variables (see `src/config/env.ts`).:
 
-    ```bash
-    export INVENIO_USER_EMAIL=...
-    export INVENIO_USER_PASSWORD=...
-    ```
+```bash
+source .venv/bin/activate
 
-6. Run your server in another terminal:
+invenio users create user@demo.org --password 123456 --active --confirm
 
-    ```bash
-    cd <my-repository>
-    invenio-cli run
-    ```
+invenio roles create admin
+invenio access allow administration-access role admin
+invenio users create admin@demo.org --password 123456 --active --confirm
+invenio roles add admin@demo.org admin
+invenio access allow superuser-access user admin@demo.org
 
-7. Run tests:
+export INVENIO_USER_EMAIL=user@demo.org
+export INVENIO_USER_PASSWORD=123456
+```
 
-    ```bash
-    cd <my-repository>/e2e
-    npx playwright test
-    ```
 
-## API Testing
-
-The project also ships with a lightweight API regression suite that reuses the same authentication helpers as the UI tests.
-
-### InvenioRDM Instance Setup
-
-Add this to your `invenio.cfg` to enable API testing:
+6. Add this to your `invenio.cfg` to enable tests for the FETCH transport:
 
 ```python
 # invenio.cfg
@@ -104,37 +95,49 @@ RECORDS_RESOURCES_FILES_ALLOWED_DOMAINS = [
 ]
 ```
 
-Setup a test user and admin (and possibly other users) in your InvenioRDM instance with the credentials matching those in your environment variables (see `src/config/env.ts`).:
+7. Initialize translations
 
 ```bash
-invenio users create user@demo.org --password 123456 --active --confirm
 
-invenio roles create admin
-invenio access allow administration-access role admin
-invenio users create admin@demo.org --password 123456 --active --confirm
-invenio roles add admin@demo.org admin
-invenio access allow superuser-access user admin@demo.org
+source .venv/bin/activate
+cd e2e
+npm run build-translations -- -l en
+npm run build-translations -- -l de
+npm run build-translations -- -l cs
 ```
 
-### Running the API Tests
-
-1. Generate authenticated storage states for all tested users once by running (or let it be automatically generated when you run `npx playwright test`):
+7. Run your server in another terminal:
 
     ```bash
-    npx playwright test tests/api/auth.setup.ts
+    cd <my-repository>
+    invenio-cli run
     ```
 
-    The user state is saved in `tests/playwright/.auth/user.json` and admin state in `tests/playwright/.auth/admin.json` by default. Override the destination by setting the `AUTH_USER_FILE_PATH` and `AUTH_ADMIN_FILE_PATH` environment variables (see `src/config/env.ts` for details).
-
-    NOTE: You need to first create the test user and admin in your InvenioRDM instance.
-
-2. Execute the API suite:
+8. Run tests:
 
     ```bash
-    npx playwright test tests/api/invenio-api.spec.ts
+    cd <my-repository>/e2e
+    npx playwright test
     ```
 
-    Requests target various endpoints like `/api/records` unless you provide a different base URL. See the JSDoc in `src/tests/api` for additional customization options.
+Tests can be filtered with the following tags:
+
+* `@api` - run API tests
+* `@smoke` - run smoke tests
+
+Example:
+
+```bash
+    npx playwright test --grep "@api|@smoke"
+```
+
+## What is tested
+
+### API
+
+### UI
+
+### Translations
 
 ## Development
 
