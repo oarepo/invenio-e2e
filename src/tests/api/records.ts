@@ -820,7 +820,7 @@ export function recordsApiTests(
         expect(createVersionResponse.status()).toBe(201);
         const newDraftVersion =
           (await createVersionResponse.json()) as ApiRecordResponse;
-
+        console.log("newDraftVersion", newDraftVersion)
         const firstVersionIndex = (
           firstPublishedVersion as { versions?: { index?: number } }
         ).versions?.index;
