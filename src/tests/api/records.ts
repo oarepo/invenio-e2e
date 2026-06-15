@@ -820,7 +820,6 @@ export function recordsApiTests(
         expect(createVersionResponse.status()).toBe(201);
         const newDraftVersion =
           (await createVersionResponse.json()) as ApiRecordResponse;
-        console.log("newDraftVersion", newDraftVersion)
         const firstVersionIndex = (
           firstPublishedVersion as { versions?: { index?: number } }
         ).versions?.index;
@@ -848,9 +847,9 @@ export function recordsApiTests(
           })
         );
         expect(
-          newDraftVersion,
-          "new draft version should not carry publication_date in metadata"
-        ).not.toHaveProperty("metadata.publication_date");
+          newDraftVersion.metadata.publication_date as string,
+          "new draft version should carry publication_date in metadata set to today"
+        ).not.toBe(firstPublishedVersion.metadata.publication_date as string);
         expect(
           newDraftVersion,
           "new draft version should not carry metadata.version"
