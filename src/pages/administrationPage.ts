@@ -122,7 +122,7 @@ export class AdministrationPage<T extends Locators = Locators> extends BasePage<
     const messageFieldIframe = this.page.locator(
       this.locators.administrationPage.createBannerMessageInput
     );
-    const messageTextArea = messageFieldIframe.contentFrame().locator("body#tinymce");
+    const messageTextArea = messageFieldIframe.contentFrame().locator("body.mce-content-body");
     await messageTextArea.fill(message);
   }
 
